@@ -61,6 +61,11 @@ class conversation_context:
     def update_conversation_properties(conversation_id,data,user_email):
         conversations_collection.update_one({"_id":conversation_id, "user_email":user_email}, {"$set":{"folderId":data['folderId'], "title":data['title']}})
 
+    def request_approval(conversation_id,group_managers_emails):
+        conversations_collection.update_one({"_id":conversation_id}, {"$set":{"state":"waiting for approval","assigned_to":group_managers_emails}})
+
+
+
     #conversation_logs admin-ui
 
     def get_conversation_list(sort, range_, filter_):
@@ -69,7 +74,6 @@ class conversation_context:
         sort_list = eval(sort)
         sort_field_name = sort_list[0]
         sort_value = sort_list[1]
-        sort_parameter={f"{sort_field_name}":sort_value}
 
         #range
         range_list = eval(range_)
@@ -78,11 +82,9 @@ class conversation_context:
 
         #filter
         filter_list = eval(filter_)
-        print(filter_list)
         filter_parameter = {}
         if(len(filter_list)!=0):
             filter_parameter = get_filter_parameter(filter_list)
-
 
         return conversations_collection.find(filter_parameter).skip(start).limit(end-start+1)
 
@@ -94,6 +96,53 @@ class conversation_context:
             filter_parameter = get_filter_parameter(filter_list)
         
         return conversations_collection.count_documents(filter_parameter)
+    
+    def get_conversation_approval_requests(user_email, sort, range_, filter_):
+
+        #sort
+        sort_list = eval(sort)
+        sort_field_name = sort_list[0]
+        sort_value = sort_list[1]
+
+        #range
+        range_list = eval(range_)
+        start = range_list[0]
+        end = range_list[1]
+
+        #filter
+        filter_list = eval(filter_)
+        filter_parameter = {}
+        if(len(filter_list)!=0):
+            filter_parameter = get_filter_parameter(filter_list)
+
+        conditions = {
+            "$and": [
+                filter_parameter,
+                { 'assigned_to': { "$in": [user_email] } }
+            ]
+        }
+
+        return conversations_collection.find(conditions).skip(start).limit(end-start+1)
+
+
+    def get_conversation_approval_requests_count(user_email, filter_):
+        filter_list = eval(filter_)
+        filter_parameter = {}
+        if(len(filter_list)!=0):
+            filter_parameter = get_filter_parameter(filter_list)
+
+        conditions = {
+            "$and": [
+                filter_parameter,
+                { 'assigned_to': { "$in": [user_email] } }
+            ]
+        }
+
+        return conversations_collection.count_documents(conditions)
+
+
+
+
 
 
 class analysis_audit_context:

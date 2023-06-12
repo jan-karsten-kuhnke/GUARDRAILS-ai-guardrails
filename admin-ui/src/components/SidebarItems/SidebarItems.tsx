@@ -20,6 +20,8 @@ import SmartToyOutlinedIcon from "@mui/icons-material/SmartToyOutlined";
 import VoiceOverOffOutlinedIcon from "@mui/icons-material/VoiceOverOffOutlined";
 import QuestionAnswerOutlinedIcon from '@mui/icons-material/QuestionAnswerOutlined';
 import PsychologyOutlinedIcon from '@mui/icons-material/PsychologyOutlined';
+import ReportOutlinedIcon from '@mui/icons-material/ReportOutlined';
+import ResetTvOutlinedIcon from '@mui/icons-material/ResetTvOutlined';
 import { useState } from "react";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
@@ -109,6 +111,19 @@ export const SidebarItems = () => {
           name: "Custom Deny Lists",
           icon: <GavelOutlinedIcon sx={{ color: "white" }} />,
           link: "/custom-deny-lists",
+        },
+      ],
+    },
+    {
+      name: "Monitoring",
+      icon: <ResetTvOutlinedIcon sx={{ color: "white" }} />,
+      isExpanded: false,
+      link: "/risk-monitoring",
+      subMenu: [
+        {
+          name: "Escalations",
+          link: "/escalations",
+          icon: <ReportOutlinedIcon sx={{ color: "white" }} />,
         },
       ],
     },

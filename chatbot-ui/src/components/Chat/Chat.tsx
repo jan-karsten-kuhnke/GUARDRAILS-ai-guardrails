@@ -29,7 +29,7 @@ import { ModelSelect } from './ModelSelect';
 import { SystemPrompt } from './SystemPrompt';
 import { TemperatureSlider } from './Temperature';
 import { MemoizedChatMessage } from './MemoizedChatMessage';
-import { anonymizeMessage, fetchPrompt } from '@/services';
+import { anonymizeMessage, fetchPrompt, requestApproval } from '@/services';
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -276,6 +276,27 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     ],
   );
 
+  const handleRequestApproval = async (conversationId: string) => {
+    homeDispatch({ field: 'loading', value: true });
+    homeDispatch({ field: 'messageIsStreaming', value: true });
+
+    let { data } = await requestApproval(conversationId)
+    let message: Message = { role: "guardrails", content: data.message, userActionRequired: false };
+
+    let updatedConversation = {
+      ...selectedConversation,
+      messages: selectedConversation?.messages ? [...selectedConversation?.messages, message] : [message],
+    };
+
+    homeDispatch({
+      field: 'selectedConversation',
+      value: updatedConversation,
+    });
+    homeDispatch({ field: 'loading', value: false });
+    homeDispatch({ field: 'messageIsStreaming', value: false });
+
+  }
+
   const scrollToBottom = useCallback(() => {
     if (autoScrollEnabled) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -471,6 +492,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       null,
                       true
                     );
+                  }}
+                  onRequestApproval={(conversationId) => {
+                    handleRequestApproval(conversationId);
                   }}
                 />
               ))}
