@@ -6,6 +6,7 @@ import { AnonymizeGrid } from './components/DataGrids/AnonymizeGrid';
 import { ComingSoon } from './components/ComingSoon/ComingSoon';
 import {PredefinedRulesGrid} from './components/PII Entities/PredifnedRulesGrid';
 import { ConversationGrid } from './components/DataGrids/ConversationGrid';
+import { Escalation } from './components/Escalations/Escalation';
 
 export const AppRoutes = [
 
@@ -52,7 +53,10 @@ export const AppRoutes = [
     {
         path: '/user-management',
         component:< ComingSoon/>
+    },
+    {
+        path:'escalations',
+        component:<Escalation/>
     }
-    
-  ];
+];
 

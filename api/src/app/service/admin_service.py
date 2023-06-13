@@ -46,4 +46,18 @@ class admin_service:
 
         data={"data":rows,"totalRows":total_count}
         return data
-          
+    
+    def get_conversation_approval_requests_list( user_email,sort, range_, filter_):
+        total_count=conversation_context.get_conversation_approval_requests_count(user_email, filter_)
+        conversation_cursor=conversation_context.get_conversation_approval_requests(user_email, sort, range_, filter_)
+        rows = []
+        for conversation in conversation_cursor:
+            #changing key _id to id because data-grid in admin-ui expects id
+            id=conversation['_id']
+            conversation.pop('_id')
+            conversation['id'] = id
+            rows.append(conversation)
+
+        data={"data":rows,"totalRows":total_count}
+        return data
+

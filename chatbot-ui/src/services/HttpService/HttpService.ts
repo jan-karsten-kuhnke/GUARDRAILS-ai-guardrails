@@ -73,3 +73,7 @@ export const updateUserPrompts = (prompts: any) => {
 export const updateConversationProperties = (conversationId: string, title: string , folderId: string|null) => {
 return _axios.put(`/conversations/${conversationId}/properties`, {title: title, folderId: folderId});
 }
+
+export const requestApproval = (conversationId: string) => {
+  return _axios.get(`/requestapproval/${conversationId}`);
+}

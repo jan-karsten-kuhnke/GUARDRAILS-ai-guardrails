@@ -5,6 +5,7 @@ from integration.superset_wrapper import superset
 from service.admin_service import admin_service
 from flask_smorest import Blueprint as SmorestBlueprint
 from marshmallow import Schema, fields,validate
+from oidc import get_current_user_email
 from oidc import oidc
 
 adminendpoints = SmorestBlueprint('admin', __name__)
@@ -147,4 +148,15 @@ def conversation_log_get_list():
     filter_ = request.args.get('filter', default=None, type=str)
     
     data=admin_service.get_conversation_list( sort, range_, filter_)
+    return jsonify(data),200
+
+@adminendpoints.route('/escalations', methods=['GET'])
+@oidc.accept_token(require_token=True)
+def approvalrequests_get_list():
+    sort = request.args.get('sort', default=None, type=str)
+    range_ = request.args.get('range', default=None, type=str)
+    filter_ = request.args.get('filter', default=None, type=str)
+    user_email = get_current_user_email()
+
+    data=admin_service.get_conversation_approval_requests_list( user_email, sort, range_, filter_)
     return jsonify(data),200

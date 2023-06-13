@@ -5,6 +5,7 @@ from integration.openai_wrapper import openai_wrapper
 from integration.presidio_wrapper import presidio_wrapper
 from presidio_anonymizer.entities import RecognizerResult
 from integration.nsfw_model_wrapper import NSFWModelWrapper
+from integration.keycloak_wrapper import keycloak_wrapper
 import uuid
 from typing import TypedDict
 from datetime import datetime
@@ -21,6 +22,8 @@ class conversation_obj(TypedDict):
     created: datetime
     updated: datetime
     user_email: str
+    state : str
+    assigned_to : list
     
 class message_obj(TypedDict):
     id: str 
@@ -188,7 +191,9 @@ class chat_service:
             messages= messages,
             user_email=email,
             title= openai_wrapper.gen_title(prompt,model)[1:-1],
-            model_name = model
+            model_name = model,
+            state = 'active',
+            assigned_to = []
         )
         new_conversation_id = conversation_context.insert_conversation(conversation)
         return new_conversation_id
@@ -198,6 +203,8 @@ class chat_service:
         if(conversation == None):
             chat_service.create_Conversation(content,user_email,model,conversation_id)
             return
+        if(model is None or not model):
+            model = conversation['model']
         messages = conversation['messages']
         message = message_obj(
             id=str(uuid.uuid4()),
@@ -330,4 +337,13 @@ class chat_service:
     def update_conversation_properties(conversation_id,data,user_email):
         conversation_context.update_conversation_properties(conversation_id,data,user_email)
 
+    def request_approval(conversation_id,user_email,user_groups):
+        current_group = user_groups[0]   #needs to be updated for multiple groups
+        group_managers = keycloak_wrapper.get_users_by_role_and_group("manager", current_group)
+        group_managers_emails = [user['email'] for user in group_managers]
+        conversation_context.request_approval(conversation_id,group_managers_emails)
 
+        csv_email = ','.join(group_managers_emails)
+        message = f"Request sent for approval to: {csv_email}"
+        chat_service.update_conversation(conversation_id,message,'guardrails',user_email,model=None,user_action_required=False)
+        return message
