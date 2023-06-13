@@ -26,7 +26,7 @@ def create_connection_pool(host: str, port: str, database: str, user: str, passw
             password=password,
             minconn=minconn,
             maxconn=maxconn,
-            connect_timeout=120
+            connect_timeout=1800
         )
         print("Postgres connection created successfully!")
         return connection_pool
@@ -53,7 +53,7 @@ def get_connection():
                 user=Globals.pg_user,
                 password=Globals.pg_password,
                 minconn=1,
-                maxconn=10
+                maxconn=1800
             )
             connection_pool.autocommit = True # Set autocommit to True
 
@@ -61,6 +61,8 @@ def get_connection():
         return conn
     except Exception as ex:
         print(f"Exception getting Postgres connection: {ex}")
+    finally:
+        connection_pool.putconn(conn)
 
 
 pg_schema = Globals.pg_schema
