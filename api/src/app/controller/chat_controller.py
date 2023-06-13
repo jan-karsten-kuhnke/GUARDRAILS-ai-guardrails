@@ -6,6 +6,7 @@ from flask_smorest import Blueprint as SmorestBlueprint
 # import time
 from oidc import oidc
 from oidc import get_current_user_email
+from oidc import get_current_user_groups
 from utils.util import utils
 
 endpoints = SmorestBlueprint('chatbot', __name__)
@@ -42,7 +43,6 @@ def chat_completion():
 def get_conversations():
     archived_param = request.args.get('archived')
     flag = archived_param.lower() == 'true'
-    print(flag)
     user_email = get_current_user_email()
     conversations = chat_service.get_conversations(user_email,flag)
     return utils.rename_id(conversations)
@@ -121,6 +121,13 @@ def update_conversation_properties(conversation_id):
     return {"result":"success"}
 
 
+@endpoints.route('/requestapproval/<conversationId>', methods=['GET'])
+@oidc.accept_token(require_token=True)
+def request_approval(conversationId):
+    user_email = get_current_user_email()
+    user_groups = get_current_user_groups()
+    message=chat_service.request_approval(conversationId,user_email,user_groups)
+    return {"message":message}
 
 
 

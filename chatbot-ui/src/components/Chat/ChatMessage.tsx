@@ -27,10 +27,11 @@ export interface Props {
   messageIndex: number;
   onEdit?: (editedMessage: Message) => void;
   onOverRide?: (selectedMessage: Message) => void;
+  onRequestApproval?: (conversationId: string) => void;
 }
 
 export const ChatMessage: FC<Props> = memo(
-  ({ message, messageIndex, onEdit,onOverRide }) => {
+  ({ message, messageIndex, onEdit, onOverRide, onRequestApproval }) => {
     const {
       state: {
         selectedConversation,
@@ -232,7 +233,9 @@ export const ChatMessage: FC<Props> = memo(
 
                   <button
                     className=" mt-1 ml-3 flex w-[190px] flex-shrink-0 cursor-pointer gap-3 rounded-md border border-white/100 p-3 text-white bg-white dark:bg-[#343541] py-2 px-4 hover:opacity-50  md:mb-0 md:mt-2 "
-                    onClick={() => {}}
+                    onClick={() => {
+                      if(onRequestApproval && selectedConversation) onRequestApproval(selectedConversation?.id);
+                    }}
                   >
                     Request Approval
                   </button>
