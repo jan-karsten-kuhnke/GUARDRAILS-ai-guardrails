@@ -1,6 +1,6 @@
 from oidc import get_current_user_email
 from repo.db import conversation_context, anonymize_audit_context,analysis_audit_context,folders_context,prompts_context
-from repo.postgres import sql_audits
+from repo.postgres import SqlAudits
 from integration.openai_wrapper import openai_wrapper
 from integration.presidio_wrapper import presidio_wrapper
 from presidio_anonymizer.entities import RecognizerResult
@@ -241,7 +241,7 @@ class chat_service:
         )
         analysis_audit_context.insert_analysis_audit(analysis_audit)
         for flag in analysis:   
-            sql_audits.insert_analysis_audits(text = message, user_email = user_email, flagged_text = flag['flagged_text'],  analysed_entity = flag['entity_type'], criticality = 'SEVERE')
+            SqlAudits.insert_analysis_audits(text = message, user_email = user_email, flagged_text = flag['flagged_text'],  analysed_entity = flag['entity_type'], criticality = 'SEVERE')
         
 
 
@@ -257,10 +257,10 @@ class chat_service:
         )    
         anonymize_audit_context.insert_anonymize_audit(anonymize_audit)
         for flag in analysis:   
-            sql_audits.insert_anonymize_audits(original_text = message, anonymized_text  = anonymized_message, flagged_text = flag['flagged_text'] , user_email= user_email, analysed_entity = flag['entity_type'], criticality = 'SEVERE')
+            SqlAudits.insert_anonymize_audits(original_text = message, anonymized_text  = anonymized_message, flagged_text = flag['flagged_text'] , user_email= user_email, analysed_entity = flag['entity_type'], criticality = 'SEVERE')
     
     def save_chat_log(user_email, text):
-        sql_audits.insert_chat_log(user_email, text)
+        SqlAudits.insert_chat_log(user_email, text)
 
     def format_and_filter_analysis(results,message):
         response = []

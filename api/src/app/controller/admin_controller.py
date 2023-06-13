@@ -25,14 +25,14 @@ def superset_token():
 @adminendpoints.route('/getorg')
 @oidc.accept_token(require_token=True)
 def getOrgDetails():
-    return admin_service.getorg()
+    return admin_service.get_org()
 
 
 @adminendpoints.route('/saveorg', methods=['POST'])
 @oidc.accept_token(require_token=True)
 def saveOrgDetails():
     request_data = request.get_json()
-    return admin_service.saveorg(request_data)
+    return admin_service.save_org(request_data)
 
 #predefinedrules get_list, get, put endpoints
 @adminendpoints.route('/predefined_rules', methods=['GET'])
