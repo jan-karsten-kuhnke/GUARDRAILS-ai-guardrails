@@ -53,7 +53,7 @@ def get_connection():
                 user=Globals.pg_user,
                 password=Globals.pg_password,
                 minconn=1,
-                maxconn=1800
+                maxconn=10
             )
             connection_pool.autocommit = True # Set autocommit to True
 
