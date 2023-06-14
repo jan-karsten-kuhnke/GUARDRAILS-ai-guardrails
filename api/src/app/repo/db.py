@@ -73,7 +73,7 @@ class conversation_context:
         #sort
         sort_list = eval(sort)
         sort_field_name = sort_list[0]
-        sort_value = sort_list[1]
+        sort_value = 1 if sort_list[1] == "asc" else -1
 
         #range
         range_list = eval(range_)
@@ -86,7 +86,8 @@ class conversation_context:
         if(len(filter_list)!=0):
             filter_parameter = get_filter_parameter(filter_list)
 
-        return conversations_collection.find(filter_parameter).skip(start).limit(end-start+1)
+        return conversations_collection.find(filter_parameter).sort(sort_field_name,sort_value).hint([(sort_field_name,sort_value)]).skip(start).limit(end-start+1)
+
 
 
     def get_conversation_list_count(filter_):
@@ -102,7 +103,7 @@ class conversation_context:
         #sort
         sort_list = eval(sort)
         sort_field_name = sort_list[0]
-        sort_value = sort_list[1]
+        sort_value = 1 if sort_list[1] == "asc" else -1
 
         #range
         range_list = eval(range_)
@@ -122,7 +123,7 @@ class conversation_context:
             ]
         }
 
-        return conversations_collection.find(conditions).skip(start).limit(end-start+1)
+        return conversations_collection.find(conditions).sort(sort_field_name,sort_value).hint([(sort_field_name,sort_value)]).skip(start).limit(end-start+1)
 
 
     def get_conversation_approval_requests_count(user_email, filter_):

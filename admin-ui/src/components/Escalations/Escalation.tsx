@@ -11,7 +11,7 @@ export const Escalation = () => {
   const entity = 'escalations'
   const initialSort = [
     {
-      field: "created_at",
+      field: "created",
       sort: "desc",
     },
   ];

@@ -141,6 +141,7 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
             columns={props.columns}
             paginationMode="server"
             filterMode="server"
+            sortingMode="server"
             sortModel={sortConfig}
             rowCount={totalRows}
             loading={loading}
