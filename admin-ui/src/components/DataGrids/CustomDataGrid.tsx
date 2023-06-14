@@ -6,7 +6,7 @@ import TablePagination from '@mui/material/TablePagination';
 import PaginationItem from '@mui/material/PaginationItem';
 import KeyboardBackspaceOutlinedIcon from '@mui/icons-material/KeyboardBackspaceOutlined';
 import { Button, Container, Typography ,Grid} from '@mui/material';
-import { ChatMessage } from "./ChatMessage";
+import { EscalationConversation } from "../Escalations/EscalationConversation";
 interface CustomDataGridProps {
     columns: any;
     entity: string;
@@ -165,30 +165,9 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
         <div style={{  width: "100%", padding:"2%" }}>
           
           {/*New component to Show all conversation in escalation */}
-          {selectedRow? 
-            <Container 
-                sx={{
-                  backgroundColor: "#202123",
-                  paddingBottom:"15px",
-                  paddingTop:"5px",
-                  borderRadius: '2px',
-                  width: "100%",
-                  }}>
-                <div style={{display:"flex" ,justifyContent:"space-between" ,margin:"10px"}}>
-                  <div style={{fontSize:"1.8em", color:"#d1cac5", cursor: "pointer"}}>
-                    <KeyboardBackspaceOutlinedIcon onClick={handleClose} />
-                  </div>
-                  <div style={{fontSize:"1.8em", color:"#d1cac5"}}>
-                    {selectedRow?.title}
-                  </div>
-                  <div></div>
-                </div>
-
-                {selectedRow?.messages.map((message:Message, index:number) => (
-                  <ChatMessage message={message} messageIndex={index}/>
-                ))}
-                
-           </Container>:
+          {selectedRow?
+              <EscalationConversation selectedRow={selectedRow} handleClose={handleClose}/>
+                :
 
           <DataGrid
             rows={rows}
