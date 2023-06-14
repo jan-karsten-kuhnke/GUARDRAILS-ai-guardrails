@@ -1,9 +1,12 @@
+
 import React, { useEffect, useState } from "react";
-import { DataGrid, GridToolbar, GridSortModel, useGridApiContext, useGridSelector, gridPageSelector, gridPageCountSelector } from "@mui/x-data-grid";
+import { DataGrid, GridToolbar, GridSortModel, useGridApiContext, useGridSelector, gridPageSelector, gridPageCountSelector,GridRowParams  } from "@mui/x-data-grid";
 import { getGridData } from "@/services";
 import TablePagination from '@mui/material/TablePagination';
 import PaginationItem from '@mui/material/PaginationItem';
-
+import KeyboardBackspaceOutlinedIcon from '@mui/icons-material/KeyboardBackspaceOutlined';
+import { Button, Container, Typography ,Grid} from '@mui/material';
+import { ChatMessage } from "./ChatMessage";
 interface CustomDataGridProps {
     columns: any;
     entity: string;
@@ -11,6 +14,18 @@ interface CustomDataGridProps {
     onGridDataUpdate?:any;
 }
 
+interface RowData {
+  id: number;
+  title: string;
+  messages:Message[];
+  // Add more fields as needed
+}
+export type Role = 'assistant' | 'user' | 'guardrails';
+export interface Message {
+  role: Role;
+  content: string;
+  userActionRequired: boolean;
+}
 export const CustomDataGrid = (props: CustomDataGridProps) => {
 
     const [rows, setRows] = useState([]);
@@ -23,7 +38,9 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
       pageSize: 10,
       page: 0,
     });
-  
+    const [selectedRow, setSelectedRow] = React.useState<RowData | null>(null);
+
+
     useEffect(() => {
         fetchData();
       }, [sortConfig, range, filter]);
@@ -105,6 +122,16 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
         setRange([0, paginationModel.pageSize-1]);
       };
 
+      const handleRowClick = (params: GridRowParams) => {
+        if(props.entity=='escalations'){
+          setSelectedRow(params.row as RowData);
+        }
+      };
+    
+      const handleClose = () => {
+        setSelectedRow(null);
+      };
+
       const CustomPagination = () => {
         const apiRef = useGridApiContext();
         return (
@@ -136,16 +163,45 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
     
     return (
         <div style={{  width: "100%", padding:"2%" }}>
+          
+          {/*New component to Show all conversation in escalation */}
+          {selectedRow? 
+            <Container 
+                sx={{
+                  backgroundColor: "#202123",
+                  paddingBottom:"15px",
+                  paddingTop:"5px",
+                  borderRadius: '2px',
+                  width: "100%",
+                  }}>
+                <div style={{display:"flex" ,justifyContent:"space-between" ,margin:"10px"}}>
+                  <div style={{fontSize:"1.8em", color:"#d1cac5", cursor: "pointer"}}>
+                    <KeyboardBackspaceOutlinedIcon onClick={handleClose} />
+                  </div>
+                  <div style={{fontSize:"1.8em", color:"#d1cac5"}}>
+                    {selectedRow?.title}
+                  </div>
+                  <div></div>
+                </div>
+
+                {selectedRow?.messages.map((message:Message, index:number) => (
+                  <ChatMessage message={message} messageIndex={index}/>
+                ))}
+                
+           </Container>:
+
           <DataGrid
             rows={rows}
             columns={props.columns}
             paginationMode="server"
             filterMode="server"
+            sortingMode="server"
             sortModel={sortConfig}
             rowCount={totalRows}
             loading={loading}
             slots={{ toolbar: GridToolbar, pagination : CustomPagination }}
             paginationModel={paginationModel}
+            onRowClick={handleRowClick}
             
             sx={{
               backgroundColor: "#202123",
@@ -194,6 +250,8 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
             onFilterModelChange={handleFilterChange}
            
           />
+          }
+          
         </div>
       );
 }
