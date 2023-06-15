@@ -160,3 +160,19 @@ def approvalrequests_get_list():
 
     data=admin_service.get_conversation_approval_requests_list( user_email, sort, range_, filter_)
     return jsonify(data),200
+
+@adminendpoints.route('/approve_escalation/<conversation_id>', methods=['PUT'])
+@oidc.accept_token(require_token=True)
+def approve_escalation(conversation_id):
+    #email of user whose conversation is escalated recieving from admin-ui
+    user_email = request.json
+    admin_service.approve_escalation( conversation_id, user_email )
+    return {"result":"success"},200
+
+@adminendpoints.route('/reject_escalation/<conversation_id>', methods=['PUT'])
+@oidc.accept_token(require_token=True)
+def reject_escalation(conversation_id):
+    #email of user whose conversation is escalated recieving from admin-ui
+    user_email = request.json
+    admin_service.reject_escalation( conversation_id, user_email )
+    return {"result":"success"},200

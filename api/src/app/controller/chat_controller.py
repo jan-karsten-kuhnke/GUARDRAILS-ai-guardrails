@@ -121,12 +121,12 @@ def update_conversation_properties(conversation_id):
     return {"result":"success"}
 
 
-@endpoints.route('/requestapproval/<conversationId>', methods=['GET'])
+@endpoints.route('/requestapproval/<conversation_id>', methods=['GET'])
 @oidc.accept_token(require_token=True)
-def request_approval(conversationId):
+def request_approval(conversation_id):
     user_email = get_current_user_email()
     user_groups = get_current_user_groups()
-    message=chat_service.request_approval(conversationId,user_email,user_groups)
+    message=chat_service.request_approval(conversation_id,user_email,user_groups)
     return {"message":message}
 
 
