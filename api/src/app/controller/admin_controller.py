@@ -171,8 +171,7 @@ def approvalrequests_get_list():
     sort = request.args.get('sort', default=None, type=str)
     range_ = request.args.get('range', default=None, type=str)
     filter_ = request.args.get('filter', default=None, type=str)
-    # user_email = get_current_user_email()
-    user_email = "navneet.agarwal@synergy-ai.us"
+    user_email = get_current_user_email()
 
     data=admin_service.get_conversation_approval_requests_list( user_email, sort, range_, filter_)
     return jsonify(data),200
