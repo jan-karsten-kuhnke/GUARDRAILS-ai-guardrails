@@ -1,6 +1,7 @@
 from repo.postgres import SqlAudits
 from repo.db import conversation_context
 from globals import *
+from service.chat_service import chat_service
 
 pg_schema = Globals.pg_schema
 class admin_service:
@@ -60,4 +61,14 @@ class admin_service:
 
         data={"data":rows,"totalRows":total_count}
         return data
+
+    def approve_escalation(conversation_id, user_email):
+        conversation_context.approve_escalation(conversation_id)
+        message = f"Request Approved by: {user_email}"
+        chat_service.update_conversation(conversation_id,message,'guardrails',user_email,model=None,user_action_required=False)
+
+    def reject_escalation(conversation_id, user_email):
+        conversation_context.reject_escalation(conversation_id)
+        message = f"Request Rejected by: {user_email}"
+        chat_service.update_conversation(conversation_id,message,'guardrails',user_email,model=None,user_action_required=False)
 

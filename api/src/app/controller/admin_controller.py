@@ -1,14 +1,28 @@
 from flask import Flask, render_template, request, redirect, url_for
-from flask import Blueprint, Response, jsonify
+from flask import Blueprint, Response, jsonify, abort
 from flask_restful import Resource, Api, reqparse, request
+from functools import wraps
 from integration.superset_wrapper import superset
 from service.admin_service import admin_service
 from flask_smorest import Blueprint as SmorestBlueprint
 from marshmallow import Schema, fields,validate
 from oidc import get_current_user_email
+from oidc import get_current_user_roles
 from oidc import oidc
 
 adminendpoints = SmorestBlueprint('admin', __name__)
+
+def require_role(role_name):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            roles=get_current_user_roles()
+            if role_name in roles:
+                return func(*args, **kwargs)
+            else:
+                abort(403)
+        return wrapper
+    return decorator
 
 #for payload in query string 
 #@adminendpoints.arguments(PayloadSchema, location="query")
@@ -152,6 +166,7 @@ def conversation_log_get_list():
 
 @adminendpoints.route('/escalations', methods=['GET'])
 @oidc.accept_token(require_token=True)
+@require_role('manager')
 def approvalrequests_get_list():
     sort = request.args.get('sort', default=None, type=str)
     range_ = request.args.get('range', default=None, type=str)
@@ -160,3 +175,21 @@ def approvalrequests_get_list():
 
     data=admin_service.get_conversation_approval_requests_list( user_email, sort, range_, filter_)
     return jsonify(data),200
+
+@adminendpoints.route('/approve_escalation/<conversation_id>', methods=['PUT'])
+@oidc.accept_token(require_token=True)
+@require_role('manager')
+def approve_escalation(conversation_id):
+    #email of user whose conversation is escalated recieving from admin-ui
+    user_email = request.json
+    admin_service.approve_escalation( conversation_id, user_email )
+    return {"result":"success"},200
+
+@adminendpoints.route('/reject_escalation/<conversation_id>', methods=['PUT'])
+@oidc.accept_token(require_token=True)
+@require_role('manager')
+def reject_escalation(conversation_id):
+    #email of user whose conversation is escalated recieving from admin-ui
+    user_email = request.json
+    admin_service.reject_escalation( conversation_id, user_email )
+    return {"result":"success"},200

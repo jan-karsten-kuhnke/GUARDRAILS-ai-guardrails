@@ -43,3 +43,11 @@ export const getGridData = (entity: string,params: any) => {
 export const updateGridData = (entity: string, id: any, data: any) => {
   return _axios.put(`/${entity}/${id}`, data);
 }
+
+export const approveEscalation = ( conversationId:string, user_email:string ) => {
+  return _axios.put(`/approve_escalation/${conversationId}`, user_email);
+}
+
+export const rejectEscalation = ( conversationId:string, user_email:string ) => {
+  return _axios.put(`/reject_escalation/${conversationId}`, user_email);
+}

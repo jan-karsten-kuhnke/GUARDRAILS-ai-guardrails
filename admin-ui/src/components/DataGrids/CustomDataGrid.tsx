@@ -46,13 +46,13 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
       }, [sortConfig, range, filter]);
     
       const fetchData = async () => {
+        setLoading(true);
         const sort = [sortConfig[0].field, sortConfig[0].sort];
         const params = {
           filter: filter,
           range: range,
           sort: sort,
         };
-        setLoading(true);
     
         try {
           const response = await getGridData(props.entity,params);
@@ -130,6 +130,7 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
     
       const handleClose = () => {
         setSelectedRow(null);
+        fetchData();
       };
 
       const CustomPagination = () => {

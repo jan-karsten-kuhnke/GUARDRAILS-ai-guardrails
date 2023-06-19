@@ -118,8 +118,8 @@ class conversation_context:
 
         conditions = {
             "$and": [
-                filter_parameter,
-                { 'assigned_to': { "$in": [user_email] } }
+                { "state":"waiting for approval", 'assigned_to': { "$in": [user_email] } },
+                filter_parameter
             ]
         }
 
@@ -134,12 +134,20 @@ class conversation_context:
 
         conditions = {
             "$and": [
-                filter_parameter,
-                { 'assigned_to': { "$in": [user_email] } }
+                { "state":"waiting for approval", 'assigned_to': { "$in": [user_email] } },
+                filter_parameter
             ]
         }
 
         return conversations_collection.count_documents(conditions)
+
+
+    def approve_escalation(conversation_id):
+        conversations_collection.update_one({"_id":conversation_id}, {"$set":{"state":"active"}})
+
+    def reject_escalation(conversation_id):
+        print("farhan")
+        conversations_collection.update_one({"_id":conversation_id}, {"$set":{"state":"locked","archived":True}})
 
 
 
