@@ -23,7 +23,7 @@ export const PrivateDocuments = () => {
       open: true,
       message: `Uploading ${files.length} Documents`,
       severity: "info",
-      autoHideDuration:3000
+      autoHideDuration:10000
     });
 
     const formData = new FormData();
