@@ -1,11 +1,8 @@
 
 import React, { useEffect, useState } from "react";
 import { DataGrid, GridToolbar, GridSortModel, useGridApiContext, useGridSelector, gridPageSelector, gridPageCountSelector,GridRowParams  } from "@mui/x-data-grid";
-import { getGridData } from "@/services";
+import { getGridData, getDocsGridData } from "@/services";
 import TablePagination from '@mui/material/TablePagination';
-import PaginationItem from '@mui/material/PaginationItem';
-import KeyboardBackspaceOutlinedIcon from '@mui/icons-material/KeyboardBackspaceOutlined';
-import { Button, Container, Typography ,Grid} from '@mui/material';
 import { EscalationConversation } from "../Escalations/EscalationConversation";
 interface CustomDataGridProps {
     columns: any;
@@ -55,7 +52,14 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
         };
     
         try {
-          const response = await getGridData(props.entity,params);
+          let response;
+          if(props.entity=="documents")
+          {
+            response = await getDocsGridData(props.entity,params);
+          }
+          else{
+            response = await getGridData(props.entity,params);
+          }
           const { data } = response;
           const {data:rows , totalRows} = data;
           if(props.onGridDataUpdate)
@@ -163,7 +167,7 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
       }
     
     return (
-        <div style={{  width: "100%", padding:"2%" }}>
+        <div style={{  width: "100%", padding:"0% 2%" }}>
           
           {/*New component to Show all conversation in escalation */}
           {selectedRow?

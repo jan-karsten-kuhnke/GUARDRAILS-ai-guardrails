@@ -7,6 +7,7 @@ import { ComingSoon } from './components/ComingSoon/ComingSoon';
 import {PredefinedRulesGrid} from './components/PII Entities/PredifnedRulesGrid';
 import { ConversationGrid } from './components/DataGrids/ConversationGrid';
 import { Escalation } from './components/Escalations/Escalation';
+import { PrivateDocuments } from './components/PrivateDocuments/PrivateDocuments';
 
 export const AppRoutes = [
 
@@ -57,6 +58,10 @@ export const AppRoutes = [
     {
         path:'escalations',
         component:<Escalation/>
+    },
+    {
+        path:'/private-documents',
+        component:<PrivateDocuments/>
     }
 ];
 

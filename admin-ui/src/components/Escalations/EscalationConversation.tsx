@@ -1,25 +1,10 @@
 import * as React from "react";
-import {
-  IconRobot,
-  IconUser,
-  IconShieldExclamation,
-} from "@tabler/icons-react";
-import { Button, Container, Typography, Grid } from "@mui/material";
-import Snackbar from "@mui/material/Snackbar";
-import MuiAlert, { AlertColor, AlertProps } from "@mui/material/Alert";
-
-import KeyboardBackspaceOutlinedIcon from "@mui/icons-material/KeyboardBackspaceOutlined";
-
-import { approveEscalation, rejectEscalation } from "@/services";
 import { useState } from "react";
-
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  props,
-  ref
-) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
-
+import { approveEscalation, rejectEscalation } from "@/services";
+import { PopupNotify, AlertType } from "../PopupNotify/PopupNotify";
+import { Button, Container } from "@mui/material";
+import KeyboardBackspaceOutlinedIcon from "@mui/icons-material/KeyboardBackspaceOutlined";
+import { IconRobot, IconUser, IconShieldExclamation} from "@tabler/icons-react";
 export interface Props {
   selectedRow: any;
   handleClose: any;
@@ -28,12 +13,6 @@ export interface Message {
   role: Role;
   content: string;
   userActionRequired: boolean;
-}
-
-export interface AlertType {
-  open: boolean;
-  message: string;
-  severity: AlertColor | undefined;
 }
 
 export type Role = "assistant" | "user" | "guardrails";
@@ -46,6 +25,7 @@ export const EscalationConversation = (props: Props) => {
     open: false,
     message: "",
     severity: "success",
+    autoHideDuration: 2000
   });
 
   const handleApprove = async () => {
@@ -58,6 +38,7 @@ export const EscalationConversation = (props: Props) => {
       open: true,
       message: "Conversation Escalation Approved",
       severity: "success",
+      autoHideDuration: 2000
     });
   };
 
@@ -71,6 +52,7 @@ export const EscalationConversation = (props: Props) => {
       open: true,
       message: "Conversation Escalation Rejected",
       severity: "error",
+      autoHideDuration: 2000
     });
   };
 
@@ -196,23 +178,7 @@ export const EscalationConversation = (props: Props) => {
         </Button>
       </div>
 
-      <Snackbar
-        open={alert.open}
-        autoHideDuration={2000}
-        onClose={handleAlertClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
-        }}
-      >
-        <Alert
-          onClose={handleAlertClose}
-          severity={alert.severity}
-          sx={{ width: "100%" }}
-        >
-          {alert.message}
-        </Alert>
-      </Snackbar>
+      {alert.open && <PopupNotify {...alert} onClose={handleAlertClose}/>}
     </Container>
   );
 };
