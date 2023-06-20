@@ -6,7 +6,7 @@ export interface AlertType {
   open: boolean;
   message: string;
   severity: AlertColor | undefined;
-  autoHideDuration : number
+  autoHideDuration : number | null
 }
 
 export interface PopupNotifyProps extends AlertType {
