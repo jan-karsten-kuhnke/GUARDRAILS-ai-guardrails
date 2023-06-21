@@ -1,10 +1,12 @@
 import * as React from "react";
 import { useState } from "react";
 import { approveEscalation, rejectEscalation } from "@/services";
-import { PopupNotify, AlertType } from "../PopupNotify/PopupNotify";
 import { Button, Container } from "@mui/material";
 import KeyboardBackspaceOutlinedIcon from "@mui/icons-material/KeyboardBackspaceOutlined";
+import HourglassBottomOutlinedIcon from '@mui/icons-material/HourglassBottomOutlined';
 import { IconRobot, IconUser, IconShieldExclamation} from "@tabler/icons-react";
+import toast from "react-hot-toast";
+import { NULL } from "sass";
 export interface Props {
   selectedRow: any;
   handleClose: any;
@@ -21,47 +23,66 @@ export const EscalationConversation = (props: Props) => {
   const { selectedRow, handleClose } = props;
   const [loading, setLoading] = useState(false);
 
-  const [alert, setAlert] = useState<AlertType>({
-    open: false,
-    message: "",
-    severity: "success",
-    autoHideDuration: 2000
-  });
-
   const handleApprove = async () => {
     setLoading(true);
-    let { data } = await approveEscalation(
-      selectedRow.id,
-      selectedRow.user_email
-    );
-    setAlert({
-      open: true,
-      message: "Conversation Escalation Approved",
-      severity: "success",
-      autoHideDuration: 2000
+    toast('Approving Request', {
+      icon: <HourglassBottomOutlinedIcon/>,
+      position: "bottom-center",
+      duration: 1000
     });
+
+    try{
+      let { data } = await approveEscalation(
+        selectedRow.id,
+        selectedRow.user_email
+      );
+
+      toast.success('Escalationn Approved!'
+      ,{
+        position: "bottom-center",
+        duration: 3000
+      })
+      handleClose()
+    }
+    catch(error:any)
+    {
+      console.log(error)
+      toast.error(error.message,{
+        position: "bottom-center"
+      })
+      setLoading(false)
+    }
   };
 
   const handleReject = async () => {
     setLoading(true);
-    let { data } = await rejectEscalation(
-      selectedRow.id,
-      selectedRow.user_email
-    );
-    setAlert({
-      open: true,
-      message: "Conversation Escalation Rejected",
-      severity: "error",
-      autoHideDuration: 2000
+    toast('Rejecting Request', {
+      icon: <HourglassBottomOutlinedIcon/>,
+      position: "bottom-center",
+      duration: 1000
     });
-  };
 
-  const handleAlertClose = () => {
-    setAlert((prev) => {
-      return { ...prev, open: false };
-    });
-    handleClose();
-    setLoading(false);
+    try{
+      let { data } = await rejectEscalation(
+        selectedRow.id,
+        selectedRow.user_email
+      );
+
+      toast.success('Escalationn Rejected!'
+      ,{
+        position: "bottom-center",
+        duration: 3000
+      })
+      handleClose()
+    }
+    catch(error:any)
+    {
+      console.log(error)
+      toast.error(error.message,{
+        position: "bottom-center"
+      })
+      setLoading(false)
+    }
   };
   return (
     <Container
@@ -177,8 +198,6 @@ export const EscalationConversation = (props: Props) => {
           Approve
         </Button>
       </div>
-
-      {alert.open && <PopupNotify {...alert} onClose={handleAlertClose}/>}
     </Container>
   );
 };

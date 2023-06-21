@@ -34,10 +34,6 @@ export const uploadDocuments = ( formData:FormData ) => {
 }
 
 export const getDocsGridData = (entity: string,params: any) => {
-  //url : https://chat.synergy.control-gpt.com/api/admin/chat_log?filter={}&range=[0,9]&sort=["created_at","DESC"]
-  //server side pagination , sorting and filtering
-  //https://mui.com/x/react-data-grid/filtering/
-  //convert into string
   const stringParams = Object.keys(params)
     .map((key, index) => `${key}=${JSON.stringify(params[key])}`)
     .join("&");
