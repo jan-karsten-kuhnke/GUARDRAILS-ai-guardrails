@@ -105,36 +105,25 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         const chatBody: any = {
           message: message.content
         };
-        let body;
-        if (!plugin) {
-          body = JSON.stringify(chatBody);
-        } else {
-          body = JSON.stringify({
-            ...chatBody,
-            googleAPIKey: pluginKeys
-              .find((key) => key.pluginId === 'google-search')
-              ?.requiredKeys.find((key) => key.key === 'GOOGLE_API_KEY')?.value,
-            googleCSEId: pluginKeys
-              .find((key) => key.pluginId === 'google-search')
-              ?.requiredKeys.find((key) => key.key === 'GOOGLE_CSE_ID')?.value,
-          });
-        }
+
+        let modelName = plugin?.id;
         const controller = new AbortController();
         let response: any;
         if(isOverRide){
           response = await fetchPrompt(
             updatedConversation.messages[updatedConversation.messages.length - 2].content,
             selectedConversation.id,
-            isOverRide
+            isOverRide,
+            modelName
           );
         }else{
           response = await fetchPrompt(
             chatBody.message,
             selectedConversation.id,
-            isOverRide
+            isOverRide,
+            modelName
           );
         }
-       
 
         if (!response.ok) {
           homeDispatch({ field: 'loading', value: false });
@@ -148,7 +137,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           homeDispatch({ field: 'messageIsStreaming', value: false });
           return;
         }
-        if (!plugin) {
+
           homeDispatch({ field: 'loading', value: false });
           const reader = data.getReader();
           const decoder = new TextDecoder("utf-8");
@@ -233,38 +222,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           }
           
           homeDispatch({ field: 'messageIsStreaming', value: false });
-        } else {
-          const { answer } = await response.json();
-          const updatedMessages: Message[] = [
-            ...updatedConversation.messages,
-            { role: 'assistant', content: answer, userActionRequired: false },
-          ];
-          updatedConversation = {
-            ...updatedConversation,
-            messages: updatedMessages,
-          };
-          homeDispatch({
-            field: 'selectedConversation',
-            value: updateConversation,
-          });
-          // saveConversation(updatedConversation);
-          const updatedConversations: Conversation[] = conversations.map(
-            (conversation) => {
-              if (conversation.id === selectedConversation.id) {
-                return updatedConversation;
-              }
-              return conversation;
-            },
-          );
-          if (updatedConversations.length === 0) {
-            updatedConversations.push(updatedConversation);
-          }
-          homeDispatch({ field: 'conversations', value: updatedConversations });
-          homeDispatch({ field: 'isArchiveView', value: false });
-          // saveConversations(updatedConversations);
-          homeDispatch({ field: 'loading', value: false });
-          homeDispatch({ field: 'messageIsStreaming', value: false });
-        }
+         
       }
     },
     [

@@ -5,7 +5,9 @@ import {
   IconPlayerStop,
   IconRepeat,
   IconSend,
+  IconBook
 } from "@tabler/icons-react";
+
 import {
   KeyboardEvent,
   MutableRefObject,
@@ -15,7 +17,7 @@ import {
   useRef,
   useState,
 } from "react";
-
+import { PluginList } from '@/types/plugin';
 import toast from "react-hot-toast";
 import Chip from '@mui/material/Chip';
 
@@ -34,7 +36,7 @@ import { analyzeMessage } from "@/services";
 import { AxiosResponse } from "axios";
 
 interface Props {
-  onSend: (message: Message, plugin: Plugin | null) => void;
+  onSend: (message: Message, plugin: Plugin) => void;
   onRegenerate: () => void;
   onScrollDownClick: () => void;
   stopConversationRef: MutableRefObject<boolean>;
@@ -66,7 +68,7 @@ export const ChatInput = ({
   const [variables, setVariables] = useState<string[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [showPluginSelect, setShowPluginSelect] = useState(false);
-  const [plugin, setPlugin] = useState<Plugin | null>(null);
+  const [plugin, setPlugin] = useState<Plugin>(PluginList[0]);
 
   const [analysisResponse, setAnalysisResponse] = useState<AnalysisObject[]>(
     []
@@ -78,6 +80,7 @@ export const ChatInput = ({
     prompt.name.toLowerCase().includes(promptInputValue.toLowerCase())
   );
 
+  console.log(plugin)
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     const maxLength = 2000;
@@ -136,7 +139,6 @@ export const ChatInput = ({
 
     onSend({ role: "user", content: content , userActionRequired: false }, plugin);
     setContent("");
-    setPlugin(null);
 
     if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
       textareaRef.current.blur();
@@ -321,10 +323,10 @@ export const ChatInput = ({
             onClick={() => setShowPluginSelect(!showPluginSelect)}
             onKeyDown={(e) => { }}
           >
-            {plugin ? <IconBrandGoogle size={20} /> : <IconBolt size={20} />}
+            {plugin.id == PluginList[0].id ? <IconBolt size={20} /> : <IconBook size={20} />}
           </button>
-          {/* {remove false from below to enable plugin select} */}
-          {false && showPluginSelect && (
+          {/* {plugin can only be changed if conversation is empty} */}
+          {selectedConversation?.messages?.length === 0 && showPluginSelect && (
             <div className="absolute left-0 bottom-14 rounded bg-white dark:bg-[#343541]">
               <PluginSelect
                 plugin={plugin}

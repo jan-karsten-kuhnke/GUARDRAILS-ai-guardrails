@@ -27,7 +27,7 @@ _axios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 
 _axios.interceptors.response.use(handleSuccess, handleError);
 
-export const fetchPrompt = (message: string, conversationId: string | null , isOverride: boolean) => fetch(`${import.meta.env.VITE_CHAT_SERVICE_URL}/completions`, { method: "POST", headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${AuthService.getToken()}` }, body: JSON.stringify(conversationId ? {message: message, conversation_id: conversationId , isOverride: isOverride}  : { message: message })  });
+export const fetchPrompt = (message: string, conversationId: string | null , isOverride: boolean , modelName: string | undefined) => fetch(`${import.meta.env.VITE_CHAT_SERVICE_URL}/completions`, { method: "POST", headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${AuthService.getToken()}` }, body: JSON.stringify(conversationId ? {message: message, conversation_id: conversationId , isOverride: isOverride, model_name : modelName}  : { message: message })});
 
 export const analyzeMessage = (message: string) => {
   return _axios.post('/analyze', { message: message });

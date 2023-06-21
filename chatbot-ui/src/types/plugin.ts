@@ -12,24 +12,42 @@ export interface PluginKey {
 }
 
 export enum PluginID {
-  GOOGLE_SEARCH = 'google-search',
+  // GOOGLE_SEARCH = 'google-search',
+  CHAT_GPT = "gpt-3.5-turbo",
+  PRIVATE_DOCS = "private-docs"
 }
 
 export enum PluginName {
-  GOOGLE_SEARCH = 'Google Search',
+  // GOOGLE_SEARCH = 'Google Search',
+  CHAT_GPT = "Chat-GPT",
+  PRIVATE_DOCS = "Private-Docs"
 }
 
 export const Plugins: Record<PluginID, Plugin> = {
-  [PluginID.GOOGLE_SEARCH]: {
-    id: PluginID.GOOGLE_SEARCH,
-    name: PluginName.GOOGLE_SEARCH,
+  [PluginID.CHAT_GPT]: {
+    id: PluginID.CHAT_GPT,
+    name: PluginName.CHAT_GPT,
     requiredKeys: [
       {
-        key: 'GOOGLE_API_KEY',
+        key: 'CHAT_GPT_API_KEY',
         value: '',
       },
       {
-        key: 'GOOGLE_CSE_ID',
+        key: 'CHAT_GPT_CSE_ID',
+        value: '',
+      },
+    ],
+  },
+  [PluginID.PRIVATE_DOCS]: {
+    id: PluginID.PRIVATE_DOCS,
+    name: PluginName.PRIVATE_DOCS,
+    requiredKeys: [
+      {
+        key: 'PRIVATE_DOCS_API_KEY',
+        value: '',
+      },
+      {
+        key: 'PRIVATE_DOCS_CSE_ID',
         value: '',
       },
     ],

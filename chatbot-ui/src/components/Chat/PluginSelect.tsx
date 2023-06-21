@@ -3,7 +3,7 @@ import { FC, useEffect, useRef } from 'react';
 import { Plugin, PluginList } from '@/types/plugin';
 
 interface Props {
-  plugin: Plugin | null;
+  plugin: Plugin;
   onPluginChange: (plugin: Plugin) => void;
   onKeyDown: (e: React.KeyboardEvent<HTMLSelectElement>) => void;
 }
@@ -76,13 +76,6 @@ export const PluginSelect: FC<Props> = ({
             handleKeyDown(e);
           }}
         >
-          <option
-            key="chatgpt"
-            value="chatgpt"
-            className="dark:bg-[#343541] dark:text-white"
-          >
-            ChatGPT
-          </option>
 
           {PluginList.map((plugin) => (
             <option
