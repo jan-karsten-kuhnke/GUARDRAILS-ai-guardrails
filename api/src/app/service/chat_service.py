@@ -10,6 +10,7 @@ import uuid
 from typing import TypedDict
 from datetime import datetime
 import json
+import requests
 
 
 class conversation_obj(TypedDict):
@@ -74,15 +75,14 @@ class chat_service:
             chat_service.save_analysis_audit(message, result,get_current_user_email())
         return result
 
-    def chat_completion(data,current_user_email):
+    def chat_completion(data,current_user_email,token):
         try:
             prompt = str(data["message"])
             isOverride = bool(data["isOverride"])
             conversation_id = None
             manage_conversation_context = False
-            model = data.get('model', None)
-            if(model is None or not model):
-                model = "gpt-3.5-turbo"
+            model = data.get('model_name', None)
+            
             if('conversation_id'  in data and  data['conversation_id']):
                 conversation_id = data['conversation_id']
                 manage_conversation_context = True
@@ -92,9 +92,9 @@ class chat_service:
                 stop_conversation = False
                 stop_response = ''
             else:
-                
                 stop_conversation,stop_response,anonymized_prompt = chat_service.validate_prompt(prompt,conversation_id,current_user_email)
                 chat_service.update_conversation(conversation_id,anonymized_prompt,'user',current_user_email,model)
+            
             
             current_completion = ''
 
@@ -114,25 +114,44 @@ class chat_service:
                 messages = chat_service.get_history_for_bot(conversation_id, current_user_email)
                 if (len(messages) > 1):
                     conversation = conversation_context.get_conversation_by_id(conversation_id, current_user_email)
-                    if(conversation and 'model_name' in conversation and conversation['model_name']):
-                        model = conversation['model_name']
-                    else:
-                        model = "gpt-3.5-turbo"
+                    # if(conversation and 'model_name' in conversation and conversation['model_name']):
+                    #     model = conversation['model_name']
+                    #     print(model)
+                    # else:
+                    #     model = "gpt-3.5-turbo"
+                    #     print("else")
+            print("hello")
+            if(model =="gpt-3.5-turbo"):
+                response = openai_wrapper.chat_completion(messages, model)
+                # yield (conversation_id)
+                for chunk in response:
+                    if (
+                        chunk["choices"][0]["delta"]
+                        and "content" in chunk["choices"][0]["delta"]
+                    ):
+                        chunk_to_yeild = chunk["choices"][0]["delta"]["content"]
+                        current_completion += chunk["choices"][0]["delta"]["content"]
+                        chunk = json.dumps({
+                                "role": "assistant",
+                                "content": chunk_to_yeild,
+                            })
+                        yield (chunk)
+            else:
+                print("private")
+                url = "http://127.0.0.1:8083/api/query/"
+                payload = json.dumps({
+                    "query": messages[-1]['content'],
+                    "model_type": "OpenAI"
+                })
+                
+                headers = {
+                    'Authorization': f"Bearer {token}",
+                    'Content-Type': 'application/json'
+                }
+                response = requests.request("POST", url, headers=headers, data=payload)
 
-            response = openai_wrapper.chat_completion(messages, model)
-            # yield (conversation_id)
-            for chunk in response:
-                if (
-                    chunk["choices"][0]["delta"]
-                    and "content" in chunk["choices"][0]["delta"]
-                ):
-                    chunk_to_yeild = chunk["choices"][0]["delta"]["content"]
-                    current_completion += chunk["choices"][0]["delta"]["content"]
-                    chunk = json.dumps({
-                            "role": "assistant",
-                            "content": chunk_to_yeild,
-                        })
-                    yield (chunk)
+                print(response.text)
+            
             
         
             chat_service.save_chat_log(current_user_email, anonymized_prompt)
