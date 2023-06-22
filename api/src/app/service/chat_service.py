@@ -140,7 +140,6 @@ class chat_service:
                 sources = res['sources'][0]
                 source = json.loads(sources)['metadata']['source']
                 answer = res['answer'] + "  \n  \n" + "Source: " + source  #adding double space + \n because ReactMarkdown in chatbot-ui needs this for next line
-                print(answer)
                 chunk = json.dumps({
                                 "role": "assistant",
                                 "content": answer,
