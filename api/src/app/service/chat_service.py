@@ -133,6 +133,7 @@ class chat_service:
                                 "content": chunk_to_yeild,
                             })
                         yield (chunk)
+                response.close()
             else:
                 print("private")
                 url = "http://127.0.0.1:8085/api/query/"
@@ -156,7 +157,6 @@ class chat_service:
         
             chat_service.save_chat_log(current_user_email, anonymized_prompt)
             chat_service.update_conversation(conversation_id,current_completion,'assistant',current_user_email,model)
-            response.close()
         except Exception as e:
             yield (json.dumps({"error": "error"}))
             print("error: ", e)
