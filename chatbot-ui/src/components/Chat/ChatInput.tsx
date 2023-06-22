@@ -270,10 +270,6 @@ export const ChatInput = ({
   };
 
   useEffect(() => {
-    if(!selectedConversation)
-    {
-      return
-    }
     if(!selectedConversation?.messages.length || selectedConversation.model == "gpt-3.5-turbo")
     {
       setPlugin(PluginList[0])
@@ -345,6 +341,7 @@ export const ChatInput = ({
             className="absolute left-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
             onClick={() => toggleShowPluginSelect() }
             onKeyDown={(e) => { }}
+            style={{opacity: selectedConversation?.messages?.length!=0? "10%" : ""}}
           >
             {plugin.id == PluginList[0].id ? <IconBolt size={20} /> : <IconBook size={20} />}
           </button>
