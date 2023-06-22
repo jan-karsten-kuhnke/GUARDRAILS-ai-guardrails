@@ -25,7 +25,7 @@ class openai_wrapper:
                 stream=False,  # this time, we set stream=True
             )
             title  = response['choices'][0]['message']['content']
-            return str(title)
+            return str(title[1:-1])
         else:
             return prompt
 

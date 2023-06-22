@@ -135,7 +135,6 @@ class chat_service:
                         yield (chunk)
                 response.close()
             else:
-                print("private")
                 url = "http://127.0.0.1:8085/api/query/"
                 payload = json.dumps({
                     "query": messages[-1]['content'],
@@ -210,7 +209,7 @@ class chat_service:
             created=datetime.now(),
             messages= messages,
             user_email=email,
-            title= openai_wrapper.gen_title(prompt,model)[1:-1],
+            title= openai_wrapper.gen_title(prompt,model),
             model_name = model,
             state = 'active',
             assigned_to = []
