@@ -38,6 +38,8 @@ class Globals:
     
     open_ai_api_key=os.environ.get("OPEN_AI_API_KEY")
 
+    document_api_url=os.environ.get("DOCUMENT_API_URL")
+    
     def prepare_client_secrets():
         if os.path.isfile("client_secrets.json"):
             print("removing existing client_secrets.json")

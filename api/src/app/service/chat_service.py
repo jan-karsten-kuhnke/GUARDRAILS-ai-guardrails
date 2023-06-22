@@ -2,6 +2,7 @@ from oidc import get_current_user_email
 from repo.db import conversation_context, anonymize_audit_context,analysis_audit_context,folders_context,prompts_context
 from repo.postgres import SqlAudits
 from integration.openai_wrapper import openai_wrapper
+from integration.document_wrapper import document_wrapper
 from integration.presidio_wrapper import presidio_wrapper
 from presidio_anonymizer.entities import RecognizerResult
 from integration.nsfw_model_wrapper import NSFWModelWrapper
@@ -135,17 +136,7 @@ class chat_service:
                         yield (chunk)
                 response.close()
             else:
-                url = "http://127.0.0.1:8085/api/query/"
-                payload = json.dumps({
-                    "query": messages[-1]['content'],
-                    "model_type": "OpenAI"
-                })
-                
-                headers = {
-                    'Authorization': f"Bearer {token}",
-                    'Content-Type': 'application/json'
-                }
-                res = requests.request("POST", url, headers=headers, data=payload).json()
+                res = document_wrapper.document_completion(messages,token)
                 chunk = json.dumps({
                                 "role": "assistant",
                                 "content": res['answer'],
