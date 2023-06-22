@@ -172,9 +172,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 role = parsed.role;
               }
             } else{
-               parsed = JSON.parse(chunkValue);
+              parsed = JSON.parse(chunkValue);
               text += parsed.content;
               role = parsed.role;
+              console.log(text)
             }
             if (isFirst) {
               isFirst = false;

@@ -137,13 +137,17 @@ class chat_service:
                 response.close()
             else:
                 res = document_wrapper.document_completion(messages,token)
+                sources = res['sources'][0]
+                source = json.loads(sources)['metadata']['source']
+                answer = res['answer'] + "  \n  \n" + "Source: " + source  #adding double space + \n because ReactMarkdown in chatbot-ui needs this for next line
+                print(answer)
                 chunk = json.dumps({
                                 "role": "assistant",
-                                "content": res['answer'],
+                                "content": answer,
                                 "sources": res['sources']
                             })
                 yield (chunk)
-                current_completion += res['answer']
+                current_completion += answer
         
             chat_service.save_chat_log(current_user_email, anonymized_prompt)
             chat_service.update_conversation(conversation_id,current_completion,'assistant',current_user_email,model)
