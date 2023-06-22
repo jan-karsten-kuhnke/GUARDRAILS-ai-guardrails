@@ -155,7 +155,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             done = doneReading;
             const chunkValue = decoder.decode(value);
             let parsed;
-            if(chunkValue === '') continue;
+            if(!chunkValue || chunkValue === '') continue;
             if(chunkValue.includes('}{')){
               var split = chunkValue.split('}{');
               for(var i = 0; i < split.length; i++){

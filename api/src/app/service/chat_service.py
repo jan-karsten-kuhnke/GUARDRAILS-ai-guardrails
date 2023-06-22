@@ -94,8 +94,6 @@ class chat_service:
             else:
                 stop_conversation,stop_response,anonymized_prompt = chat_service.validate_prompt(prompt,conversation_id,current_user_email)
                 chat_service.update_conversation(conversation_id,anonymized_prompt,'user',current_user_email,model)
-            
-            
             current_completion = ''
 
             if stop_conversation:
@@ -120,7 +118,6 @@ class chat_service:
                     # else:
                     #     model = "gpt-3.5-turbo"
                     #     print("else")
-            print("hello")
             if(model =="gpt-3.5-turbo"):
                 response = openai_wrapper.chat_completion(messages, model)
                 # yield (conversation_id)
@@ -138,7 +135,7 @@ class chat_service:
                         yield (chunk)
             else:
                 print("private")
-                url = "http://127.0.0.1:8083/api/query/"
+                url = "http://127.0.0.1:8085/api/query/"
                 payload = json.dumps({
                     "query": messages[-1]['content'],
                     "model_type": "OpenAI"
@@ -148,17 +145,21 @@ class chat_service:
                     'Authorization': f"Bearer {token}",
                     'Content-Type': 'application/json'
                 }
-                response = requests.request("POST", url, headers=headers, data=payload)
-
-                print(response.text)
-            
-            
+                res = requests.request("POST", url, headers=headers, data=payload).json()
+                chunk = json.dumps({
+                                "role": "assistant",
+                                "content": res['answer'],
+                                "sources": res['sources']
+                            })
+                yield (chunk)
+                current_completion += res['answer']
         
             chat_service.save_chat_log(current_user_email, anonymized_prompt)
             chat_service.update_conversation(conversation_id,current_completion,'assistant',current_user_email,model)
             response.close()
         except Exception as e:
             yield (json.dumps({"error": "error"}))
+            print("error: ", e)
             return
 
     def validate_prompt(prompt,conversation_id,current_user_email):
