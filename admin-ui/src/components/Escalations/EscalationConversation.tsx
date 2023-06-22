@@ -1,25 +1,12 @@
 import * as React from "react";
-import {
-  IconRobot,
-  IconUser,
-  IconShieldExclamation,
-} from "@tabler/icons-react";
-import { Button, Container, Typography, Grid } from "@mui/material";
-import Snackbar from "@mui/material/Snackbar";
-import MuiAlert, { AlertColor, AlertProps } from "@mui/material/Alert";
-
-import KeyboardBackspaceOutlinedIcon from "@mui/icons-material/KeyboardBackspaceOutlined";
-
-import { approveEscalation, rejectEscalation } from "@/services";
 import { useState } from "react";
-
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  props,
-  ref
-) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
-
+import { approveEscalation, rejectEscalation } from "@/services";
+import { Button, Container } from "@mui/material";
+import KeyboardBackspaceOutlinedIcon from "@mui/icons-material/KeyboardBackspaceOutlined";
+import HourglassBottomOutlinedIcon from '@mui/icons-material/HourglassBottomOutlined';
+import { IconRobot, IconUser, IconShieldExclamation} from "@tabler/icons-react";
+import toast from "react-hot-toast";
+import { NULL } from "sass";
 export interface Props {
   selectedRow: any;
   handleClose: any;
@@ -30,56 +17,72 @@ export interface Message {
   userActionRequired: boolean;
 }
 
-export interface AlertType {
-  open: boolean;
-  message: string;
-  severity: AlertColor | undefined;
-}
-
 export type Role = "assistant" | "user" | "guardrails";
 
 export const EscalationConversation = (props: Props) => {
   const { selectedRow, handleClose } = props;
   const [loading, setLoading] = useState(false);
 
-  const [alert, setAlert] = useState<AlertType>({
-    open: false,
-    message: "",
-    severity: "success",
-  });
-
   const handleApprove = async () => {
     setLoading(true);
-    let { data } = await approveEscalation(
-      selectedRow.id,
-      selectedRow.user_email
-    );
-    setAlert({
-      open: true,
-      message: "Conversation Escalation Approved",
-      severity: "success",
+    toast('Approving Request', {
+      icon: <HourglassBottomOutlinedIcon/>,
+      position: "bottom-center",
+      duration: 1000
     });
+
+    try{
+      let { data } = await approveEscalation(
+        selectedRow.id,
+        selectedRow.user_email
+      );
+
+      toast.success('Escalationn Approved!'
+      ,{
+        position: "bottom-center",
+        duration: 3000
+      })
+      handleClose()
+    }
+    catch(error:any)
+    {
+      console.log(error)
+      toast.error(error.message,{
+        position: "bottom-center"
+      })
+      setLoading(false)
+    }
   };
 
   const handleReject = async () => {
     setLoading(true);
-    let { data } = await rejectEscalation(
-      selectedRow.id,
-      selectedRow.user_email
-    );
-    setAlert({
-      open: true,
-      message: "Conversation Escalation Rejected",
-      severity: "error",
+    toast('Rejecting Request', {
+      icon: <HourglassBottomOutlinedIcon/>,
+      position: "bottom-center",
+      duration: 1000
     });
-  };
 
-  const handleAlertClose = () => {
-    setAlert((prev) => {
-      return { ...prev, open: false };
-    });
-    handleClose();
-    setLoading(false);
+    try{
+      let { data } = await rejectEscalation(
+        selectedRow.id,
+        selectedRow.user_email
+      );
+
+      toast.success('Escalationn Rejected!'
+      ,{
+        position: "bottom-center",
+        duration: 3000
+      })
+      handleClose()
+    }
+    catch(error:any)
+    {
+      console.log(error)
+      toast.error(error.message,{
+        position: "bottom-center"
+      })
+      setLoading(false)
+    }
   };
   return (
     <Container
@@ -195,24 +198,6 @@ export const EscalationConversation = (props: Props) => {
           Approve
         </Button>
       </div>
-
-      <Snackbar
-        open={alert.open}
-        autoHideDuration={2000}
-        onClose={handleAlertClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "center",
-        }}
-      >
-        <Alert
-          onClose={handleAlertClose}
-          severity={alert.severity}
-          sx={{ width: "100%" }}
-        >
-          {alert.message}
-        </Alert>
-      </Snackbar>
     </Container>
   );
 };

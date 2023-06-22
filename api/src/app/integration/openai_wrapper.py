@@ -16,13 +16,16 @@ class openai_wrapper:
     
 
     def gen_title(prompt, model):
-        openai.api_key = api_key
-        response = openai.ChatCompletion.create(
-            model=model,
-            messages=[{"role": "user", "content":  'Generate conversation title for this message "' + prompt + '"  Respond only with the title.'}],
-            temperature=0,
-            stream=False,  # this time, we set stream=True
-        )
-        title  = response['choices'][0]['message']['content']
-        return str(title)
+        if model == 'gpt-3.5-turbo':
+            openai.api_key = api_key
+            response = openai.ChatCompletion.create(
+                model=model,
+                messages=[{"role": "user", "content":  'Generate conversation title for this message "' + prompt + '"  Respond only with the title.'}],
+                temperature=0,
+                stream=False,  # this time, we set stream=True
+            )
+            title  = response['choices'][0]['message']['content']
+            return str(title[1:-1])
+        else:
+            return prompt
 

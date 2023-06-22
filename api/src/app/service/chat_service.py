@@ -2,6 +2,7 @@ from oidc import get_current_user_email
 from repo.db import conversation_context, anonymize_audit_context,analysis_audit_context,folders_context,prompts_context
 from repo.postgres import SqlAudits
 from integration.openai_wrapper import openai_wrapper
+from integration.document_wrapper import document_wrapper
 from integration.presidio_wrapper import presidio_wrapper
 from presidio_anonymizer.entities import RecognizerResult
 from integration.nsfw_model_wrapper import NSFWModelWrapper
@@ -10,6 +11,7 @@ import uuid
 from typing import TypedDict
 from datetime import datetime
 import json
+import requests
 
 
 class conversation_obj(TypedDict):
@@ -74,15 +76,14 @@ class chat_service:
             chat_service.save_analysis_audit(message, result,get_current_user_email())
         return result
 
-    def chat_completion(data,current_user_email):
+    def chat_completion(data,current_user_email,token):
         try:
             prompt = str(data["message"])
             isOverride = bool(data["isOverride"])
             conversation_id = None
             manage_conversation_context = False
-            model = data.get('model', None)
-            if(model is None or not model):
-                model = "gpt-3.5-turbo"
+            model = data.get('model_name', None)
+            
             if('conversation_id'  in data and  data['conversation_id']):
                 conversation_id = data['conversation_id']
                 manage_conversation_context = True
@@ -92,10 +93,8 @@ class chat_service:
                 stop_conversation = False
                 stop_response = ''
             else:
-                
                 stop_conversation,stop_response,anonymized_prompt = chat_service.validate_prompt(prompt,conversation_id,current_user_email)
                 chat_service.update_conversation(conversation_id,anonymized_prompt,'user',current_user_email,model)
-            
             current_completion = ''
 
             if stop_conversation:
@@ -114,32 +113,46 @@ class chat_service:
                 messages = chat_service.get_history_for_bot(conversation_id, current_user_email)
                 if (len(messages) > 1):
                     conversation = conversation_context.get_conversation_by_id(conversation_id, current_user_email)
-                    if(conversation and 'model_name' in conversation and conversation['model_name']):
-                        model = conversation['model_name']
-                    else:
-                        model = "gpt-3.5-turbo"
-
-            response = openai_wrapper.chat_completion(messages, model)
-            # yield (conversation_id)
-            for chunk in response:
-                if (
-                    chunk["choices"][0]["delta"]
-                    and "content" in chunk["choices"][0]["delta"]
-                ):
-                    chunk_to_yeild = chunk["choices"][0]["delta"]["content"]
-                    current_completion += chunk["choices"][0]["delta"]["content"]
-                    chunk = json.dumps({
-                            "role": "assistant",
-                            "content": chunk_to_yeild,
-                        })
-                    yield (chunk)
-            
+                    # if(conversation and 'model_name' in conversation and conversation['model_name']):
+                    #     model = conversation['model_name']
+                    #     print(model)
+                    # else:
+                    #     model = "gpt-3.5-turbo"
+                    #     print("else")
+            if(model =="gpt-3.5-turbo"):
+                response = openai_wrapper.chat_completion(messages, model)
+                # yield (conversation_id)
+                for chunk in response:
+                    if (
+                        chunk["choices"][0]["delta"]
+                        and "content" in chunk["choices"][0]["delta"]
+                    ):
+                        chunk_to_yeild = chunk["choices"][0]["delta"]["content"]
+                        current_completion += chunk["choices"][0]["delta"]["content"]
+                        chunk = json.dumps({
+                                "role": "assistant",
+                                "content": chunk_to_yeild,
+                            })
+                        yield (chunk)
+                response.close()
+            else:
+                res = document_wrapper.document_completion(messages,token)
+                sources = res['sources'][0]
+                source = json.loads(sources)['metadata']['source']
+                answer = res['answer'] + "  \n  \n" + "Source: " + source  #adding double space + \n because ReactMarkdown in chatbot-ui needs this for next line
+                chunk = json.dumps({
+                                "role": "assistant",
+                                "content": answer,
+                                "sources": res['sources']
+                            })
+                yield (chunk)
+                current_completion += answer
         
             chat_service.save_chat_log(current_user_email, anonymized_prompt)
             chat_service.update_conversation(conversation_id,current_completion,'assistant',current_user_email,model)
-            response.close()
         except Exception as e:
             yield (json.dumps({"error": "error"}))
+            print("error: ", e)
             return
 
     def validate_prompt(prompt,conversation_id,current_user_email):
@@ -190,7 +203,7 @@ class chat_service:
             created=datetime.now(),
             messages= messages,
             user_email=email,
-            title= openai_wrapper.gen_title(prompt,model)[1:-1],
+            title= openai_wrapper.gen_title(prompt,model),
             model_name = model,
             state = 'active',
             assigned_to = []

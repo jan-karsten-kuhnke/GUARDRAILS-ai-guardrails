@@ -32,8 +32,9 @@ def anonymize():
 def chat_completion():
     data = request.get_json(silent=True)
     user_email = get_current_user_email()
+    token = request.headers['authorization'].split(' ')[1]
     def chat_completion_stream(data,user_email):
-        response = chat_service.chat_completion(data,user_email)
+        response = chat_service.chat_completion(data,user_email,token)
         for chunk in response:
             yield chunk
     return Response(chat_completion_stream(data,user_email), mimetype='text/event-stream')
