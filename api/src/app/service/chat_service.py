@@ -1,3 +1,4 @@
+import logging
 from oidc import get_current_user_email
 from repo.db import conversation_context, anonymize_audit_context,analysis_audit_context,folders_context,prompts_context
 from repo.postgres import SqlAudits
@@ -136,17 +137,24 @@ class chat_service:
                         yield (chunk)
                 response.close()
             else:
-                res = document_wrapper.document_completion(messages,token)
-                sources = res['sources'][0]
-                source = json.loads(sources)['metadata']['source']
-                answer = res['answer'] + "  \n  \n" + "Source: " + source  #adding double space + \n because ReactMarkdown in chatbot-ui needs this for next line
-                chunk = json.dumps({
-                                "role": "assistant",
-                                "content": answer,
-                                "sources": res['sources']
-                            })
-                yield (chunk)
-                current_completion += answer
+                try:
+                    logging.info("calling document completion")
+                    res = document_wrapper.document_completion(messages,token)
+                    answer = res['answer']
+                    if res['sources']:
+                        sources = res['sources'][0]
+                        source = json.loads(sources)['metadata']['source'].split('/')[-1]
+                        answer = answer + "  \n  \n" + "Source: " + source  #adding double space + \n because ReactMarkdown in chatbot-ui needs this for next line
+                    chunk = json.dumps({
+                                    "role": "assistant",
+                                    "content": answer,
+                                    "sources": res['sources']
+                                })
+                    yield (chunk)
+                    current_completion += answer
+                except Exception as e:
+                    yield("Sorry. Some error occured. Please try again.")
+                    logging.error("error: "+str(e))
         
             chat_service.save_chat_log(current_user_email, anonymized_prompt)
             chat_service.update_conversation(conversation_id,current_completion,'assistant',current_user_email,model)
@@ -167,7 +175,7 @@ class chat_service:
             stop_response =  "Warning From Guardrails: We've detected that your message contains NSFW content. Please refrain from posting such content in a work environment, You can choose to override this warning if you wish to continue the conversation, or you can get your manager's approval before continuing."
             stop_conversation = True
         
-        blocked_content = ["Technology Alpha" , 'synergy ai']
+        blocked_content = ["Technology Alpha"]
         for word in blocked_content:
              lower_word = word.lower()
              if lower_word in prompt.lower():

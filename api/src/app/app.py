@@ -1,3 +1,4 @@
+import logging
 from dotenv import load_dotenv
 load_dotenv(override=False)
 from flask import Flask, render_template, make_response, jsonify, request
@@ -12,7 +13,7 @@ from globals import *
 
 Globals.prepare_client_secrets()
 app = Flask(__name__)
-
+logging.basicConfig(level=logging.INFO)
 app.config["PROPAGATE_EXCEPTIONS"] = True
 app.config["API_TITLE"] = "AI-Guardrails Swagger"
 app.config["API_VERSION"] = "v1"
