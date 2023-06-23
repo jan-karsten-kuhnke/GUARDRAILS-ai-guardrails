@@ -88,8 +88,15 @@ class conversation_context:
             if(len(filter_list)!=0):
                 filter_parameter = get_filter_parameter(filter_list)
             
-            data=conversations_collection.find(filter_parameter).sort(sort_field_name,sort_value).hint([(sort_field_name,sort_value)]).skip(start).limit(end-start+1)
-            response.update(True,"Successfully retrieved the data",data)
+            cursor=conversations_collection.find(filter_parameter).sort(sort_field_name,sort_value).hint([(sort_field_name,sort_value)]).skip(start).limit(end-start+1)
+            rows = []
+            for conversation in cursor:
+                #changing key _id to id because data-grid in admin-ui expects id
+                id=conversation['_id']
+                conversation.pop('_id')
+                conversation['id'] = id
+                rows.append(conversation)
+            response.update(True,"Successfully retrieved the data",rows)
         except Exception as ex:
             print(f"Exception while getting list: {ex}")
             response.update(False,"Error in retrieving the data",None)
@@ -141,8 +148,15 @@ class conversation_context:
                 ]
             }
 
-            data= conversations_collection.find(conditions).sort(sort_field_name,sort_value).hint([(sort_field_name,sort_value)]).skip(start).limit(end-start+1)
-            response.update(True,"Successfully retrieved the data",data)
+            cursor = conversations_collection.find(conditions).sort(sort_field_name,sort_value).hint([(sort_field_name,sort_value)]).skip(start).limit(end-start+1)
+            rows = []
+            for conversation in cursor:
+                #changing key _id to id because data-grid in admin-ui expects id
+                id=conversation['_id']
+                conversation.pop('_id')
+                conversation['id'] = id
+                rows.append(conversation)
+            response.update(True,"Successfully retrieved the data",rows)
         
         except Exception as ex:
             print(f"Exception while getting list: {ex}")
@@ -174,6 +188,7 @@ class conversation_context:
 
 
     def approve_escalation(conversation_id):
+        response = ApiResponse()
         try:
             conversations_collection.update_one({"_id":conversation_id}, {"$set":{"state":"active"}})
             response.update(True,"Successfully approved",None)
@@ -184,6 +199,7 @@ class conversation_context:
         return response.json()
 
     def reject_escalation(conversation_id):
+        response = ApiResponse()
         try:
             conversations_collection.update_one({"_id":conversation_id}, {"$set":{"state":"locked","archived":True}})
             response.update(True,"Successfully rejected",None)

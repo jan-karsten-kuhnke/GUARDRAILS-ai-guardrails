@@ -30,4 +30,4 @@ black = "*"
 python_version = "3.11"
 
 [scripts]
-start = "python3 src/app/app.py"
+start = "python src/app/app.py"

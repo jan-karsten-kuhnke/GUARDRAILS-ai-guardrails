@@ -3,7 +3,6 @@ import psycopg2
 from psycopg2.pool import SimpleConnectionPool
 from globals import Globals
 from utils.apiResponse import ApiResponse
-import utils.messages
 
 
 def create_connection_pool(host: str, port: str, database: str, user: str, password: str, minconn: int = 1, maxconn: int = 10):

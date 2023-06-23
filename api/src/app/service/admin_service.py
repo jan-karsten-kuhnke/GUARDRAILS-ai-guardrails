@@ -40,15 +40,8 @@ class admin_service:
     #mongodb
     def get_conversation_list(sort, range_, filter_):
         total_count=conversation_context.get_conversation_list_count(filter_)
-        conversation_cursor=conversation_context.get_conversation_list(sort, range_, filter_)
-        rows = []
-        for conversation in conversation_cursor:
-            #changing key _id to id because data-grid in admin-ui expects id
-            id=conversation['_id']
-            conversation.pop('_id')
-            conversation['id'] = id
-            rows.append(conversation)
-
+        rows=conversation_context.get_conversation_list(sort, range_, filter_)
+        
         if total_count['success'] and rows['success']:
             data={"rows":rows['data'],"totalRows":total_count['data']}
             return {"data":data,"success":True,"message":"Successfully retrieved the data"}
@@ -57,14 +50,7 @@ class admin_service:
     
     def get_conversation_approval_requests_list( user_email,sort, range_, filter_):
         total_count=conversation_context.get_conversation_approval_requests_count(user_email, filter_)
-        conversation_cursor=conversation_context.get_conversation_approval_requests(user_email, sort, range_, filter_)
-        rows = []
-        for conversation in conversation_cursor:
-            #changing key _id to id because data-grid in admin-ui expects id
-            id=conversation['_id']
-            conversation.pop('_id')
-            conversation['id'] = id
-            rows.append(conversation)
+        rows=conversation_context.get_conversation_approval_requests(user_email, sort, range_, filter_)
 
         if total_count['success'] and rows['success']:
             data={"rows":rows['data'],"totalRows":total_count['data']}
