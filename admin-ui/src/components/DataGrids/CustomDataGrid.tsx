@@ -79,20 +79,11 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
           setRows(rows);
           setTotalRows(totalRows);
         } catch (error:any) {
-          console.error("Error fetching data: \n", error);
-          if(error.response.status == 403)
-          {
-            toast.error("You are not Authorized",{
-              duration:3000,
-              position:"bottom-center"
-            })
-          }
-          else{
+            console.error("Error fetching data: \n", error);
             toast.error(error?.message,{
               duration:3000,
               position:"bottom-center"
             })
-          }
         } finally {
           setLoading(false);
         }
