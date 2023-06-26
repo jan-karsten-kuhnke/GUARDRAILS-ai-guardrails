@@ -17,6 +17,7 @@ def create_connection_pool(host: str, port: str, database: str, user: str, passw
     :param maxconn: The maximum number of connections in the connection pool.
     :return: Returns the connection pool.
     """
+    connection_pool = None
     try:
         print("Creating Postgres connection...")
         connection_pool = SimpleConnectionPool(
@@ -30,40 +31,21 @@ def create_connection_pool(host: str, port: str, database: str, user: str, passw
             connect_timeout=1800
         )
         print("Postgres connection created successfully!")
-        return connection_pool
     except psycopg2.Error as e:
         print(f"Error creating Postgres connection: {e}")
     except Exception as ex:
         print(f"Exception creating Postgres connection: {ex}")
+    return connection_pool
 
-
-connection_pool = None
-
-def get_connection():
-    """
-    Gets a connection from the connection pool.
-    :return: Returns a connection from the connection pool.
-    """
-    global connection_pool
-    try:
-        if connection_pool is None:
-            connection_pool = create_connection_pool(
-                host=Globals.pg_host,
-                port=Globals.pg_port,
-                database=Globals.pg_db,
-                user=Globals.pg_user,
-                password=Globals.pg_password,
-                minconn=1,
-                maxconn=10
-            )
-            connection_pool.autocommit = True # Set autocommit to True
-
-        conn = connection_pool.getconn()
-        return conn
-    except Exception as ex:
-        print(f"Exception getting Postgres connection: {ex}")
-    finally:
-        connection_pool.putconn(conn)
+connection_pool = create_connection_pool(
+    host=Globals.pg_host,
+    port=Globals.pg_port,
+    database=Globals.pg_db,
+    user=Globals.pg_user,
+    password=Globals.pg_password,
+    minconn=1,
+    maxconn=10
+)
 
 
 pg_schema = Globals.pg_schema
@@ -119,13 +101,17 @@ class SqlAudits:
     #     :return: Returns the organisation details as a json object.
     #     """
     #     data = None
-    #     with get_connection() as conn:
+    #     global connection_pool
+    #     if connection_pool:
+    #         conn = connection_pool.getconn()
     #         try:
     #             cursor = conn.cursor()
     #             cursor.execute(get_org_query)
     #             data = cursor.fetchone()
     #         except Exception as ex:
     #             print(f"Exception while getting organisation details: {ex}")
+    #         finally:
+    #             connection_pool.putconn(conn)
     #     return json.dumps(data, indent=4, sort_keys=True, default=str)
 
 
@@ -136,7 +122,9 @@ class SqlAudits:
     #     :return: Returns the response of the API as a json object.
     #     """
     #     apiResponse = ""
-    #     with get_connection() as conn:
+    #     global connection_pool
+    #     if connection_pool:
+    #         conn = connection_pool.getconn()
     #         try:
     #             cursor = conn.cursor()
     #             cursor.execute(f"SELECT * FROM {pg_schema}.organisation")
@@ -154,6 +142,8 @@ class SqlAudits:
     #         except Exception as e:
     #             print("Exception while saving organisation details: ", e)
     #             apiResponse = "Error: {}".format(str(e))
+    #         finally:
+    #             connection_pool.putconn(conn)
     #     return json.dumps(apiResponse)
 
 
@@ -168,7 +158,9 @@ class SqlAudits:
         """
         response=ApiResponse()
         data = []
-        with get_connection() as conn:
+        global connection_pool
+        if connection_pool:
+            conn = connection_pool.getconn()
             try:
                 cursor = conn.cursor()
                 query = f"SELECT * FROM {table}"
@@ -194,7 +186,8 @@ class SqlAudits:
             except Exception as ex:
                 print(f"Exception while getting list: {ex}")
                 response.update(False,"Error in retrieving the data",None)
-                
+            finally:
+                connection_pool.putconn(conn)
         return response.json()
 
 
@@ -207,7 +200,9 @@ class SqlAudits:
         """
         response=ApiResponse()
         row_dict = {}
-        with get_connection() as conn:
+        global connection_pool
+        if connection_pool:
+            conn = connection_pool.getconn()
             try:
                 cursor = conn.cursor()
                 query = f"SELECT * FROM {table} WHERE id=%s"
@@ -221,7 +216,8 @@ class SqlAudits:
             except Exception as ex:
                 print(f"Exception while getting query: {ex}")
                 response.update(False,"Error in retrieving the data",None)
-                
+            finally:
+                connection_pool.putconn(conn)
         return response.json()
 
 
@@ -235,7 +231,9 @@ class SqlAudits:
         response=ApiResponse()
         
         count = 0
-        with get_connection() as conn:
+        global connection_pool
+        if connection_pool:
+            conn = connection_pool.getconn()
             try:
                 cursor = conn.cursor()
                 query = f"SELECT count(*) FROM {table}"
@@ -251,7 +249,8 @@ class SqlAudits:
             except Exception as ex:
                 print(f"Exception while getting count of query: {ex}")
                 response.update(False,"Error in retrieving the data",None)
-                
+            finally:
+                connection_pool.putconn(conn)
         return response.json()
 
 
@@ -263,7 +262,9 @@ class SqlAudits:
     #     :return: Returns the newly created record.
     #     """
     #     result = {}
-    #     with get_connection() as conn:
+    #     global connection_pool
+    #     if connection_pool:
+    #         conn = connection_pool.getconn()
     #         try:
     #             cursor = conn.cursor()
     #             keys = ", ".join(data.keys())
@@ -277,6 +278,8 @@ class SqlAudits:
     #             result = SqlAudits.get_one_query(table, new_id)
     #         except Exception as ex:
     #             print(f"Exception while creating query: {ex}")
+    #         finally:
+    #             connection_pool.putconn(conn)
     #     return result
 
 
@@ -289,7 +292,9 @@ class SqlAudits:
     #     :return: Returns the updated record.
     #     """
     #     result = {}
-    #     with get_connection() as conn:
+    #     global connection_pool
+    #     if connection_pool:
+    #         conn = connection_pool.getconn()
     #         try:
     #             cursor = conn.cursor()
     #             set_list = [f"{key}=%s" for key in data.keys()]
@@ -301,6 +306,8 @@ class SqlAudits:
     #             result = SqlAudits.get_one_query(table, id)
     #         except Exception as ex:
     #             print(f"Exception while updating query: {ex}")
+    #         finally:
+    #             connection_pool.putconn(conn)
     #     return result
 
 
@@ -313,7 +320,9 @@ class SqlAudits:
         :return: Returns the list of enabled entities.
         """
         enabled_entities = []
-        with get_connection() as conn:
+        global connection_pool
+        if connection_pool:
+            conn = connection_pool.getconn()
             try:
                 cursor = conn.cursor()
                 query = f"SELECT name FROM {table} where provider='{provider_name}' and is_active = true"
@@ -322,4 +331,6 @@ class SqlAudits:
                 enabled_entities = [item[0] for item in count]
             except Exception as ex:
                 print(f"Exception while getting enabled entities: {ex}")
+            finally:
+                connection_pool.putconn(conn)
         return enabled_entities
