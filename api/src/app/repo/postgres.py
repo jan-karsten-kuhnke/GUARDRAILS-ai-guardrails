@@ -114,6 +114,8 @@ class SqlAudits:
                 )
             except Exception as ex:
                 print(f"Exception while inserting analysis audit: {ex}")
+            finally:
+                connection_pool.putconn(conn)
 
 
     def insert_anonymize_audits(original_text, anonymized_text, flagged_text, user_email, analysed_entity, criticality):
@@ -138,6 +140,8 @@ class SqlAudits:
                 )
             except Exception as ex:
                 print(f"Exception while inserting anonymize audit: {ex}")
+            finally:
+                connection_pool.putconn(conn)
 
 
     def insert_chat_log(user_email, text):
@@ -157,6 +161,8 @@ class SqlAudits:
                 )
             except Exception as ex:
                 print(f"Exception while inserting chat log: {ex}")
+            finally:
+                connection_pool.putconn(conn)
 
 
     def get_chat_log():
@@ -174,6 +180,8 @@ class SqlAudits:
                 data = cursor.fetchall()
             except Exception as ex:
                 print(f"Exception while getting chat log: {ex}")
+            finally:
+                connection_pool.putconn(conn)
         return json.dumps(data, indent=4, sort_keys=True, default=str)
     
     # Admin APIs below
