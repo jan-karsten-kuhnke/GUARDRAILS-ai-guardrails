@@ -20,6 +20,7 @@ import { ChatBody, Conversation, Message } from '@/types/chat';
 import { Plugin } from '@/types/plugin';
 
 import HomeContext from '@/pages/home/home.context';
+import { PluginList } from '@/types/plugin';
 
 import Spinner from '../Spinner';
 import { ChatInput } from './ChatInput';
@@ -67,9 +68,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [plugin, setPlugin] = useState<Plugin>(PluginList[0]);
+
 
   const handleSend = useCallback(
-    async (message: Message, deleteCount = 0, plugin: Plugin | null = null, isOverRide:boolean = false) => {
+    async (message: Message, deleteCount = 0, plugin: Plugin , isOverRide:boolean = false) => {
       if (containsOnlyWhitespacesOrNewlines(message.content)) return;
       message.content = message.content.trim();
       await anonymizeMessage(message.content)
@@ -77,6 +80,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           message.content = res?.data?.result;
         })
         .catch((err) => {
+          toast.error(err.message,{
+            position:"bottom-right",
+            duration:3000
+          })
           console.log(err.message, "API ERROR");
         });
       if (selectedConversation) {
@@ -110,19 +117,35 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         const controller = new AbortController();
         let response: any;
         if(isOverRide){
-          response = await fetchPrompt(
-            updatedConversation.messages[updatedConversation.messages.length - 2].content,
-            selectedConversation.id,
-            isOverRide,
-            modelName
-          );
+          try{
+            response = await fetchPrompt(
+              updatedConversation.messages[updatedConversation.messages.length - 2].content,
+              selectedConversation.id,
+              isOverRide,
+              modelName
+            );
+          }
+          catch(err:any){
+            toast.error(err.message,{
+              position:"bottom-right",
+              duration:3000
+            })
+          }
         }else{
-          response = await fetchPrompt(
-            chatBody.message,
-            selectedConversation.id,
-            isOverRide,
-            modelName
-          );
+          try{
+            response = await fetchPrompt(
+              chatBody.message,
+              selectedConversation.id,
+              isOverRide,
+              modelName
+            );
+
+          }catch(err:any){
+            toast.error(err.message,{
+              position:"bottom-right",
+              duration:3000
+            })
+          }
         }
 
         if (!response.ok) {
@@ -168,14 +191,26 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 else{
                   parsed = JSON.parse('{' + split[i] + '}');
                 }
-                text += parsed.content;
+                if(parsed.content==undefined){
+                  text='Sorry currently your request could not be fullfiled. Please try again.!';
+                }
+                else{
+
+                  text += parsed.content;
+                }
                 role = parsed.role;
               }
             } else{
               parsed = JSON.parse(chunkValue);
-              text += parsed.content;
+              console.log(parsed)
+              if(parsed.content==undefined){
+                text='Sorry currently your request could not be fullfiled. Please try again.!';
+              }
+              else{
+                text += parsed.content;
+              }
               role = parsed.role;
-              console.log(text)
+              
             }
             if (isFirst) {
               isFirst = false;
@@ -440,6 +475,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     handleSend(
                       editedMessage,
                       selectedConversation?.messages.length - index,
+                      plugin
                     );
                   }}
                   onOverRide={(selectedMessage) => {
@@ -448,8 +484,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     handleSend(
                       selectedMessage,
                       selectedConversation?.messages.length - index,
-                      null,
-                      true
+                      plugin,
+                      true,
                     );
                   }}
                   onRequestApproval={(conversationId) => {
@@ -470,6 +506,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
         <ChatInput
           stopConversationRef={stopConversationRef}
+          plugin={plugin}
+          setPlugin={setPlugin}
           textareaRef={textareaRef}
           onSend={(message, plugin) => {
             setCurrentMessage(message);
@@ -478,7 +516,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           onScrollDownClick={handleScrollDown}
           onRegenerate={() => {
             if (currentMessage) {
-              handleSend(currentMessage, 2, null);
+              handleSend(currentMessage, 2, plugin);
             }
           }}
           showScrollDownButton={showScrollDownButton}
