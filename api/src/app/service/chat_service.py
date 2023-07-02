@@ -136,10 +136,13 @@ class chat_service:
                             })
                         yield (chunk)
                 response.close()
-            elif(model =="private-docs"):
+            elif(model =="private-docs" or model == "private-docs-private-llm" ):
                 try:
+                    is_private = False
+                    if(model == "private-docs-private-llm"):
+                        is_private = True
                     logging.info("calling document completion")
-                    res = document_wrapper.document_completion(messages,token)
+                    res = document_wrapper.document_completion(messages,token, is_private,prompt)
                     answer = res['answer']
                     if res['sources']:
                         sources = res['sources'][0]

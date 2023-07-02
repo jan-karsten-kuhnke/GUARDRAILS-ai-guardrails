@@ -6,12 +6,13 @@ from globals import Globals
 url = Globals.open_ai_api_key
 class document_wrapper:
     
-    def document_completion(messages,token):
+    def document_completion(messages,token,is_private,prompt):
         res = {}
         try:
             url = Globals.document_api_url
             payload = json.dumps({
-                "query": messages[-1]['content'],
+                "query": prompt,
+                "is_private": is_private,
             })
             
             headers = {
