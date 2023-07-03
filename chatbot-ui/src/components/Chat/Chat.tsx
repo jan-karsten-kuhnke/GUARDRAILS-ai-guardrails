@@ -31,7 +31,7 @@ import { SystemPrompt } from './SystemPrompt';
 import { TemperatureSlider } from './Temperature';
 import { MemoizedChatMessage } from './MemoizedChatMessage';
 import { anonymizeMessage, fetchPrompt, requestApproval } from '@/services';
-import PersonalPrivateSwitch from '../PersonalPrivateSwitch';
+import PublicPrivateSwitch from '../PublicPrivateSwitch';
 
 
 interface Props {
@@ -56,8 +56,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       modelError,
       loading,
       prompts,
+      isPrivate
     },
     handleUpdateConversation,
+    handleIsPrivate,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -116,6 +118,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         };
 
         let modelName = plugin?.id;
+        let task=plugin?.task;
         const controller = new AbortController();
         let response: any;
         if(isOverRide){
@@ -124,7 +127,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               updatedConversation.messages[updatedConversation.messages.length - 2].content,
               selectedConversation.id,
               isOverRide,
-              modelName
+              modelName,
+              task ,
+              isPrivate
             );
           }
           catch(err:any){
@@ -139,7 +144,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               chatBody.message,
               selectedConversation.id,
               isOverRide,
-              modelName
+              modelName,
+              task,
+              isPrivate
             );
 
           }catch(err:any){
@@ -204,7 +211,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               }
             } else{
               parsed = JSON.parse(chunkValue);
-              console.log(parsed)
               if(parsed.content==undefined){
                 text='Sorry currently your request could not be fullfiled. Please try again.!';
               }
@@ -269,6 +275,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       pluginKeys,
       selectedConversation,
       stopConversationRef,
+      isPrivate
     ],
   );
 
@@ -389,7 +396,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       }
     };
   }, [messagesEndRef]);
-
+  
   return (
     <div className="relative flex-1 overflow-hidden bg-white dark:bg-[#343541]">
       <>
@@ -416,17 +423,17 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   )}
                 </div>
                 <div className='flex gap-10'>
-                  <div className={`flex flex-col w-full gap-5 justify-center rounded-lg border border-neutral-200 p-4 dark:border-neutral-600 hover:bg-[#202123] cursor-pointer ${ plugin === PluginList[0] && 'bg-[#202123]' }`}
+                  <div className={`flex flex-col w-full gap-5 justify-center text-black  rounded-lg border border-neutral-200 p-4 dark:text-gray-400 dark:border-neutral-600 hover:bg-[#595959] dark:hover:bg-[#202123] cursor-pointer ${ plugin === PluginList[0] && 'bg-[#595959] dark:bg-[#202123]'}`}
                     onClick={(e)=>{handleModelSelect(PluginList[0])}}
                   >
                     <div className='flex justify-center'>
                       <IconBolt size={80} />
                     </div>
-                    <div className='text-center'>
+                    <div className='text-center '>
                       Conversation with GPT-3.5 Turbo
                     </div>
                   </div>
-                  <div className={`flex flex-col w-full gap-5 justify-center rounded-lg border border-neutral-200 p-4 dark:border-neutral-600 hover:bg-[#202123] cursor-pointer ${ plugin === PluginList[1] && 'bg-[#202123]' }`}
+                  <div className={`flex flex-col w-full gap-5 justify-center text-black rounded-lg border border-neutral-200 p-4 dark:text-gray-400 dark:border-neutral-600 hover:bg-[#595959] dark:hover:bg-[#202123] cursor-pointer ${ plugin === PluginList[1] && 'bg-[#595959] dark:bg-[#202123]'}`}
                     onClick={(e)=>{handleModelSelect(PluginList[1])}}
                   >
                     <div className='flex justify-center'>
@@ -438,7 +445,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   </div>
                 </div>
                 <div className='w-full justify-center rounded-lg border border-neutral-200 p-4 dark:border-neutral-600'>
-                    <PersonalPrivateSwitch size={40}/>
+                    <PublicPrivateSwitch size={40}/>
                 </div>
 
                 {models.length > 0 && (

@@ -29,6 +29,7 @@ export interface HomeInitialState {
   serverSidePluginKeysSet: boolean;
   refreshConversations: boolean;
   isArchiveView: boolean;
+  isPrivate:boolean;
 }
 
 export const initialState: HomeInitialState = {
@@ -55,4 +56,5 @@ export const initialState: HomeInitialState = {
   serverSidePluginKeysSet: false,
   refreshConversations: false,
   isArchiveView: false,
+  isPrivate:true
 };

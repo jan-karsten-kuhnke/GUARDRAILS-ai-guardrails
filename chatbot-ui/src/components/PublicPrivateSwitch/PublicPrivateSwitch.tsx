@@ -1,5 +1,5 @@
 import { FC, useState, useContext } from "react";
-
+import HomeContext from "@/pages/home/home.context";
 import { styled } from "@mui/material/styles";
 import Switch, { SwitchProps } from "@mui/material/Switch";
 
@@ -60,16 +60,26 @@ const CustomSwitch = styled((props: SwitchProps) => (
   },
 }));
 
-const PersonalPrivateSwitch: FC<Props> = ({ size }) => {
+const PublicPrivateSwitch: FC<Props> = ({ size }) => {
+  const {
+    state: { isPrivate},
+    handleIsPrivate
+  } = useContext(HomeContext);
+
+  
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    handleIsPrivate(event.target.checked);
+  };
   return (
     <>
-      <div className="flex justify-around  items-center pb-2 pt-2 text-sm">
+      <div className="flex justify-around  items-center pb-2 pt-2 text-sm text-black dark:text-gray-400">
         <div className="flex flex-col justify-around  items-center">
           <IconLockOpen size={size} />
           Public
         </div>
-        <CustomSwitch sx={{ m: 1 }} defaultChecked />
-        <div className="flex flex-col justify-around  items-center">
+        <CustomSwitch sx={{ m: 1 }} checked={isPrivate} onChange={handleChange}/>
+        <div className="flex flex-col justify-around  items-center text-black dark:text-gray-400">
           <IconLock size={size} />
           Private
         </div>
@@ -77,4 +87,4 @@ const PersonalPrivateSwitch: FC<Props> = ({ size }) => {
     </>
   );
 };
-export default PersonalPrivateSwitch;
+export default PublicPrivateSwitch;

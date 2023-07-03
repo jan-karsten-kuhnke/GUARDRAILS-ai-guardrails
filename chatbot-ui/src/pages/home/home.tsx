@@ -209,6 +209,9 @@ export const Home = () => {
       });
     };
 
+    const handleIsPrivate=(isPrivate:boolean)=>{
+      dispatch({field:'isPrivate',value:isPrivate});
+    }
 
   return (
     <HomeContext.Provider
@@ -220,6 +223,7 @@ export const Home = () => {
         handleUpdateFolder,
         handleSelectConversation,
         handleUpdateConversation,
+        handleIsPrivate,
       }}
     >
       <main
