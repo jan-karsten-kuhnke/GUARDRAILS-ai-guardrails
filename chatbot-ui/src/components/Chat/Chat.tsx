@@ -339,6 +339,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   //   }
   // };
 
+  const handleModelSelect = (model:Plugin) => {
+      setPlugin(model)
+  }
+
   const scrollDown = () => {
     if (autoScrollEnabled) {
       messagesEndRef.current?.scrollIntoView(true);
@@ -412,7 +416,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   )}
                 </div>
                 <div className='flex gap-10'>
-                  <div className='flex flex-col w-full gap-2 justify-center rounded-lg border border-neutral-200 p-4 dark:border-neutral-600'>
+                  <div className={`flex flex-col w-full gap-5 justify-center rounded-lg border border-neutral-200 p-4 dark:border-neutral-600 hover:bg-[#202123] cursor-pointer ${ plugin === PluginList[0] && 'bg-[#202123]' }`}
+                    onClick={(e)=>{handleModelSelect(PluginList[0])}}
+                  >
                     <div className='flex justify-center'>
                       <IconBolt size={80} />
                     </div>
@@ -420,7 +426,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       Conversation with GPT-3.5 Turbo
                     </div>
                   </div>
-                  <div className='flex flex-col w-full gap-2 justify-center rounded-lg border border-neutral-200 p-4 dark:border-neutral-600'>
+                  <div className={`flex flex-col w-full gap-5 justify-center rounded-lg border border-neutral-200 p-4 dark:border-neutral-600 hover:bg-[#202123] cursor-pointer ${ plugin === PluginList[1] && 'bg-[#202123]' }`}
+                    onClick={(e)=>{handleModelSelect(PluginList[1])}}
+                  >
                     <div className='flex justify-center'>
                       <IconBook size={80}/>
                     </div>
