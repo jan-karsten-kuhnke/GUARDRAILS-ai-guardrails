@@ -143,6 +143,7 @@ const Promptbar = () => {
         handleCreateItem={handleCreatePrompt}
         handleCreateFolder={() => handleCreateFolder(('New folder'), 'prompt')}
         handleDrop={handleDrop}
+        footerComponent={<PromptbarSettings/>}
       />
     </PromptbarContext.Provider>
   );
