@@ -1,4 +1,4 @@
-import { IconClearAll, IconSettings } from '@tabler/icons-react';
+import { IconClearAll, IconSettings, IconBolt, IconBook } from '@tabler/icons-react';
 import {
   MutableRefObject,
   memo,
@@ -408,6 +408,27 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   ) : (
                     'Chatbot UI'
                   )}
+                </div>
+                <div className='flex gap-10'>
+                  <div className='flex flex-col w-full gap-2 justify-center rounded-lg border border-neutral-200 p-4 dark:border-neutral-600'>
+                    <div className='flex justify-center'>
+                      <IconBolt size={100} />
+                    </div>
+                    <div className='text-center'>
+                      Conversation with GPT-3.5 Turbo
+                    </div>
+                  </div>
+                  <div className='flex flex-col w-full gap-2 justify-center rounded-lg border border-neutral-200 p-4 dark:border-neutral-600'>
+                    <div className='flex justify-center'>
+                      <IconBook size={100}/>
+                    </div>
+                    <div className='text-center'>
+                      QA on Private-Docs
+                    </div>
+                  </div>
+                </div>
+                <div className='flex w-full gap-2 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600'>
+
                 </div>
 
                 {models.length > 0 && (
