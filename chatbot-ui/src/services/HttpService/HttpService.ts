@@ -27,53 +27,59 @@ _axios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 
 _axios.interceptors.response.use(handleSuccess, handleError);
 
-export const fetchPrompt = (message: string, conversationId: string | null , isOverride: boolean , modelName: string | undefined) => fetch(`${import.meta.env.VITE_CHAT_SERVICE_URL}/completions`, { method: "POST", headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${AuthService.getToken()}` }, body: JSON.stringify(conversationId ? {message: message, conversation_id: conversationId , isOverride: isOverride, model_name : modelName}  : { message: message })});
 
-export const analyzeMessage = (message: string) => {
-  return _axios.post('/analyze', { message: message });
-};
+//chat => endpoints={baseURL}/chat
 
-export const anonymizeMessage = (message: string) => {
-  return _axios.post('/anonymize', { message: message });
-}
+export const fetchPrompt = (message: string, conversationId: string | null , isOverride: boolean , modelName: string | undefined) => fetch(`${import.meta.env.VITE_CHAT_SERVICE_URL}/chat/completions`, { method: "POST", headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${AuthService.getToken()}` }, body: JSON.stringify(conversationId ? {message: message, conversation_id: conversationId , isOverride: isOverride, model_name : modelName}  : { message: message })});
+
 export const archiveConversations = () => {
-  return _axios.delete('/conversations/archive');
+  return _axios.delete('/chat/conversations/archive');
 }
 
 export const archiveUnarchiveConversation = (conversationId: string, isArchived: boolean) => {
-  return _axios.delete(`/conversations/archive/${conversationId}?flag=${isArchived}`);
+  return _axios.delete(`/chat/conversations/archive/${conversationId}?flag=${isArchived}`);
 }
 
 export const fetchAllConversations = (getArchived:boolean) => {
-  return _axios.get(`/conversations?archived=${getArchived}`);
+  return _axios.get(`/chat/conversations?archived=${getArchived}`);
 }
 
 export const fetchConversationById = (id:string) => {
-  return _axios.get(`/conversations/${id}`);
-}
-
-//folders and prompts
-
-export const fetchFolders = () => {
-  return _axios.get('/folders');
-}
-
-export const updateUserFolders = (folders: any) => {
-  return _axios.put('/folders', folders);
-}
-
-export const fetchPrompts = () => {
-  return _axios.get('/prompts');
-}
-
-export const updateUserPrompts = (prompts: any) => {
-  return _axios.put('/prompts', prompts);
+  return _axios.get(`/chat/conversations/${id}`);
 }
 
 export const updateConversationProperties = (conversationId: string, title: string , folderId: string|null) => {
-return _axios.put(`/conversations/${conversationId}/properties`, {title: title, folderId: folderId});
+return _axios.put(`/chat/conversations/${conversationId}/properties`, {title: title, folderId: folderId});
 }
 
 export const requestApproval = (conversationId: string) => {
-  return _axios.get(`/requestapproval/${conversationId}`);
+  return _axios.get(`/chat/requestapproval/${conversationId}`);
+}
+
+//pii => enpoints={baseURL}/pii
+
+export const analyzeMessage = (message: string) => {
+  return _axios.post('/pii/analyze', { message: message });
+};
+
+export const anonymizeMessage = (message: string) => {
+  return _axios.post('/pii/anonymize', { message: message });
+}
+
+//folders and prompts => endpoints={baseURL}/user
+
+export const fetchFolders = () => {
+  return _axios.get('/user/folders');
+}
+
+export const updateUserFolders = (folders: any) => {
+  return _axios.put('/user/folders', folders);
+}
+
+export const fetchPrompts = () => {
+  return _axios.get('/user/prompts');
+}
+
+export const updateUserPrompts = (prompts: any) => {
+  return _axios.put('/user/prompts', prompts);
 }
