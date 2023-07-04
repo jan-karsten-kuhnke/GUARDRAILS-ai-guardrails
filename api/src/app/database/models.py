@@ -2,9 +2,9 @@ from sqlalchemy import Column, Integer, String, Text,MetaData,Boolean, TIMESTAMP
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
+from globals import Globals
 
-
-metadata_obj = MetaData(schema="chat_audits")
+metadata_obj = MetaData(schema=Globals.pg_schema)
 Base = declarative_base(metadata=metadata_obj)
 
 class PredefinedRuleEntity(Base):
