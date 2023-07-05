@@ -36,8 +36,6 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
       pageSize: 10,
       page: 0,
     });
-    const [selectedRow, setSelectedRow] = React.useState<RowData | null>(null);
-
 
     useEffect(() => {
         fetchData();
@@ -137,12 +135,6 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
         setRange([0, paginationModel.pageSize-1]);
       };
 
-      const handleRowClick = (params: GridRowParams) => {
-        if(props.entity=='escalations'){
-          setSelectedRow(params.row as RowData);
-        }
-      };
-
 
       const CustomPagination = () => {
         const apiRef = useGridApiContext();
@@ -186,7 +178,6 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
             loading={loading}
             slots={{ toolbar: GridToolbar, pagination : CustomPagination }}
             paginationModel={paginationModel}
-            onRowClick={handleRowClick}
             
             sx={{
               backgroundColor: "#202123",

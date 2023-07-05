@@ -15,11 +15,6 @@ interface Props {
 }
 
 export const DocumentDialog: FC<Props> = ({ open, onClose }) => {
-  const settings: Settings = getSettings();
-  const { state, dispatch } = useCreateReducer<Settings>({
-    initialState: settings,
-  });
-  const { dispatch: homeDispatch } = useContext(HomeContext);
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -40,11 +35,6 @@ export const DocumentDialog: FC<Props> = ({ open, onClose }) => {
       window.removeEventListener('mousedown', handleMouseDown);
     };
   }, [onClose]);
-
-  const handleSave = () => {
-    homeDispatch({ field: 'lightMode', value: state.theme });
-    saveSettings(state);
-  };
 
   // Render nothing if the dialog is not open.
   if (!open) {
