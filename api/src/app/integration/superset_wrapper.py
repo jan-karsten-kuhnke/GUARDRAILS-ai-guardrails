@@ -23,7 +23,6 @@ class superset:
 
     def get_guest_token():
         access_token, refresh_token, cookie = superset.get_access_token()
-        #print(f'{access_token} \n{refresh_token} \n {cookie}')
         url = format(Globals.superset_url)+'/api/v1/security/guest_token'
 
         headers = {"Authorization": f'Bearer {access_token}'}

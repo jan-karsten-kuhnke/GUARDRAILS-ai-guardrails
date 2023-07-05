@@ -12,7 +12,6 @@ class document_wrapper:
             history = []
             if len(messages) > 1:
                 for i in range(len(messages)-1):
-                    print(i)
                     if(messages[i]['role'] == 'user'):
                         history.append(
                             {

@@ -129,12 +129,12 @@ class chat_service:
             chat_service.update_conversation(conversation_id,current_completion,role,current_user_email,model,user_action_required)
         except Exception as e:
             yield (json.dumps({"error": "error"}))
-            print("error: ", e)
+            logging.info("error: ", e)
             return
 
     def validate_prompt(prompt,isOverride, pii_scan, nsfw_scan,current_user_email,conversation_id):
-        print("piiScan: ", pii_scan)
-        print("nsfwScan: ", nsfw_scan)
+        logging.info("piiScan: ", pii_scan)
+        logging.info("nsfwScan: ", nsfw_scan)
         stop_conversation = False
         stop_response = ""
         role = "guardrails"
@@ -149,14 +149,14 @@ class chat_service:
             if nsfw_score > nsfw_threshold:
                 stop_response =  nsfw_warning
                 stop_conversation = True
-                print("returning from nsfw")
+                logging.info("returning from nsfw")
                 return stop_conversation,stop_response,prompt,role
             
         if(pii_scan):
             updated_prompt = pii_service.anonymize(prompt,current_user_email,conversation_id)
             stop_conversation = False
             
-            print("returning")
+            logging.info("returning from pii")
             return stop_conversation,stop_response,updated_prompt,role
         
     def create_Conversation(prompt,email,model,id=None,):

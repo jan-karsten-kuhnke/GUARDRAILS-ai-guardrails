@@ -1,6 +1,6 @@
 import os
 import json
-
+import logging
 
 class Globals:
     mongo_uri = os.environ.get("MONGO_URI")
@@ -43,7 +43,7 @@ class Globals:
     
     def prepare_client_secrets():
         if os.path.isfile("client_secrets.json"):
-            print("removing existing client_secrets.json")
+            logging.info("removing existing client_secrets.json")
             os.remove("client_secrets.json")
 
         new_client_secrets = {
@@ -60,6 +60,6 @@ class Globals:
         }
         
         with open("client_secrets.json", "w") as outfile:
-            print('writing new client_secrets.json')
+            logging.info('writing new client_secrets.json')
             json.dump(new_client_secrets, outfile)
 

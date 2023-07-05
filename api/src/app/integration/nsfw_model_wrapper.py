@@ -4,13 +4,14 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 tokenizer = None
 model = None
+import logging
 class NSFWModelWrapper:
     
     def init_model():
         global tokenizer
         global model
         if tokenizer is None:
-            print("Initializing tokenizer and model")
+            logging.info("Initializing tokenizer and model")
             tokenizer = AutoTokenizer.from_pretrained("michellejieli/NSFW_text_classifier")
         if model is None:
             model = AutoModelForSequenceClassification.from_pretrained("michellejieli/NSFW_text_classifier")
@@ -26,5 +27,5 @@ class NSFWModelWrapper:
             outputs = model(**inputs)
         prediction_scores = outputs.logits
         probabilities = torch.softmax(prediction_scores, dim=1).squeeze()
-        print(float (probabilities[1]))
+        logging.info(float (probabilities[1]))
         return(float (probabilities[1]))
