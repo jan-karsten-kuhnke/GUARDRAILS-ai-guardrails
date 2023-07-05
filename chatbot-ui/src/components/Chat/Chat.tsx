@@ -434,7 +434,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       <IconBolt size={80} />
                     </div>
                     <div className='text-center '>
-                      Conversation with GPT-3.5 Turbo
+                      Conversational Chatbot
                     </div>
                   </div>
                   <div className={`flex flex-col w-full gap-5 justify-center text-black rounded-lg border border-neutral-200 p-4 dark:text-gray-400 dark:border-neutral-600 hover:bg-[#595959] dark:hover:bg-[#202123] cursor-pointer ${ plugin === PluginList[1] && 'bg-[#595959] dark:bg-[#202123]'}`}
@@ -444,7 +444,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       <IconBook size={80}/>
                     </div>
                     <div className='text-center'>
-                      QA on Private-Docs
+                      Knowledge Mining on Private Docs
                     </div>
                   </div>
                 </div>
