@@ -9,7 +9,7 @@ class openai_wrapper:
         response = openai.ChatCompletion.create(
             model = model,
             messages=messages,
-            temperature=0,
+            temperature=0.1,
             stream=True,  # this time, we set stream=True
         )
         return response
