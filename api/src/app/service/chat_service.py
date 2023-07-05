@@ -1,6 +1,6 @@
 import logging
 from oidc import get_current_user_email
-from repo.db import conversation_context, anonymize_audit_context,analysis_audit_context,folders_context,prompts_context
+from repo.db import conversation_context
 from repo.postgres import SqlAudits
 from integration.openai_wrapper import openai_wrapper
 from integration.document_wrapper import document_wrapper
@@ -8,6 +8,7 @@ from integration.presidio_wrapper import presidio_wrapper
 from presidio_anonymizer.entities import RecognizerResult
 from integration.nsfw_model_wrapper import NSFWModelWrapper
 from integration.keycloak_wrapper import keycloak_wrapper
+from service.pii_service import pii_service
 import uuid
 from typing import TypedDict
 from datetime import datetime
@@ -16,7 +17,6 @@ import requests
 
 override_message = "You chose to Override the warning, proceeding to Open AI."
 nsfw_warning = "Warning From Guardrails: We've detected that your message contains NSFW content. Please refrain from posting such content in a work environment, You can choose to override this warning if you wish to continue the conversation, or you can get your manager's approval before continuing."
-sensitive_info_warning = f"Warning From Guardrails: We've detected that your message might contain sensitive info. Please be careful when talking about confidential topics.\n Refer to your company's policy on what is considered confidential information [here](https://synergy-ai.us).\n You can choose to override this warning if you wish to continue the conversation, or you can get your manager's approval before continuing."
 
 class conversation_obj(TypedDict):
     _id: str
@@ -39,52 +39,13 @@ class message_obj(TypedDict):
     children: list
     user_action_required: bool
 
-class analysis_audit_obj(TypedDict):
-    _id: str
-    message: str
-    analysis: list
-    created: datetime
-    user_email: str
-
-class anonymize_audit_obj(TypedDict):
-    _id: str
-    original_message: str
-    anonymized_message: list
-    created: datetime
-    user_email: str
-    conversation_id: str
-    analysis: list
-
 
 class chat_service:
-    def analyze(message):
-        presidio_analysis = presidio_wrapper.analyze_message(message)
-        
-        result = chat_service.format_and_filter_analysis(presidio_analysis, message)
-        result.sort(key=lambda x: x["start"], reverse=False)
-
-        nsfw_score = NSFWModelWrapper.analyze(message)
-        if nsfw_score > 0.9:
-            result.append(
-                {
-                    "entity_type": "NSFW",
-                    "start": 0,
-                    "end": len(message),
-                    "score": nsfw_score,
-                    "flagged_text": message,
-                    "block": True,
-                }
-            )
-
-        if len(result):
-            chat_service.save_analysis_audit(message, result,get_current_user_email())
-        return result
-
     def chat_completion(data,current_user_email,token):
         try:
-            task = ""
-            isPrivate = False
-            piiScan = True
+            task = str(data["task"]) if "task" in data else None
+            isPrivate = bool(data["isPrivate"]) if "isPrivate" in data else False
+            piiScan = True 
             nsfwScan = True
 
             prompt = str(data["message"])
@@ -92,18 +53,21 @@ class chat_service:
             conversation_id = None
             manage_conversation_context = False
             model = data.get('model_name', None)
+            if(model =="private-docs" or model == "private-docs-private-llm"):
+                isOverride = True
             
             if('conversation_id'  in data and  data['conversation_id']):
                 conversation_id = data['conversation_id']
                 manage_conversation_context = True
 
-            stop_conversation,stop_response,updated_prompt,role = chat_service.validate_prompt(prompt,conversation_id,isOverride,piiScan,nsfwScan,current_user_email)
-            chat_service.update_conversation(conversation_id,updated_prompt,role,current_user_email,model)
+            stop_conversation,stop_response,updated_prompt,role = chat_service.validate_prompt(prompt,isOverride,piiScan,nsfwScan,current_user_email,conversation_id)
+            chat_service.update_conversation(conversation_id,updated_prompt,'user',current_user_email,model)
             
             current_completion = ''
             user_action_required = False
 
             if stop_conversation:
+
                 chunk  =  json.dumps({
                         "role": "guardrails",
                         "content": stop_response,
@@ -119,8 +83,7 @@ class chat_service:
                 role = "assistant"
                 if(manage_conversation_context):
                     messages = chat_service.get_history_for_bot(conversation_id, current_user_email)
-                    if (len(messages) > 1):
-                        conversation = conversation_context.get_conversation_by_id(conversation_id, current_user_email)
+                    
 
                 if(model =="gpt-3.5-turbo"):
                     response = openai_wrapper.chat_completion(messages, model)
@@ -169,46 +132,33 @@ class chat_service:
             print("error: ", e)
             return
 
-    def validate_prompt(prompt,conversation_id,isOverride,piiScan,nsfwScan,current_user_email):
-        nsfw_score = NSFWModelWrapper.analyze(prompt)
-        updated_prompt = ""
+    def validate_prompt(prompt,isOverride, pii_scan, nsfw_scan,current_user_email,conversation_id):
+        print("piiScan: ", pii_scan)
+        print("nsfwScan: ", nsfw_scan)
         stop_conversation = False
         stop_response = ""
-        role = "user"
+        role = "guardrails"
+        nsfw_threshold = 0.94
 
         if(isOverride):
-            updated_prompt = override_message
-            role = "guardrails"
-            return stop_conversation,stop_response,updated_prompt,role
+            return stop_conversation,stop_response,prompt,role
 
-
-
-        updated_prompt = chat_service.anonymize(prompt,current_user_email)
-
-        #decide if we should stop the conversation
-        if nsfw_score > 0.9:
-            stop_response =  nsfw_warning
-            stop_conversation = True
-        
-        blocked_content = ["Technology Alpha"]
-        for word in blocked_content:
-             lower_word = word.lower()
-             if lower_word in prompt.lower():
-                stop_response =  sensitive_info_warning
+        if(nsfw_scan):
+            nsfw_score = NSFWModelWrapper.analyze(prompt)
+            print (nsfw_score)
+            if nsfw_score > nsfw_threshold:
+                stop_response =  nsfw_warning
                 stop_conversation = True
-        return stop_conversation,stop_response,updated_prompt,role
+                print("returning from nsfw")
+                return stop_conversation,stop_response,prompt,role
+            
+        if(pii_scan):
+            updated_prompt = pii_service.anonymize(prompt,current_user_email,conversation_id)
+            stop_conversation = False
+            
+            print("returning")
+            return stop_conversation,stop_response,updated_prompt,role
         
-
-
-    def anonymize(message,email = None, conversaton_id = None):
-        if not email:
-            email = get_current_user_email()
-        analysis = presidio_wrapper.analyze_message(message)
-        anonymized_message = presidio_wrapper.anonymyze_message(message, analysis)
-        if message != anonymized_message:
-            chat_service.save_anonymize_audit(message, chat_service.format_and_filter_analysis(analysis, message), anonymized_message,email,conversaton_id)
-        return anonymized_message
-
     def create_Conversation(prompt,email,model,id=None,):
         message = message_obj(
             id= str(uuid.uuid4()),
@@ -267,53 +217,9 @@ class chat_service:
         messages.append(message)
         conversation_context.update_conversation(conversation_id, conversation)
 
-    def save_analysis_audit(message,analysis,user_email):
-        analysis_audit = analysis_audit_obj(
-            _id=str(uuid.uuid4()),
-            message=message,
-            analysis=analysis,
-            created=datetime.now(),
-            user_email=user_email,
-        )
-        analysis_audit_context.insert_analysis_audit(analysis_audit)
-        for flag in analysis:   
-            SqlAudits.insert_analysis_audits(text = message, user_email = user_email, flagged_text = flag['flagged_text'],  analysed_entity = flag['entity_type'], criticality = 'SEVERE')
-        
-
-
-    def save_anonymize_audit(message,analysis,anonymized_message,user_email,conversation_id = None):
-        anonymize_audit =  anonymize_audit_obj(
-            _id=str(uuid.uuid4()),
-            original_message=message,
-            anonymized_message=anonymized_message,
-            analysis=analysis,
-            created=datetime.now(),
-            user_email=user_email,
-            conversation_id= conversation_id
-        )    
-        anonymize_audit_context.insert_anonymize_audit(anonymize_audit)
-        for flag in analysis:   
-            SqlAudits.insert_anonymize_audits(original_text = message, anonymized_text  = anonymized_message, flagged_text = flag['flagged_text'] , user_email= user_email, analysed_entity = flag['entity_type'], criticality = 'SEVERE')
-    
     def save_chat_log(user_email, text):
         SqlAudits.insert_chat_log(user_email, text)
 
-    def format_and_filter_analysis(results,message):
-        response = []
-        for result in results:
-                if result.score > 0.3:
-                    response.append(
-                        {
-                            "entity_type": str(result.entity_type).replace("_", " ").title(),
-                            "start": result.start,
-                            "end": result.end,
-                            "score": result.score,
-                            "flagged_text": message[result.start : result.end],
-                            "block": False,
-                        }
-                    )
-        return response
-    
     def get_conversations(user_email,flag = False):
         cursor = conversation_context.get_conversations_by_user_email(user_email,flag)
         conversations = []
@@ -331,34 +237,6 @@ class chat_service:
     def archive_conversation(user_email,conversation_id, flag = True):
         conversation_context.archive_unarchive_conversation(user_email,conversation_id,flag)
 
-    
-    def get_all_folders(user_email):
-        return folders_context.get_folder_data(user_email)
-        
-        
-    
-    def upsert_folders(folders,user_email):
-        user_folder_data = {
-            "user_email": user_email,
-            "folders": folders
-        }
-        folders_context.upsert_folders_by_user_email(user_folder_data,user_email)
-
-
-    def get_all_prompts(user_email):
-        return prompts_context.get_prompts_data(user_email)
-        
-        
-    
-    def upsert_prompts(prompts,user_email):
-        user_prompts_data = {
-            "user_email": user_email,
-            "prompts": prompts
-        }
-        prompts_context.upsert_prompts_by_user_email(user_prompts_data,user_email)
-
-
-    
     def get_history_for_bot(conversation_id,user_email):
         conversation = conversation_context.get_conversation_by_id(conversation_id,user_email)
         messages = conversation['messages']

@@ -11,6 +11,7 @@ class Globals:
     pg_password = os.environ.get("PG_PASSWORD")
     pg_db = os.environ.get("PG_DB")
     pg_schema = os.environ.get("PG_SCHEMA")
+    DB_URL =os.environ.get("DB_URI")
     
     
     oidc_client_id = os.environ.get("OIDC_CLIENT_ID")

@@ -6,6 +6,8 @@ from flask_restful import Resource, reqparse, marshal
 from flask_cors import CORS
 from controller.chat_controller import endpoints
 from controller.admin_controller import adminendpoints
+from controller.pii_controller import piiendpoints
+from controller.userdata_controller import userdataendpoints
 from flask_smorest import Api
 import secrets
 from oidc import oidc
@@ -38,8 +40,10 @@ app.config['API_SPEC_OPTIONS'] = {
 print('client_secret', Globals.oidc_client_id)
 
 api=Api(app)
-api.register_blueprint(endpoints, url_prefix="/api/chat")
-api.register_blueprint(adminendpoints,name="admin", url_prefix="/api/admin")
+api.register_blueprint(endpoints, name="chat", url_prefix="/api/chat")
+api.register_blueprint(piiendpoints, name="pii", url_prefix="/api/pii")
+api.register_blueprint(userdataendpoints, name="user", url_prefix="/api/user")
+api.register_blueprint(adminendpoints, name="admin", url_prefix="/api/admin")
 
 CORS(app)
 cors = CORS(app, resource={
