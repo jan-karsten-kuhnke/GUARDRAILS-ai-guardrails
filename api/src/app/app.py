@@ -37,7 +37,7 @@ app.config['API_SPEC_OPTIONS'] = {
         }
     }
 
-print('client_secret', Globals.oidc_client_id)
+logging.info('client_secret', Globals.oidc_client_id)
 
 api=Api(app)
 api.register_blueprint(endpoints, name="chat", url_prefix="/api/chat")

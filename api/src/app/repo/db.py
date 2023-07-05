@@ -98,7 +98,7 @@ class conversation_context:
                 rows.append(conversation)
             response.update(True,"Successfully retrieved the data",rows)
         except Exception as ex:
-            print(f"Exception while getting list: {ex}")
+            logging.info(f"Exception while getting list: {ex}")
             response.update(False,"Error in retrieving the data",None)
 
         return response.json()
@@ -117,7 +117,7 @@ class conversation_context:
             response.update(True,"Successfully retrieved the data",data)
         
         except Exception as ex:
-            print(f"Exception while getting list: {ex}")
+            logging.info(f"Exception while getting list: {ex}")
             response.update(False,"Error in retrieving the data",None)
         return response.json()
         
@@ -159,7 +159,7 @@ class conversation_context:
             response.update(True,"Successfully retrieved the data",rows)
         
         except Exception as ex:
-            print(f"Exception while getting list: {ex}")
+            logging.info(f"Exception while getting list: {ex}")
             response.update(False,"Error in retrieving the data",None)
         return response.json()
 
@@ -182,7 +182,7 @@ class conversation_context:
             response.update(True,"Successfully retrieved the data",data)
         
         except Exception as ex:
-            print(f"Exception while getting list: {ex}")
+            logging.info(f"Exception while getting list: {ex}")
             response.update(False,"Error in retrieving the data",None)
         return response.json()
 
@@ -194,7 +194,7 @@ class conversation_context:
             response.update(True,"Successfully approved",None)
             
         except Exception as ex:
-            print(f"Exception while getting list: {ex}")
+            logging.info(f"Exception while getting list: {ex}")
             response.update(False,"Error in approving",None)
         return response.json()
 
@@ -205,7 +205,7 @@ class conversation_context:
             response.update(True,"Successfully rejected",None)
             
         except Exception as ex:
-            print(f"Exception while getting list: {ex}")
+            logging.info(f"Exception while getting list: {ex}")
             response.update(False,"Error in rejecting",None)
         return response.json()
 

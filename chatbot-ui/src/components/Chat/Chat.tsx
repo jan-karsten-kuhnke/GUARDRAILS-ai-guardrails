@@ -75,7 +75,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     async (message: Message, deleteCount = 0, plugin: Plugin , isOverRide:boolean = false) => {
       if (containsOnlyWhitespacesOrNewlines(message.content)) return;
       message.content = message.content.trim();
-      await anonymizeMessage(message.content)
+      console.log(plugin)
+      if(plugin.id === "gpt-3.5-turbo"){
+        await anonymizeMessage(message.content)
         .then((res: any) => {
           message.content = res?.data?.result;
         })
@@ -86,6 +88,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           })
           console.log(err.message, "API ERROR");
         });
+      }
+      
       if (selectedConversation) {
         let updatedConversation: Conversation;
         if (deleteCount) {

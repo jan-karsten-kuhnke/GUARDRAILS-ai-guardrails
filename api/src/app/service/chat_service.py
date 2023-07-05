@@ -15,6 +15,8 @@ from datetime import datetime
 import json
 import requests
 
+override_message = "You chose to Override the warning, proceeding to Open AI."
+nsfw_warning = "Warning From Guardrails: We've detected that your message contains NSFW content. Please refrain from posting such content in a work environment, You can choose to override this warning if you wish to continue the conversation, or you can get your manager's approval before continuing."
 
 class conversation_obj(TypedDict):
     _id: str
@@ -41,114 +43,121 @@ class message_obj(TypedDict):
 class chat_service:
     def chat_completion(data,current_user_email,token):
         try:
+            task = str(data["task"]) if "task" in data else None
+            isPrivate = bool(data["isPrivate"]) if "isPrivate" in data else False
+            piiScan = True 
+            nsfwScan = True
+
             prompt = str(data["message"])
             isOverride = bool(data["isOverride"])
             conversation_id = None
             manage_conversation_context = False
             model = data.get('model_name', None)
+            if(model =="private-docs" or model == "private-docs-private-llm"):
+                isOverride = True
             
             if('conversation_id'  in data and  data['conversation_id']):
                 conversation_id = data['conversation_id']
                 manage_conversation_context = True
-            if(isOverride):
-                anonymized_prompt = pii_service.anonymize(prompt,current_user_email,conversation_id)
-                chat_service.update_conversation(conversation_id,"You chose to Override the warning, proceeding to Open AI.",'guardrails',current_user_email,model)
-                stop_conversation = False
-                stop_response = ''
-            else:
-                stop_conversation,stop_response,anonymized_prompt = chat_service.validate_prompt(prompt,conversation_id,current_user_email)
-                chat_service.update_conversation(conversation_id,anonymized_prompt,'user',current_user_email,model)
+
+            stop_conversation,stop_response,updated_prompt,role = chat_service.validate_prompt(prompt,isOverride,piiScan,nsfwScan,current_user_email,conversation_id)
+            chat_service.update_conversation(conversation_id,updated_prompt,'user',current_user_email,model)
+            
             current_completion = ''
+            user_action_required = False
 
             if stop_conversation:
+
                 chunk  =  json.dumps({
                         "role": "guardrails",
                         "content": stop_response,
                         "user_action_required": True
                     })
                 yield (chunk)
-                chat_service.save_chat_log(current_user_email, anonymized_prompt)
-                chat_service.update_conversation(conversation_id,stop_response,'guardrails',current_user_email,model,user_action_required=True)
-                return
 
-            messages = []
-            if(manage_conversation_context):
-                messages = chat_service.get_history_for_bot(conversation_id, current_user_email)
-                if (len(messages) > 1):
-                    conversation = conversation_context.get_conversation_by_id(conversation_id, current_user_email)
-                    # if(conversation and 'model_name' in conversation and conversation['model_name']):
-                    #     model = conversation['model_name']
-                    #     print(model)
-                    # else:
-                    #     model = "gpt-3.5-turbo"
-                    #     print("else")
-            if(model =="gpt-3.5-turbo"):
-                response = openai_wrapper.chat_completion(messages, model)
-                # yield (conversation_id)
-                for chunk in response:
-                    if (
-                        chunk["choices"][0]["delta"]
-                        and "content" in chunk["choices"][0]["delta"]
-                    ):
-                        chunk_to_yeild = chunk["choices"][0]["delta"]["content"]
-                        current_completion += chunk["choices"][0]["delta"]["content"]
-                        chunk = json.dumps({
-                                "role": "assistant",
-                                "content": chunk_to_yeild,
-                            })
-                        yield (chunk)
-                response.close()
-            elif(model =="private-docs" or model == "private-docs-private-llm" ):
-                try:
-                    is_private = False
-                    if(model == "private-docs-private-llm"):
-                        is_private = True
-                    logging.info("calling document completion")
-                    res = document_wrapper.document_completion(messages,token, is_private,prompt)
-                    answer = res['answer']
-                    if res['sources']:
-                        sources = res['sources'][0]
-                        source = json.loads(sources)['metadata']['source'].split('/')[-1]
-                        answer = answer + "  \n  \n" + "Source: " + source  #adding double space + \n because ReactMarkdown in chatbot-ui needs this for next line
-                    chunk = json.dumps({
-                                    "role": "assistant",
-                                    "content": answer,
-                                    "sources": res['sources']
-                                })
-                    yield (chunk)
-                    current_completion += answer
-                except Exception as e:
-                    yield("Sorry. Some error occured. Please try again.")
-                    logging.error("error: "+str(e))
+                current_completion = stop_response
+                role = "guardrails"
+                user_action_required = True
             else:
-                yield (json.dumps({"error": "Invalid model type"}))
+                messages = []
+                role = "assistant"
+                if(manage_conversation_context):
+                    messages = chat_service.get_history_for_bot(conversation_id, current_user_email)
+                    
+
+                if(model =="gpt-3.5-turbo"):
+                    response = openai_wrapper.chat_completion(messages, model)
+                    for chunk in response:
+                        if (
+                            chunk["choices"][0]["delta"]
+                            and "content" in chunk["choices"][0]["delta"]
+                        ):
+                            chunk_to_yeild = chunk["choices"][0]["delta"]["content"]
+                            current_completion += chunk["choices"][0]["delta"]["content"]
+                            chunk = json.dumps({
+                                    "role": "assistant",
+                                    "content": chunk_to_yeild,
+                                })
+                            yield (chunk)
+                    response.close()
+                elif(model =="private-docs" or model == "private-docs-private-llm" ):
+                    try:
+                        is_private = False
+                        if(model == "private-docs-private-llm"):
+                            is_private = True
+                        logging.info("calling document completion")
+                        res = document_wrapper.document_completion(messages,token, is_private,prompt)
+                        answer = res['answer']
+                        if res['sources']:
+                            sources = res['sources'][0]
+                            source = json.loads(sources)['metadata']['source'].split('/')[-1]
+                            answer = answer + "  \n  \n" + "Source: " + source  #adding double space + \n because ReactMarkdown in chatbot-ui needs this for next line
+                        chunk = json.dumps({
+                                        "role": "assistant",
+                                        "content": answer,
+                                        "sources": res['sources']
+                                    })
+                        yield (chunk)
+                        current_completion += answer
+                    except Exception as e:
+                        yield("Sorry. Some error occured. Please try again.")
+                        logging.error("error: "+str(e))
+                else:
+                    yield (json.dumps({"error": "Invalid model type"}))
                 
-            chat_service.save_chat_log(current_user_email, anonymized_prompt)
-            chat_service.update_conversation(conversation_id,current_completion,'assistant',current_user_email,model)
+            chat_service.save_chat_log(current_user_email, updated_prompt)
+            chat_service.update_conversation(conversation_id,current_completion,role,current_user_email,model,user_action_required)
         except Exception as e:
             yield (json.dumps({"error": "error"}))
-            print("error: ", e)
+            logging.info("error: ", e)
             return
 
-    def validate_prompt(prompt,conversation_id,current_user_email):
-        nsfw_score = NSFWModelWrapper.analyze(prompt)
-        anonymized_prompt = pii_service.anonymize(prompt,current_user_email)
-
-        updated_prompt = anonymized_prompt
+    def validate_prompt(prompt,isOverride, pii_scan, nsfw_scan,current_user_email,conversation_id):
+        logging.info("piiScan: ", pii_scan)
+        logging.info("nsfwScan: ", nsfw_scan)
         stop_conversation = False
-        stop_response = ''
-        #decide if we should stop the conversation
-        if nsfw_score > 0.9:
-            stop_response =  "Warning From Guardrails: We've detected that your message contains NSFW content. Please refrain from posting such content in a work environment, You can choose to override this warning if you wish to continue the conversation, or you can get your manager's approval before continuing."
-            stop_conversation = True
-        
-        blocked_content = ["Technology Alpha"]
-        for word in blocked_content:
-             lower_word = word.lower()
-             if lower_word in prompt.lower():
-                stop_response =  f"Warning From Guardrails: We've detected that your message might contain sensitive info. Please be careful when talking about confidential topics.\n Refer to your company's policy on what is considered confidential information [here](https://synergy-ai.us).\n You can choose to override this warning if you wish to continue the conversation, or you can get your manager's approval before continuing."
+        stop_response = ""
+        role = "guardrails"
+        nsfw_threshold = 0.94
+
+        if(isOverride):
+            return stop_conversation,stop_response,prompt,role
+
+        if(nsfw_scan):
+            nsfw_score = NSFWModelWrapper.analyze(prompt)
+            print (nsfw_score)
+            if nsfw_score > nsfw_threshold:
+                stop_response =  nsfw_warning
                 stop_conversation = True
-        return stop_conversation,stop_response,updated_prompt
+                logging.info("returning from nsfw")
+                return stop_conversation,stop_response,prompt,role
+            
+        if(pii_scan):
+            updated_prompt = pii_service.anonymize(prompt,current_user_email,conversation_id)
+            stop_conversation = False
+            
+            logging.info("returning from pii")
+            return stop_conversation,stop_response,updated_prompt,role
         
     def create_Conversation(prompt,email,model,id=None,):
         message = message_obj(

@@ -3,6 +3,7 @@ import psycopg2
 from psycopg2.pool import SimpleConnectionPool
 from globals import Globals
 from utils.apiResponse import ApiResponse
+import logging
 
 
 def create_connection_pool(host: str, port: str, database: str, user: str, password: str, minconn: int = 1, maxconn: int = 10):
@@ -19,7 +20,7 @@ def create_connection_pool(host: str, port: str, database: str, user: str, passw
     """
     connection_pool = None
     try:
-        print("Creating Postgres connection...")
+        logging.info("Creating Postgres connection...")
         connection_pool = SimpleConnectionPool(
             host=host,
             port=port,
@@ -30,11 +31,11 @@ def create_connection_pool(host: str, port: str, database: str, user: str, passw
             maxconn=maxconn,
             connect_timeout=1800
         )
-        print("Postgres connection created successfully!")
+        logging.info("Postgres connection created successfully!")
     except psycopg2.Error as e:
-        print(f"Error creating Postgres connection: {e}")
+        logging.info(f"Error creating Postgres connection: {e}")
     except Exception as ex:
-        print(f"Exception creating Postgres connection: {ex}")
+        logging.info(f"Exception creating Postgres connection: {ex}")
     return connection_pool
 
 connection_pool = create_connection_pool(
@@ -113,7 +114,7 @@ class SqlAudits:
                     (text, user_email, flagged_text, analysed_entity, criticality),
                 )
             except Exception as ex:
-                print(f"Exception while inserting analysis audit: {ex}")
+                logging.info(f"Exception while inserting analysis audit: {ex}")
             finally:
                 connection_pool.putconn(conn)
 
@@ -139,7 +140,7 @@ class SqlAudits:
                                             flagged_text, user_email, analysed_entity, criticality)
                 )
             except Exception as ex:
-                print(f"Exception while inserting anonymize audit: {ex}")
+                logging.info(f"Exception while inserting anonymize audit: {ex}")
             finally:
                 connection_pool.putconn(conn)
 
@@ -160,7 +161,7 @@ class SqlAudits:
                     chat_log_insert_query, (user_email, text)
                 )
             except Exception as ex:
-                print(f"Exception while inserting chat log: {ex}")
+                logging.info(f"Exception while inserting chat log: {ex}")
             finally:
                 connection_pool.putconn(conn)
 
@@ -179,7 +180,7 @@ class SqlAudits:
                 cursor.execute(f'''SELECT * FROM {pg_schema}.chat_log''')
                 data = cursor.fetchall()
             except Exception as ex:
-                print(f"Exception while getting chat log: {ex}")
+                logging.info(f"Exception while getting chat log: {ex}")
             finally:
                 connection_pool.putconn(conn)
         return json.dumps(data, indent=4, sort_keys=True, default=str)
@@ -199,7 +200,7 @@ class SqlAudits:
     #             cursor.execute(get_org_query)
     #             data = cursor.fetchone()
     #         except Exception as ex:
-    #             print(f"Exception while getting organisation details: {ex}")
+    #             logging.info(f"Exception while getting organisation details: {ex}")
     #         finally:
     #             connection_pool.putconn(conn)
     #     return json.dumps(data, indent=4, sort_keys=True, default=str)
@@ -230,7 +231,7 @@ class SqlAudits:
     #                             orgdata['details'], orgdata['openai_key'], empty_records[0]))
     #                 apiResponse = "{'success':True}"
     #         except Exception as e:
-    #             print("Exception while saving organisation details: ", e)
+    #             logging.info("Exception while saving organisation details: ", e)
     #             apiResponse = "Error: {}".format(str(e))
     #         finally:
     #             connection_pool.putconn(conn)
@@ -274,7 +275,7 @@ class SqlAudits:
                         for row in rows]
                 response.update(True,"Successfully retrieved the data",data)
             except Exception as ex:
-                print(f"Exception while getting list: {ex}")
+                logging.info(f"Exception while getting list: {ex}")
                 response.update(False,"Error in retrieving the data",None)
             finally:
                 connection_pool.putconn(conn)
@@ -304,7 +305,7 @@ class SqlAudits:
                 
                 response.update(True,"Successfully retrieved the data",row_dict)
             except Exception as ex:
-                print(f"Exception while getting query: {ex}")
+                logging.info(f"Exception while getting query: {ex}")
                 response.update(False,"Error in retrieving the data",None)
             finally:
                 connection_pool.putconn(conn)
@@ -337,7 +338,7 @@ class SqlAudits:
                 response.update(True,"Successfully retrieved the data",count)
                 
             except Exception as ex:
-                print(f"Exception while getting count of query: {ex}")
+                logging.info(f"Exception while getting count of query: {ex}")
                 response.update(False,"Error in retrieving the data",None)
             finally:
                 connection_pool.putconn(conn)
@@ -367,7 +368,7 @@ class SqlAudits:
     #             new_id = cursor.fetchone()[0]
     #             result = SqlAudits.get_one_query(table, new_id)
     #         except Exception as ex:
-    #             print(f"Exception while creating query: {ex}")
+    #             logging.info(f"Exception while creating query: {ex}")
     #         finally:
     #             connection_pool.putconn(conn)
     #     return result
@@ -395,7 +396,7 @@ class SqlAudits:
     #             cursor.execute(query, values)
     #             result = SqlAudits.get_one_query(table, id)
     #         except Exception as ex:
-    #             print(f"Exception while updating query: {ex}")
+    #             logging.info(f"Exception while updating query: {ex}")
     #         finally:
     #             connection_pool.putconn(conn)
     #     return result
@@ -420,7 +421,7 @@ class SqlAudits:
                 count=cursor.fetchall()
                 enabled_entities = [item[0] for item in count]
             except Exception as ex:
-                print(f"Exception while getting enabled entities: {ex}")
+                logging.info(f"Exception while getting enabled entities: {ex}")
             finally:
                 connection_pool.putconn(conn)
         return enabled_entities
