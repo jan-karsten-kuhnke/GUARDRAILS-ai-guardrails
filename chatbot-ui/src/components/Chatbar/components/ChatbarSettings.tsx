@@ -3,13 +3,15 @@ import {
   IconSettings,
   IconArchive,
   IconArchiveOff,
-  IconLogout
+  IconLogout,
+  IconFileDescription,
 } from "@tabler/icons-react";
 import { useContext, useState } from "react";
 
 import HomeContext from "@/pages/home/home.context";
 
 import { SettingDialog } from "@/components/Settings/SettingDialog";
+import { DocumentDialog } from "@/components/Documents/DocumentDialog";
 
 import { Import } from "../../Settings/Import";
 import { Key } from "../../Settings/Key";
@@ -21,7 +23,9 @@ import { AuthContext } from "@/services/AuthService";
 
 export const ChatbarSettings = () => {
   const [isSettingDialogOpen, setIsSettingDialog] = useState<boolean>(false);
-  const authContext = useContext(AuthContext)
+  const [isDocumentDialogOpen, setIsDocumentDialog] = useState<boolean>(false);
+
+  const authContext = useContext(AuthContext);
 
   const {
     state: {
@@ -35,10 +39,8 @@ export const ChatbarSettings = () => {
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
-  const {
-    handleClearConversations,
-    handleExportData,
-  } = useContext(ChatbarContext);
+  const { handleClearConversations, handleExportData } =
+    useContext(ChatbarContext);
 
   const handleIsArchiveView = () => {
     homeDispatch({ field: "isArchiveView", value: !isArchiveView });
@@ -72,15 +74,29 @@ export const ChatbarSettings = () => {
       )}
 
       <SidebarButton
+        text={"Documents"}
+        icon={<IconFileDescription size={18} />}
+        onClick={() => setIsDocumentDialog(true)}
+      />
+
+      <SidebarButton
         text={"Settings"}
         icon={<IconSettings size={18} />}
         onClick={() => setIsSettingDialog(true)}
       />
-
-    <SidebarButton
+      <SidebarButton
         text={"Log Out"}
         icon={<IconLogout size={18} />}
         onClick={() => authContext.logout()}
+      />
+
+
+
+      <DocumentDialog
+        open={isDocumentDialogOpen}
+        onClose={() => {
+          setIsDocumentDialog(false);
+        }}
       />
       <SettingDialog
         open={isSettingDialogOpen}
