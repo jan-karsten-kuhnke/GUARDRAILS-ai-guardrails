@@ -6,7 +6,7 @@ from globals import Globals
 url = Globals.open_ai_api_key
 class document_wrapper:
     
-    def document_completion(messages,token,is_private,prompt):
+    def document_completion(messages,token,is_private,prompt,task):
         res = {}
         try:
             history = []
@@ -24,6 +24,7 @@ class document_wrapper:
                 "query": prompt,
                 "is_private": is_private,
                 "history": history,
+                "task": task
             })
             
             headers = {

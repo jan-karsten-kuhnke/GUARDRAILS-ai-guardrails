@@ -52,8 +52,8 @@ class chat_service:
             isOverride = bool(data["isOverride"])
             conversation_id = None
             manage_conversation_context = False
-            model = data.get('model_name', None)
-            if(model =="private-docs" or model == "private-docs-private-llm"):
+           
+            if(task == "conversation" or task == "qa-retreival"):
                 isOverride = True
             
             if('conversation_id'  in data and  data['conversation_id']):
@@ -85,8 +85,8 @@ class chat_service:
                     messages = chat_service.get_history_for_bot(conversation_id, current_user_email)
                     
 
-                if(model =="gpt-3.5-turbo"):
-                    response = openai_wrapper.chat_completion(messages, model)
+                if(task == "gpt-3.5-turbo"):
+                    response = openai_wrapper.chat_completion(messages, task)
                     for chunk in response:
                         if (
                             chunk["choices"][0]["delta"]
@@ -100,13 +100,13 @@ class chat_service:
                                 })
                             yield (chunk)
                     response.close()
-                elif(model =="private-docs" or model == "private-docs-private-llm" ):
+                elif(task =="conversation" or task == "private-docs-private-llm" ):
                     try:
                         is_private = False
-                        if(model == "private-docs-private-llm"):
-                            is_private = True
+                        # if(model == "private-docs-private-llm"):
+                        #     is_private = True
                         logging.info("calling document completion")
-                        res = document_wrapper.document_completion(messages,token, is_private,prompt)
+                        res = document_wrapper.document_completion(messages,token, is_private,prompt,task)
                         answer = res['answer']
                         if res['sources']:
                             sources = res['sources'][0]
