@@ -3,6 +3,7 @@ export interface Message {
   role: Role;
   content: string;
   userActionRequired: boolean;
+  msg_info: any
 }
 
 export type Role = 'assistant' | 'user' | 'guardrails';

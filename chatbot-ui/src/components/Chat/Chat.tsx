@@ -17,10 +17,9 @@ import {
 import { throttle } from '@/utils/data/throttle';
 
 import { ChatBody, Conversation, Message } from '@/types/chat';
-import { Plugin } from '@/types/plugin';
+import { TilesList,Tile } from '@/types/tiles';
 
 import HomeContext from '@/pages/home/home.context';
-import { PluginList } from '@/types/plugin';
 
 import Spinner from '../Spinner';
 import { ChatInput } from './ChatInput';
@@ -72,15 +71,14 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [plugin, setPlugin] = useState<Plugin>(PluginList[0]);
+  const [tile, setTile] = useState<Tile>(TilesList[0]);
 
 
   const handleSend = useCallback(
-    async (message: Message, deleteCount = 0, plugin: Plugin , isOverRide:boolean = false) => {
+    async (message: Message, deleteCount = 0, tile: Tile , isOverRide:boolean = false) => {
       if (containsOnlyWhitespacesOrNewlines(message.content)) return;
       message.content = message.content.trim();
-      console.log(plugin)
-      if(plugin.id === "gpt-3.5-turbo"){
+      if(tile.task === "gpt-3.5-turbo"){
         await anonymizeMessage(message.content)
         .then((res: any) => {
           message.content = res?.data?.result;
@@ -121,8 +119,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           message: message.content
         };
 
-        let modelName = plugin?.id;
-        let task=plugin?.task;
+        let task=tile?.task;
         const controller = new AbortController();
         let response: any;
         if(isOverRide){
@@ -131,8 +128,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               updatedConversation.messages[updatedConversation.messages.length - 2].content,
               selectedConversation.id,
               isOverRide,
-              modelName,
-              task ,
+              task,
               isPrivate
             );
           }
@@ -148,7 +144,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               chatBody.message,
               selectedConversation.id,
               isOverRide,
-              modelName,
               task,
               isPrivate
             );
@@ -180,6 +175,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           let done = false;
           let isFirst = true;
           let text = '';
+          let msg_info = null;
           let role;
           while (!done) {
             if (stopConversationRef.current === true) {
@@ -190,6 +186,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             const { value, done: doneReading } = await reader.read();
             done = doneReading;
             const chunkValue = decoder.decode(value);
+            console.log(chunkValue);  
             let parsed;
             if(!chunkValue || chunkValue === '') continue;
             if(chunkValue.includes('}{')){
@@ -204,6 +201,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 else{
                   parsed = JSON.parse('{' + split[i] + '}');
                 }
+
                 if(parsed.content==undefined){
                   text='Sorry currently your request could not be fullfiled. Please try again.!';
                 }
@@ -211,6 +209,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
                   text += parsed.content;
                 }
+                msg_info = parsed.msg_info;
                 role = parsed.role;
               }
             } else{
@@ -221,6 +220,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               else{
                 text += parsed.content;
               }
+              msg_info = parsed.msg_info;
               role = parsed.role;
               
             }
@@ -235,14 +235,13 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   };
               });
               if(isOverRide){
-                updatedMessages.push({ role: 'guardrails', content: "You chose to Override the warning, proceeding to Open AI." , userActionRequired: false})
+                updatedMessages.push({ role: 'guardrails', content: "You chose to Override the warning, proceeding to Open AI." ,msg_info:msg_info, userActionRequired: false})
               }
-              updatedMessages.push({ role: role, content: text , userActionRequired: parsed.user_action_required})
+              updatedMessages.push({ role: role, content: text ,msg_info:msg_info, userActionRequired: parsed.user_action_required})
               updatedConversation = {
                 ...updatedConversation,
                 messages: updatedMessages,
               };
-              console.log("updatedConversation",updatedConversation);
               homeDispatch({
                 field: 'selectedConversation',
                 value: updatedConversation,
@@ -288,7 +287,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     homeDispatch({ field: 'messageIsStreaming', value: true });
 
     let { data } = await requestApproval(conversationId)
-    let message: Message = { role: "guardrails", content: data.message, userActionRequired: false };
+    let message: Message = { role: "guardrails", content: data.message, msg_info:null, userActionRequired: false };
 
     let updatedConversation = {
       ...selectedConversation,
@@ -350,8 +349,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   //   }
   // };
 
-  const handleModelSelect = (model:Plugin) => {
-      setPlugin(model)
+  const handleModelSelect = (tile:Tile) => {
+      setTile(tile)
   }
 
   const scrollDown = () => {
@@ -401,6 +400,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     };
   }, [messagesEndRef]);
   
+
   return (
     <div className="relative flex-1 overflow-hidden bg-white dark:bg-[#343541]">
       <>
@@ -427,26 +427,18 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   )}
                 </div>
                 <div className='flex gap-10'>
-                  <div className={`flex flex-col w-full gap-5 justify-center text-black  rounded-lg border border-neutral-200 p-4 dark:text-gray-400 dark:border-neutral-600 hover:bg-[#595959] dark:hover:bg-[#202123] cursor-pointer ${ plugin === PluginList[0] && 'bg-[#595959] dark:bg-[#202123]'}`}
-                    onClick={(e)=>{handleModelSelect(PluginList[0])}}
-                  >
-                    <div className='flex justify-center'>
-                      <IconBolt size={80} />
+                  {TilesList.map((curr_tile, index) => (
+                    <div key={index} className={`flex flex-col w-full gap-5 justify-center text-black  rounded-lg border border-neutral-200 p-4 dark:text-gray-400 dark:border-neutral-600 hover:bg-[#595959] dark:hover:bg-[#202123] cursor-pointer ${ tile === TilesList[index] && 'bg-[#595959] dark:bg-[#202123]'}`}
+                      onClick={(e)=>{handleModelSelect(TilesList[index])}}
+                    >
+                      <div className='flex justify-center'>
+                        {curr_tile.icon}
+                      </div>
+                      <div className='text-center '>
+                        {curr_tile.displayName}
+                      </div>
                     </div>
-                    <div className='text-center '>
-                      Conversational Chatbot
-                    </div>
-                  </div>
-                  <div className={`flex flex-col w-full gap-5 justify-center text-black rounded-lg border border-neutral-200 p-4 dark:text-gray-400 dark:border-neutral-600 hover:bg-[#595959] dark:hover:bg-[#202123] cursor-pointer ${ plugin === PluginList[1] && 'bg-[#595959] dark:bg-[#202123]'}`}
-                    onClick={(e)=>{handleModelSelect(PluginList[1])}}
-                  >
-                    <div className='flex justify-center'>
-                      <IconBook size={80}/>
-                    </div>
-                    <div className='text-center'>
-                      Knowledge Mining on Private Docs
-                    </div>
-                  </div>
+                    ))}
                 </div>
                 <div className='w-full justify-center rounded-lg border border-neutral-200 p-4 dark:border-neutral-600'>
                     <PublicPrivateSwitch size={40}/>
@@ -517,7 +509,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     handleSend(
                       editedMessage,
                       selectedConversation?.messages.length - index,
-                      plugin
+                      tile
                     );
                   }}
                   onOverRide={(selectedMessage) => {
@@ -526,7 +518,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     handleSend(
                       selectedMessage,
                       selectedConversation?.messages.length - index,
-                      plugin,
+                      tile,
                       true,
                     );
                   }}
@@ -548,17 +540,17 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
         <ChatInput
           stopConversationRef={stopConversationRef}
-          plugin={plugin}
-          setPlugin={setPlugin}
+          tile={tile}
+          setTile={setTile}
           textareaRef={textareaRef}
-          onSend={(message, plugin) => {
+          onSend={(message, tile) => {
             setCurrentMessage(message);
-            handleSend(message, 0, plugin);
+            handleSend(message, 0, tile);
           }}
           onScrollDownClick={handleScrollDown}
           onRegenerate={() => {
             if (currentMessage) {
-              handleSend(currentMessage, 2, plugin);
+              handleSend(currentMessage, 2, tile);
             }
           }}
           showScrollDownButton={showScrollDownButton}

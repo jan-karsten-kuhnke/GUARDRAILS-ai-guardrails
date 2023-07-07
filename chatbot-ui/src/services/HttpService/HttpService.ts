@@ -31,7 +31,6 @@ export const fetchPrompt = (
   message: string,
   conversationId: string | null,
   isOverride: boolean,
-  modelName: string | undefined,
   task: string | undefined,
   isPrivate: boolean | undefined
 ) =>
@@ -47,7 +46,7 @@ export const fetchPrompt = (
             message: message,
             conversation_id: conversationId,
             isOverride: isOverride,
-            model_name: modelName,
+            task: task,
           }
         : { message: message }
     ),

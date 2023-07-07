@@ -10,7 +10,7 @@ from integration.nsfw_model_wrapper import NSFWModelWrapper
 from integration.keycloak_wrapper import keycloak_wrapper
 from service.pii_service import pii_service
 import uuid
-from typing import TypedDict
+from typing import TypedDict,Optional
 from datetime import datetime
 import json
 import requests
@@ -30,6 +30,7 @@ class conversation_obj(TypedDict):
     user_email: str
     state : str
     assigned_to : list
+    task : str
     
 class message_obj(TypedDict):
     id: str 
@@ -38,12 +39,15 @@ class message_obj(TypedDict):
     created: datetime
     children: list
     user_action_required: bool
+    msg_info: Optional[dict]
+    task: str
 
 
 class chat_service:
     def chat_completion(data,current_user_email,token):
         try:
             task = str(data["task"]) if "task" in data else None
+            print(task)
             isPrivate = bool(data["isPrivate"]) if "isPrivate" in data else False
             piiScan = True 
             nsfwScan = True
@@ -60,11 +64,13 @@ class chat_service:
                 conversation_id = data['conversation_id']
                 manage_conversation_context = True
 
+
             stop_conversation,stop_response,updated_prompt,role = chat_service.validate_prompt(prompt,isOverride,piiScan,nsfwScan,current_user_email,conversation_id)
-            chat_service.update_conversation(conversation_id,updated_prompt,'user',current_user_email,model)
+            chat_service.update_conversation(conversation_id,updated_prompt,'user',current_user_email,task)
             
             current_completion = ''
             user_action_required = False
+            msg_info = None
 
             if stop_conversation:
 
@@ -86,6 +92,7 @@ class chat_service:
                     
 
                 if(task == "gpt-3.5-turbo"):
+                    print("here")
                     response = openai_wrapper.chat_completion(messages, task)
                     for chunk in response:
                         if (
@@ -100,7 +107,7 @@ class chat_service:
                                 })
                             yield (chunk)
                     response.close()
-                elif(task =="conversation" or task == "private-docs-private-llm" ):
+                elif(task =="conversation" or task == "qa-retreival" ):
                     try:
                         is_private = False
                         # if(model == "private-docs-private-llm"):
@@ -108,14 +115,14 @@ class chat_service:
                         logging.info("calling document completion")
                         res = document_wrapper.document_completion(messages,token, is_private,prompt,task)
                         answer = res['answer']
-                        if res['sources']:
-                            sources = res['sources'][0]
-                            source = json.loads(sources)['metadata']['source'].split('/')[-1]
-                            answer = answer + "  \n  \n" + "Source: " + source  #adding double space + \n because ReactMarkdown in chatbot-ui needs this for next line
+                        
+                        msg_info={
+                            "sources": res['sources'] if res['sources'] else [],
+                        }
                         chunk = json.dumps({
                                         "role": "assistant",
                                         "content": answer,
-                                        "sources": res['sources']
+                                        "msg_info": msg_info,
                                     })
                         yield (chunk)
                         current_completion += answer
@@ -126,9 +133,10 @@ class chat_service:
                     yield (json.dumps({"error": "Invalid model type"}))
                 
             chat_service.save_chat_log(current_user_email, updated_prompt)
-            chat_service.update_conversation(conversation_id,current_completion,role,current_user_email,model,user_action_required)
+            chat_service.update_conversation(conversation_id,current_completion,role,current_user_email,task,msg_info,user_action_required)
         except Exception as e:
             yield (json.dumps({"error": "error"}))
+            print(e)
             logging.info("error: ", e)
             return
 
@@ -159,13 +167,15 @@ class chat_service:
             logging.info("returning from pii")
             return stop_conversation,stop_response,updated_prompt,role
         
-    def create_Conversation(prompt,email,model,id=None,):
+    def create_Conversation(prompt,email,model,msg_info,id=None,):
+        task = model
         message = message_obj(
             id= str(uuid.uuid4()),
             role="user",
             content=prompt,
             created=datetime.now(),
             children=[],
+            msg_info=msg_info
         )
         
         messages = [message]
@@ -179,15 +189,16 @@ class chat_service:
             title= openai_wrapper.gen_title(prompt,model),
             model_name = model,
             state = 'active',
-            assigned_to = []
+            assigned_to = [],
+            task= task
         )
         new_conversation_id = conversation_context.insert_conversation(conversation)
         return new_conversation_id
 
-    def update_conversation(conversation_id, content, role,user_email, model , user_action_required = False):
+    def update_conversation(conversation_id, content, role,user_email, model ,msg_info=None, user_action_required = False):
         conversation = conversation_context.get_conversation_by_id(conversation_id,user_email)
         if(conversation == None):
-            chat_service.create_Conversation(content,user_email,model,conversation_id)
+            chat_service.create_Conversation(content,user_email,model,msg_info,conversation_id)
             return
         if(model is None or not model):
             model = conversation['model']
@@ -198,7 +209,9 @@ class chat_service:
             content=content,
             created=datetime.now(),
             children=[],
-            user_action_required = user_action_required
+            user_action_required = user_action_required,
+            msg_info = msg_info,
+            task = model
         )
 
        #find message with last node id
