@@ -21,6 +21,7 @@ export interface HomeContextProps {
     data: KeyValuePair,
   ) => void;
   handleIsPrivate:(isPrivate:boolean)=>void;
+  handleSelectedTask:(task:string)=>void;
 }
 
 const HomeContext = createContext<HomeContextProps>(undefined!);

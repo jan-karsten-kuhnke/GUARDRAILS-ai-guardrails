@@ -38,7 +38,8 @@ export const Home = () => {
       prompts,
       temperature,
       refreshConversations,
-      isArchiveView
+      isArchiveView,
+      selectedTask
     },
     dispatch,
   } = contextValue;
@@ -213,6 +214,9 @@ export const Home = () => {
     const handleIsPrivate=(isPrivate:boolean)=>{
       dispatch({field:'isPrivate',value:isPrivate});
     }
+    const handleSelectedTask=(task:string)=>{
+      dispatch({field:'selectedTask',value:task});
+    }
 
   return (
     <HomeContext.Provider
@@ -225,6 +229,7 @@ export const Home = () => {
         handleSelectConversation,
         handleUpdateConversation,
         handleIsPrivate,
+        handleSelectedTask
       }}
     >
       <main

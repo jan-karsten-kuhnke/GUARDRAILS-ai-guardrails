@@ -30,6 +30,7 @@ export interface HomeInitialState {
   refreshConversations: boolean;
   isArchiveView: boolean;
   isPrivate:boolean;
+  selectedTask:string;
 }
 
 export const initialState: HomeInitialState = {
@@ -56,5 +57,6 @@ export const initialState: HomeInitialState = {
   serverSidePluginKeysSet: false,
   refreshConversations: false,
   isArchiveView: false,
-  isPrivate:true
+  isPrivate:true,
+  selectedTask:'conversation'
 };

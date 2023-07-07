@@ -73,7 +73,7 @@ const PublicPrivateSwitch: FC<Props> = ({ size }) => {
   };
   return (
     <>
-      <div className="flex justify-around  items-center pb-2 pt-2 text-sm text-black dark:text-gray-400">
+      <div className="flex justify-around  items-center pb-2 pt-4 text-sm text-black dark:text-gray-400">
         <div className="flex flex-col justify-around  items-center">
           <IconLockOpen size={size} />
           Public
