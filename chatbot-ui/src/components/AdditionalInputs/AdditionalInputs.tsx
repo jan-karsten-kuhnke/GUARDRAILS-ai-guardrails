@@ -1,8 +1,7 @@
 import { FC, useState, useContext } from "react";
 import { ChangeEvent } from "react";
-import { Button } from "@mui/material";
 import { IconUpload } from "@tabler/icons-react";
-import { uploadDocuments, deleteDocsGridData } from "@/services/DocsService";
+// import { uploadDocuments, deleteDocsGridData } from "@/services/DocsService";
 import toast from "react-hot-toast";
 
 interface Props {
@@ -50,17 +49,8 @@ const AdditionalInputs: FC<Props> = ({ inputs }) => {
         if (input == "fileUpload") {
           return (
             <>
-              <Button
-                variant="contained"
-                component="label"
-                startIcon={<IconUpload />}
-                sx={{
-                  backgroundColor: "#202123",
-                  "&.MuiButton-root:hover": {
-                    backgroundColor: "#4b4b4b",
-                  },
-                }}
-              >
+              <label className="flex gap-1 items-center w-32 p-2.5 rounded-md bg-[black] hover:bg-[#595959]  dark:bg-[#202123] dark:hover:bg-[#3e3f40] cursor-pointer">
+                <IconUpload />
                 Upload File
                 <input
                   type="file"
@@ -69,7 +59,7 @@ const AdditionalInputs: FC<Props> = ({ inputs }) => {
                   hidden
                   onChange={handleDocumentsUpload}
                 />
-              </Button>
+              </label>
             </>
           );
         }
