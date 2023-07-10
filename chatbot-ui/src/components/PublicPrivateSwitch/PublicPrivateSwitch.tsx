@@ -76,12 +76,12 @@ const PublicPrivateSwitch: FC<Props> = ({ size }) => {
       <div className="flex justify-around  items-center pb-2 pt-4 text-sm text-black dark:text-gray-400">
         <div className="flex flex-col justify-around  items-center">
           <IconLockOpen size={size} />
-          Public
+          Public LLM
         </div>
         <CustomSwitch sx={{ m: 1 }} checked={isPrivate} onChange={handleChange}/>
         <div className="flex flex-col justify-around  items-center text-black dark:text-gray-400">
           <IconLock size={size} />
-          Private
+          Private LLM
         </div>
       </div>
     </>
