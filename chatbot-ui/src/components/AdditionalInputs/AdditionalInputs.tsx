@@ -4,6 +4,7 @@ import { IconUpload } from "@tabler/icons-react";
 
 import toast from "react-hot-toast";
 import { summarizeBrief } from "@/services";
+import { Message } from "@/types/chat";
 
 interface Props {
   inputs: string[];
@@ -20,29 +21,36 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
     }
 
     const formData = new FormData();
+    console.log(files[0])
     
     formData.append("files", files[0]);
-
-    // handleSend(formData);
+    
+    let message: Message = {
+      role: "user",
+      content: `Summarize ${files[0].name}`,
+      userActionRequired: false,
+      msg_info: null
+    }
+    handleSend(message,0,false,formData);
     
 
-    toast
-      .promise(
-        summarizeBrief(formData), //calling api here
-        {
-          loading: `Uploading ${files.length} File`,
-          success: <b>File Uploaded</b>,
-          error: <b>Error in Uploading Documents</b>,
-        },
-        {
-          position: "bottom-center",
-        }
-      )
-      .then((data) => {
-        // setRefereshGridData(!refereshGridData);
-        console.log(data.data);
-        event.target.value = "";
-      });
+    // toast
+    //   .promise(
+    //     summarizeBrief(formData), //calling api here
+    //     {
+    //       loading: `Uploading ${files.length} File`,
+    //       success: <b>File Uploaded</b>,
+    //       error: <b>Error in Uploading Documents</b>,
+    //     },
+    //     {
+    //       position: "bottom-center",
+    //     }
+    //   )
+    //   .then((data) => {
+    //     // setRefereshGridData(!refereshGridData);
+    //     console.log(data.data);
+    //     event.target.value = "";
+    //   });
   };
 
   return (
