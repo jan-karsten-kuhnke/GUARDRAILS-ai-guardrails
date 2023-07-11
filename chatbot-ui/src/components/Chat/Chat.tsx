@@ -1,8 +1,6 @@
 import {
   IconClearAll,
   IconSettings,
-  IconBolt,
-  IconBook,
 } from "@tabler/icons-react";
 import {
   MutableRefObject,
@@ -131,7 +129,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         let response: any;
 
         if(selectedTile.task === "summarize-brief"){
-          console.log("summarize-brief",formData,message)
           try {
             const payload = {
             conversation_id: selectedConversation.id,
@@ -144,7 +141,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               duration: 5000,
             });
             response = await summarizeBrief(formData);
-            console.log(response)
           } catch (err: any) {
             toast.error(err.message, {
               position: "bottom-right",

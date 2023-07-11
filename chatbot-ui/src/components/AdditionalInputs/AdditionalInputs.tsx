@@ -1,9 +1,6 @@
-import { FC, useState, useContext } from "react";
+import { FC } from "react";
 import { ChangeEvent } from "react";
 import { IconUpload } from "@tabler/icons-react";
-
-import toast from "react-hot-toast";
-import { summarizeBrief } from "@/services";
 import { Message } from "@/types/chat";
 
 interface Props {
@@ -20,9 +17,7 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
       return;
     }
 
-    const formData = new FormData();
-    console.log(files[0])
-    
+    const formData = new FormData(); 
     formData.append("files", files[0]);
     
     let message: Message = {
@@ -32,25 +27,6 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
       msg_info: null
     }
     handleSend(message,0,false,formData);
-    
-
-    // toast
-    //   .promise(
-    //     summarizeBrief(formData), //calling api here
-    //     {
-    //       loading: `Uploading ${files.length} File`,
-    //       success: <b>File Uploaded</b>,
-    //       error: <b>Error in Uploading Documents</b>,
-    //     },
-    //     {
-    //       position: "bottom-center",
-    //     }
-    //   )
-    //   .then((data) => {
-    //     // setRefereshGridData(!refereshGridData);
-    //     console.log(data.data);
-    //     event.target.value = "";
-    //   });
   };
 
   return (
