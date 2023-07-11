@@ -1,3 +1,4 @@
+import os
 import logging
 from oidc import get_current_user_email
 from repo.db import conversation_context
@@ -50,7 +51,7 @@ class chat_service:
         try:
             msg_info = {}
             task=str(data["task"]) if "task" in data else "summarize-brief"
-            prompt=f"Summarizing {filename}, It might take some minutes."
+            prompt=f"Summarize {filename}"
             title=f"Summmary of {filename}."
             conversation_id = None
             if('conversation_id'  in data and  data['conversation_id']):
@@ -60,12 +61,6 @@ class chat_service:
             
             
 
-            init_prompt  =  json.dumps({
-                                    "role": "guardrails",
-                                    "content": prompt,
-                                    "user_action_required": False
-                                })
-            yield (init_prompt)
             executor  = SummarizeBriefChain()
             summary = executor.execute(filepath=filepath)
             current_completion = summary
@@ -84,6 +79,8 @@ class chat_service:
             yield (json.dumps({"error": "error"}))
             logging.info("error: ", e)
             return
+        finally:
+            os.remove(filepath)
     def chat_completion(data,current_user_email,token):
         try:
             task = str(data["task"]) if "task" in data else None

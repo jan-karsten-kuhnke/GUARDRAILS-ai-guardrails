@@ -68,10 +68,16 @@ export const archiveUnarchiveConversation = (
   );
 };
 
-export const summarizeBrief = ( formData:FormData ) => {
-  return _axios.post('/chat/summarizebrief', formData);
-}
-
+export const summarizeBrief = (
+  formData: FormData
+) =>
+  fetch(`${import.meta.env.VITE_CHAT_SERVICE_URL}/chat/summarizebrief`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${AuthService.getToken()}`,
+    },
+    body: formData,
+  });
 
 export const fetchAllConversations = (getArchived: boolean) => {
   return _axios.get(`/chat/conversations?archived=${getArchived}`);

@@ -133,9 +133,17 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         if(selectedTile.task === "summarize-brief"){
           console.log("summarize-brief",formData,message)
           try {
-            response = await summarizeBrief(
-              formData,
-            );
+            const payload = {
+            conversation_id: selectedConversation.id,
+            isOverride: isOverRide,
+            task: selectedTile.task,
+            }
+            formData.append("data", JSON.stringify(payload));
+            toast.loading("Summarization might be a time taking process depending on the size of your document", {
+              position: "bottom-right",
+              duration: 5000,
+            });
+            response = await summarizeBrief(formData);
             console.log(response)
           } catch (err: any) {
             toast.error(err.message, {

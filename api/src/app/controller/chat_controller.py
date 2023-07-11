@@ -82,7 +82,7 @@ def request_approval(conversation_id):
 @endpoints.route('/summarizebrief', methods=['POST'])
 @oidc.accept_token(require_token=True)
 def create_document():
-    data={}
+    data = json.loads( request.form['data'])
     # data = request.get_json(silent=True)
     user_email = get_current_user_email()
     token = request.headers['authorization'].split(' ')[1]
