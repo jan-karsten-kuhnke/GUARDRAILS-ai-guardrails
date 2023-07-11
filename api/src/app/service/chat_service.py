@@ -44,6 +44,42 @@ class message_obj(TypedDict):
 
 
 class chat_service:
+    def summarize_brief(data,current_user_email,temp_dir_name,files,token):
+        
+        try:
+            isPrivate = bool(data["isPrivate"]) if "isPrivate" in data else False
+            task=str(data["task"]) if "task" in data else "summarize-brief"
+            prompt=f"Summarize {files[0].filename}."
+            title=f"Summmary of {files[0].filename}."
+            conversation_id = None
+            manage_conversation_context = False
+            
+            if('conversation_id'  in data and  data['conversation_id']):
+                conversation_id = data['conversation_id']
+                manage_conversation_context = True
+            
+            chat_service.update_conversation(conversation_id,prompt,'user',current_user_email,task,title)
+            
+            current_completion = ''
+            user_action_required = False
+            msg_info = None
+            
+            res = document_wrapper.summarize_brief(files,token)
+            answer=res["answer"]
+            chunk = json.dumps({
+                                "role": "assistant",
+                                "content": answer,
+                                "msg_info": msg_info,
+                            })
+            yield (chunk)
+            current_completion += answer
+            chat_service.save_chat_log(current_user_email, prompt)
+            chat_service.update_conversation(conversation_id,current_completion,'assistant',current_user_email,task,None,msg_info,user_action_required)
+        except Exception as e:
+            print(e)
+            yield (json.dumps({"error": "error"}))
+            logging.info("error: ", e)
+            return
     def chat_completion(data,current_user_email,token):
         try:
             task = str(data["task"]) if "task" in data else None
@@ -66,7 +102,7 @@ class chat_service:
 
 
             stop_conversation,stop_response,updated_prompt,role = chat_service.validate_prompt(prompt,isOverride,piiScan,nsfwScan,current_user_email,conversation_id)
-            chat_service.update_conversation(conversation_id,updated_prompt,'user',current_user_email,task)
+            chat_service.update_conversation(conversation_id,updated_prompt,'user',current_user_email,task,None)
             
             current_completion = ''
             user_action_required = False
@@ -92,7 +128,6 @@ class chat_service:
                     
 
                 if(task == "gpt-3.5-turbo"):
-                    print("here")
                     response = openai_wrapper.chat_completion(messages, task)
                     for chunk in response:
                         if (
@@ -133,7 +168,7 @@ class chat_service:
                     yield (json.dumps({"error": "Invalid model type"}))
                 
             chat_service.save_chat_log(current_user_email, updated_prompt)
-            chat_service.update_conversation(conversation_id,current_completion,role,current_user_email,task,msg_info,user_action_required)
+            chat_service.update_conversation(conversation_id,current_completion,role,current_user_email,task,None,msg_info,user_action_required)
         except Exception as e:
             yield (json.dumps({"error": "error"}))
             print(e)
@@ -167,7 +202,7 @@ class chat_service:
             logging.info("returning from pii")
             return stop_conversation,stop_response,updated_prompt,role
         
-    def create_Conversation(prompt,email,model,msg_info,id=None,):
+    def create_Conversation(prompt,email,model,msg_info,title=None,id=None,):
         task = model
         message = message_obj(
             id= str(uuid.uuid4()),
@@ -186,7 +221,7 @@ class chat_service:
             created=datetime.now(),
             messages= messages,
             user_email=email,
-            title= openai_wrapper.gen_title(prompt,model),
+            title= title if title else openai_wrapper.gen_title(prompt,model),
             model_name = model,
             state = 'active',
             assigned_to = [],
@@ -195,10 +230,10 @@ class chat_service:
         new_conversation_id = conversation_context.insert_conversation(conversation)
         return new_conversation_id
 
-    def update_conversation(conversation_id, content, role,user_email, model ,msg_info=None, user_action_required = False):
+    def update_conversation(conversation_id, content, role,user_email, model ,title=None,msg_info=None, user_action_required = False):
         conversation = conversation_context.get_conversation_by_id(conversation_id,user_email)
         if(conversation == None):
-            chat_service.create_Conversation(content,user_email,model,msg_info,conversation_id)
+            chat_service.create_Conversation(content,user_email,model,msg_info,title,conversation_id)
             return
         if(model is None or not model):
             model = conversation['model']
@@ -272,5 +307,5 @@ class chat_service:
 
         csv_email = ','.join(group_managers_emails)
         message = f"Request sent for approval to: {csv_email}"
-        chat_service.update_conversation(conversation_id,message,'guardrails',user_email,model=None,user_action_required=False)
+        chat_service.update_conversation(conversation_id,message,'guardrails',user_email,model=None,msg_info=None,user_action_required=False)
         return message

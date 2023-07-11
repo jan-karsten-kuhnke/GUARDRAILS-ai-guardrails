@@ -565,22 +565,23 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             </>
           )}
         </div>
-
-        <ChatInput
-          stopConversationRef={stopConversationRef}
-          textareaRef={textareaRef}
-          onSend={(message) => {
-            setCurrentMessage(message);
-            handleSend(message, 0);
-          }}
-          onScrollDownClick={handleScrollDown}
-          onRegenerate={() => {
-            if (currentMessage) {
-              handleSend(currentMessage, 2);
-            }
-          }}
-          showScrollDownButton={showScrollDownButton}
-        />
+          {selectedTile?.task != "summarize-brief" && 
+            <ChatInput
+            stopConversationRef={stopConversationRef}
+            textareaRef={textareaRef}
+            onSend={(message) => {
+              setCurrentMessage(message);
+              handleSend(message, 0);
+            }}
+            onScrollDownClick={handleScrollDown}
+            onRegenerate={() => {
+                if (currentMessage) {
+                  handleSend(currentMessage, 2);
+                }
+              }}
+              showScrollDownButton={showScrollDownButton}
+            />
+        }
       </>
     </div>
   );

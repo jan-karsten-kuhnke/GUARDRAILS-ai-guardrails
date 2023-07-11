@@ -19,6 +19,9 @@ _axios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   // eslint-disable-next-line no-param-reassign
   config.headers.Authorization = `Bearer ${AuthService.getToken()}`;
   config.headers["Content-Type"] = "application/json";
+  if(config.url=='/chat/summarizebrief' && config.method=='post'){
+    config.headers["Content-Type"] = "multipart/form-data";
+  }
   config.headers["Access-Control-Allow-Origin"] = "*";
   return config;
 });
@@ -64,6 +67,11 @@ export const archiveUnarchiveConversation = (
     `/chat/conversations/archive/${conversationId}?flag=${isArchived}`
   );
 };
+
+export const summarizeBrief = ( formData:FormData ) => {
+  return _axios.post('/chat/summarizebrief', formData);
+}
+
 
 export const fetchAllConversations = (getArchived: boolean) => {
   return _axios.get(`/chat/conversations?archived=${getArchived}`);

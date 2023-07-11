@@ -1,8 +1,9 @@
 import { FC, useState, useContext } from "react";
 import { ChangeEvent } from "react";
 import { IconUpload } from "@tabler/icons-react";
-// import { uploadDocuments, deleteDocsGridData } from "@/services/DocsService";
+
 import toast from "react-hot-toast";
+import { summarizeBrief } from "@/services";
 
 interface Props {
   inputs: string[];
@@ -18,29 +19,27 @@ const AdditionalInputs: FC<Props> = ({ inputs }) => {
     }
 
     const formData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-      formData.append("files", files[i]);
-    }
+    
+    formData.append("files", files[0]);
+    
 
-    // console.log("formData", formData);
-    // console.log("files", event.target.files);
-
-    // toast
-    //   .promise(
-    //     uploadDocuments(formData), //calling api here
-    //     {
-    //       loading: `Uploading ${files.length} Documents`,
-    //       success: <b>Documents Uploaded</b>,
-    //       error: <b>Error in Uploading Documents</b>,
-    //     },
-    //     {
-    //       position: "bottom-center",
-    //     }
-    //   )
-    //   .then(() => {
-    //     // setRefereshGridData(!refereshGridData);
-    //     event.target.value = "";
-    //   });
+    toast
+      .promise(
+        summarizeBrief(formData), //calling api here
+        {
+          loading: `Uploading ${files.length} File`,
+          success: <b>File Uploaded</b>,
+          error: <b>Error in Uploading Documents</b>,
+        },
+        {
+          position: "bottom-center",
+        }
+      )
+      .then((data) => {
+        // setRefereshGridData(!refereshGridData);
+        console.log(data.data);
+        event.target.value = "";
+      });
   };
 
   return (
@@ -53,9 +52,9 @@ const AdditionalInputs: FC<Props> = ({ inputs }) => {
                 <IconUpload />
                 Upload File
                 <input
+                 key={index}
                   type="file"
-                  // multiple
-                  accept=".doc, .docx, .pdf , .csv"
+                  accept=".pdf "
                   hidden
                   onChange={handleDocumentsUpload}
                 />
