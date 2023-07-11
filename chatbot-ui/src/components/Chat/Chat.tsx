@@ -35,6 +35,8 @@ import { MemoizedChatMessage } from "./MemoizedChatMessage";
 import { anonymizeMessage, fetchPrompt, requestApproval } from "@/services";
 import PublicPrivateSwitch from "../PublicPrivateSwitch";
 import AdditionalInputs from "../AdditionalInputs/AdditionalInputs";
+import { summarizeBrief } from "@/services";
+import { error } from "console";
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -81,7 +83,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSend = useCallback(
-    async (message: Message, deleteCount = 0, isOverRide: boolean = false) => {
+    async (message: Message, deleteCount = 0, isOverRide: boolean = false , formData : FormData = new FormData()) => {
       if (containsOnlyWhitespacesOrNewlines(message.content)) return;
       message.content = message.content.trim();
       if (selectedTile.task === "conversation") {
@@ -127,37 +129,55 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
         const controller = new AbortController();
         let response: any;
-        if (isOverRide) {
+
+        if(selectedTile.task === "summarize-brief"){
+          console.log("summarize-brief",formData,message)
           try {
-            response = await fetchPrompt(
-              updatedConversation.messages[
-                updatedConversation.messages.length - 2
-              ].content,
-              selectedConversation.id,
-              isOverRide,
-              selectedTile.task,
-              isPrivate
+            response = await summarizeBrief(
+              formData,
             );
+            console.log(response)
           } catch (err: any) {
             toast.error(err.message, {
               position: "bottom-right",
               duration: 3000,
             });
+            console.log(err)
           }
-        } else {
-          try {
-            response = await fetchPrompt(
-              chatBody.message,
-              selectedConversation.id,
-              isOverRide,
-              selectedTile.task,
-              isPrivate
-            );
-          } catch (err: any) {
-            toast.error(err.message, {
-              position: "bottom-right",
-              duration: 3000,
-            });
+        }
+        else{
+          if (isOverRide) {
+            try {
+              response = await fetchPrompt(
+                updatedConversation.messages[
+                  updatedConversation.messages.length - 2
+                ].content,
+                selectedConversation.id,
+                isOverRide,
+                selectedTile.task,
+                isPrivate
+              );
+            } catch (err: any) {
+              toast.error(err.message, {
+                position: "bottom-right",
+                duration: 3000,
+              });
+            }
+          } else {
+            try {
+              response = await fetchPrompt(
+                chatBody.message,
+                selectedConversation.id,
+                isOverRide,
+                selectedTile.task,
+                isPrivate
+              );
+            } catch (err: any) {
+              toast.error(err.message, {
+                position: "bottom-right",
+                duration: 3000,
+              });
+            }
           }
         }
 
