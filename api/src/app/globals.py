@@ -2,6 +2,8 @@ import os
 import json
 import logging
 
+
+os.environ["OPENAI_API_KEY"] = os.environ.get("OPEN_AI_API_KEY")
 class Globals:
     mongo_uri = os.environ.get("MONGO_URI")
     mongo_db_name = os.environ.get("MONGO_DB_NAME")
@@ -12,6 +14,15 @@ class Globals:
     pg_db = os.environ.get("PG_DB")
     pg_schema = os.environ.get("PG_SCHEMA")
     DB_URL =os.environ.get("DB_URI")
+
+    
+
+     #MODEL_TYPE
+    public_model_type=os.environ.get("PUBLIC_MODEL_TYPE")
+    private_model_type=os.environ.get("PRIVATE_MODEL_TYPE")
+
+    model_temp = 0
+
     
     
     oidc_client_id = os.environ.get("OIDC_CLIENT_ID")

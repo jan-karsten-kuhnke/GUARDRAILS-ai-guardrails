@@ -14,6 +14,7 @@ from typing import TypedDict,Optional
 from datetime import datetime
 import json
 import requests
+from executors.SummarizeBriefChain import SummarizeBriefChain
 
 override_message = "You chose to Override the warning, proceeding to Open AI."
 nsfw_warning = "Warning From Guardrails: We've detected that your message contains NSFW content. Please refrain from posting such content in a work environment, You can choose to override this warning if you wish to continue the conversation, or you can get your manager's approval before continuing."
@@ -44,35 +45,38 @@ class message_obj(TypedDict):
 
 
 class chat_service:
-    def summarize_brief(data,current_user_email,temp_dir_name,files,token):
+    def summarize_brief(data,current_user_email,filename,filepath,token):
         
         try:
-            isPrivate = bool(data["isPrivate"]) if "isPrivate" in data else False
+            msg_info = {}
             task=str(data["task"]) if "task" in data else "summarize-brief"
-            prompt=f"Summarize {files[0].filename}."
-            title=f"Summmary of {files[0].filename}."
+            prompt=f"Summarizing {filename}, It might take some minutes."
+            title=f"Summmary of {filename}."
             conversation_id = None
-            manage_conversation_context = False
-            
             if('conversation_id'  in data and  data['conversation_id']):
                 conversation_id = data['conversation_id']
-                manage_conversation_context = True
-            
+         
             chat_service.update_conversation(conversation_id,prompt,'user',current_user_email,task,title)
             
-            current_completion = ''
-            user_action_required = False
-            msg_info = None
             
-            res = document_wrapper.summarize_brief(files,token)
-            answer=res["answer"]
+
+            init_prompt  =  json.dumps({
+                                    "role": "guardrails",
+                                    "content": prompt,
+                                    "user_action_required": False
+                                })
+            yield (init_prompt)
+            executor  = SummarizeBriefChain()
+            summary = executor.execute(filepath=filepath)
+            current_completion = summary
             chunk = json.dumps({
                                 "role": "assistant",
-                                "content": answer,
+                                "content": summary,
                                 "msg_info": msg_info,
                             })
             yield (chunk)
-            current_completion += answer
+            user_action_required = False
+            
             chat_service.save_chat_log(current_user_email, prompt)
             chat_service.update_conversation(conversation_id,current_completion,'assistant',current_user_email,task,None,msg_info,user_action_required)
         except Exception as e:

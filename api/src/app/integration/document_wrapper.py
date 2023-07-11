@@ -37,26 +37,3 @@ class document_wrapper:
             logging.error("error: "+str(e))
         return res
     
-    def summarize_brief(files,token):
-        res = {}
-        try:
-            url = Globals.document_api_url
-            payload = {}
-            headers = {
-                "Authorization" : f"Bearer {token}",
-                "Content-Type": "multipart/form-data"
-            }
-            file=files[0]
-            files_to_send=[ ('files',(file.filename,file.stream,'application/pdf'))]
-            print("hello")
-            res = requests.request("POST", url + "/summarizebrief", files=files_to_send, headers=headers)
-            print(res)
-
-            logging.info("received response From summarize_brief")
-        except Exception as e:
-            logging.error("error: "+str(e))
-            
-        return {
-            "answer": "summary",
-        }
-            
