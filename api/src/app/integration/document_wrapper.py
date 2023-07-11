@@ -47,8 +47,11 @@ class document_wrapper:
                 "Content-Type": "multipart/form-data"
             }
             file=files[0]
-            files_to_send=[{'file':(file.filename,file.stream,file.content_type)}]
-            # res = requests.request("POST", url + "/summarizebrief", headers=headers, data=payload, files=files_to_send)
+            files_to_send=[ ('files',(file.filename,file.stream,'application/pdf'))]
+            print("hello")
+            res = requests.request("POST", url + "/summarizebrief", files=files_to_send, headers=headers)
+            print(res)
+
             logging.info("received response From summarize_brief")
         except Exception as e:
             logging.error("error: "+str(e))

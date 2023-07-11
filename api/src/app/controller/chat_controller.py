@@ -87,8 +87,8 @@ def create_document():
     files = request.files.getlist('files')
     temp_dir_name = "temp-" + str(time())
     
-    def summarize_brief_stream(data,user_email):
+    def summarize_brief_stream(data,user_email,files,token):
         response=chat_service.summarize_brief(data,user_email,temp_dir_name,files,token)
         for chunk in response:
             yield chunk
-    return Response(summarize_brief_stream(data,user_email), mimetype='text/event-stream')
+    return Response(summarize_brief_stream(data,user_email,files,token), mimetype='text/event-stream')

@@ -7,10 +7,11 @@ import { summarizeBrief } from "@/services";
 
 interface Props {
   inputs: string[];
+  handleSend: Function;
 }
 
-const AdditionalInputs: FC<Props> = ({ inputs }) => {
-  const handleDocumentsUpload = async (
+const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
+  const handleDocumentUpload = async (
     event: ChangeEvent<HTMLInputElement>
   ) => {
     const files = event.target.files;
@@ -21,6 +22,8 @@ const AdditionalInputs: FC<Props> = ({ inputs }) => {
     const formData = new FormData();
     
     formData.append("files", files[0]);
+
+    // handleSend(formData);
     
 
     toast
@@ -56,7 +59,7 @@ const AdditionalInputs: FC<Props> = ({ inputs }) => {
                   type="file"
                   accept=".pdf "
                   hidden
-                  onChange={handleDocumentsUpload}
+                  onChange={handleDocumentUpload}
                 />
               </label>
             </>

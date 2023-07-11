@@ -467,7 +467,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 </div>
                 {selectedTile?.additionalInputs && (
                   <div className="w-full justify-center rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
-                    <AdditionalInputs inputs={selectedTile?.additionalInputs} />
+                    <AdditionalInputs inputs={selectedTile?.additionalInputs} handleSend={handleSend} />
                   </div>
                 )}
                 <div className="w-full justify-center rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
