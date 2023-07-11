@@ -22,9 +22,9 @@ transformers = "*"
 sentencepiece = "*"
 flask-smorest = "*"
 marshmallow = "*"
-langchain="0.0.225"
-pypdf="3.11.0"
-tiktoken=="0.4.0"
+langchain= "0.0.225"
+pypdf= "3.11.0"
+tiktoken= "0.4.0"
 [dev-packages]
 black = "*"
 
