@@ -34,7 +34,6 @@ import { anonymizeMessage, fetchPrompt, requestApproval } from "@/services";
 import PublicPrivateSwitch from "../PublicPrivateSwitch";
 import AdditionalInputs from "../AdditionalInputs/AdditionalInputs";
 import { summarizeBrief } from "@/services";
-import { error } from "console";
 
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
@@ -215,7 +214,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           const { value, done: doneReading } = await reader.read();
           done = doneReading;
           const chunkValue = decoder.decode(value);
-          console.log(chunkValue);
           let parsed;
           if (!chunkValue || chunkValue === "") continue;
           if (chunkValue.includes("}{")) {
@@ -402,14 +400,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     }
   };
   const throttledScrollDown = throttle(scrollDown, 250);
-
-  // useEffect(() => {
-  //   console.log('currentMessage', currentMessage);
-  //   if (currentMessage) {
-  //     handleSend(currentMessage);
-  //     homeDispatch({ field: 'currentMessage', value: undefined });
-  //   }
-  // }, [currentMessage]);
 
   useEffect(() => {
     throttledScrollDown();

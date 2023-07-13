@@ -1,5 +1,6 @@
 import glob
 import os
+import logging
 from typing import List
 from langchain import OpenAI
 from langchain.chains.summarize import load_summarize_chain
