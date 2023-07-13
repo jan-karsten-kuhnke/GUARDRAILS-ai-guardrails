@@ -1,7 +1,7 @@
 import logging
 from oidc import get_current_user_email
 from repo.db import anonymize_audit_context,analysis_audit_context
-from repo.postgres import SqlAudits
+from database.query import SqlAudits
 from integration.presidio_wrapper import presidio_wrapper
 from integration.nsfw_model_wrapper import NSFWModelWrapper
 import uuid

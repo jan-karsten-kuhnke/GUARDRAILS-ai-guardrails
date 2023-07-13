@@ -35,12 +35,9 @@ export const PromptbarSettings: FC<Props> = () => {
             onChange={handleChange}
           >
             {TilesList.map((tile, index) => (
-              <>
                 <option value={tile.task} key={index} className="py-2">{tile.displayName}
                 </option>
-                
-              </>
-
+           
               ))}
           </select>
           <PublicPrivateSwitch size={25} />

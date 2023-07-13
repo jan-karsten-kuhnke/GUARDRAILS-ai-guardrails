@@ -2,9 +2,8 @@ import os
 import logging
 from oidc import get_current_user_email
 from repo.db import conversation_context
-from repo.postgres import SqlAudits
+from database.query import SqlAudits
 from integration.openai_wrapper import openai_wrapper
-from integration.document_wrapper import document_wrapper
 from integration.presidio_wrapper import presidio_wrapper
 from presidio_anonymizer.entities import RecognizerResult
 from integration.nsfw_model_wrapper import NSFWModelWrapper
@@ -16,6 +15,8 @@ from datetime import datetime
 import json
 import requests
 from executors.SummarizeBriefChain import SummarizeBriefChain
+from executors.ConversationalChain import ConversationalChain
+from executors.QaRetrievalChain import QaRetrievalChain
 
 override_message = "You chose to Override the warning, proceeding to Open AI."
 nsfw_warning = "Warning From Guardrails: We've detected that your message contains NSFW content. Please refrain from posting such content in a work environment, You can choose to override this warning if you wish to continue the conversation, or you can get your manager's approval before continuing."
@@ -75,16 +76,14 @@ class chat_service:
             chat_service.save_chat_log(current_user_email, prompt)
             chat_service.update_conversation(conversation_id,current_completion,'assistant',current_user_email,task,None,msg_info,user_action_required)
         except Exception as e:
-            print(e)
             yield (json.dumps({"error": "error"}))
-            logging.info("error: ", e)
+            logging.error("error: ", e)
             return
         finally:
             os.remove(filepath)
     def chat_completion(data,current_user_email,token):
         try:
             task = str(data["task"]) if "task" in data else None
-            print(task)
             isPrivate = bool(data["isPrivate"]) if "isPrivate" in data else False
             piiScan = True 
             nsfwScan = True
@@ -127,53 +126,54 @@ class chat_service:
                 if(manage_conversation_context):
                     messages = chat_service.get_history_for_bot(conversation_id, current_user_email)
                     
-
-                if(task == "gpt-3.5-turbo"):
-                    response = openai_wrapper.chat_completion(messages, task)
-                    for chunk in response:
-                        if (
-                            chunk["choices"][0]["delta"]
-                            and "content" in chunk["choices"][0]["delta"]
-                        ):
-                            chunk_to_yeild = chunk["choices"][0]["delta"]["content"]
-                            current_completion += chunk["choices"][0]["delta"]["content"]
-                            chunk = json.dumps({
-                                    "role": "assistant",
-                                    "content": chunk_to_yeild,
-                                })
-                            yield (chunk)
-                    response.close()
-                elif(task =="conversation" or task == "qa-retreival" ):
+                is_private = False
+                history = []
+                if len(messages) > 1:
+                    for i in range(len(messages)-1):
+                        if(messages[i]['role'] == 'user'):
+                            history.append((messages[i]['content'], messages[i+1]['content']))
+                
+                res=None
+                if(task =="conversation" ):
                     try:
-                        is_private = False
-                        # if(model == "private-docs-private-llm"):
-                        #     is_private = True
-                        logging.info("calling document completion")
-                        res = document_wrapper.document_completion(messages,token, is_private,prompt,task)
-                        answer = res['answer']
+                        logging.info("calling conversation executor")
+                        executor  = ConversationalChain()
+                        res = executor.execute(prompt,is_private,history)
                         
-                        msg_info={
-                            "sources": res['sources'] if res['sources'] else [],
-                        }
-                        chunk = json.dumps({
-                                        "role": "assistant",
-                                        "content": answer,
-                                        "msg_info": msg_info,
-                                    })
-                        yield (chunk)
-                        current_completion += answer
                     except Exception as e:
                         yield("Sorry. Some error occured. Please try again.")
                         logging.error("error: "+str(e))
+                elif(task == "qa-retreival" ):
+                    try:
+                        logging.info("calling qa retrieval executor")
+                        executor=QaRetrievalChain()
+                        res = executor.execute(prompt,is_private,history)
+
+                    except Exception as e:
+                        yield("Sorry. Some error occured. Please try again.")
+                        logging.error("error: "+str(e))
+
                 else:
                     yield (json.dumps({"error": "Invalid model type"}))
-                
+
+                answer = res['answer']
+                        
+                msg_info={
+                    "sources": res['sources'] if res['sources'] else [],
+                }
+                chunk = json.dumps({
+                                "role": "assistant",
+                                "content": answer,
+                                "msg_info": msg_info,
+                            })
+                yield (chunk)
+                current_completion += answer
+        
             chat_service.save_chat_log(current_user_email, updated_prompt)
             chat_service.update_conversation(conversation_id,current_completion,role,current_user_email,task,None,msg_info,user_action_required)
         except Exception as e:
             yield (json.dumps({"error": "error"}))
-            print(e)
-            logging.info("error: ", e)
+            logging.error("error: ", e)
             return
 
     def validate_prompt(prompt,isOverride, pii_scan, nsfw_scan,current_user_email,conversation_id):
@@ -189,7 +189,6 @@ class chat_service:
 
         if(nsfw_scan):
             nsfw_score = NSFWModelWrapper.analyze(prompt)
-            print (nsfw_score)
             if nsfw_score > nsfw_threshold:
                 stop_response =  nsfw_warning
                 stop_conversation = True

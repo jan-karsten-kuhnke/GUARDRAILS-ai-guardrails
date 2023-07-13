@@ -34,19 +34,17 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
       {inputs.map((input, index) => {
         if (input == "fileUpload") {
           return (
-            <>
-              <label className="flex gap-1 items-center w-32 p-2.5 rounded-md bg-[black] hover:bg-[#595959]  dark:bg-[#202123] dark:hover:bg-[#3e3f40] cursor-pointer">
+              <label  key={index} className="flex gap-1 items-center w-32 p-2.5 rounded-md bg-[black] hover:bg-[#595959]  dark:bg-[#202123] dark:hover:bg-[#3e3f40] cursor-pointer">
                 <IconUpload />
                 Upload File
                 <input
-                 key={index}
                   type="file"
                   accept=".pdf "
                   hidden
                   onChange={handleDocumentUpload}
                 />
               </label>
-            </>
+
           );
         }
       })}

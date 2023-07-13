@@ -4,8 +4,6 @@ from service.chat_service import chat_service
 from flask_smorest import Blueprint as SmorestBlueprint
 from time import time
 import os
-from integration.document_wrapper import document_wrapper
-# import time
 from oidc import oidc
 from oidc import get_current_user_email
 from oidc import get_current_user_groups
@@ -83,7 +81,6 @@ def request_approval(conversation_id):
 @oidc.accept_token(require_token=True)
 def create_document():
     data = json.loads( request.form['data'])
-    # data = request.get_json(silent=True)
     user_email = get_current_user_email()
     token = request.headers['authorization'].split(' ')[1]
     files = request.files.getlist('files')
@@ -92,9 +89,6 @@ def create_document():
     filename = file.filename
     filepath = os.path.join(os.getcwd(), filename)
     file.save(filepath)
-    # res = document_wrapper.summarize_brief(filename, filepath,token)
-    # answer=res["answer"]
-    # delete file from disk
     file.close()
     def summarize_brief_stream(data,user_email,filename,filepath,token):
         response=chat_service.summarize_brief(data,user_email,filename,filepath,token)
