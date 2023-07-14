@@ -23,9 +23,9 @@ class QaRetrievalChain:
     callbacks = [StreamingStdOutCallbackHandler()]
 
     if Globals.public_model_type == "OpenAI":
-        public_llm = OpenAI(callbacks=callbacks, verbose=False, temperature=temp)
+        public_llm = OpenAI(callbacks=callbacks, verbose=False, temperature=temp,max_tokens=2000)
     elif Globals.public_model_type == "VertexAI":
-        public_llm = VertexAI()
+        public_llm = VertexAI(max_output_tokens=1000)
     private_llm = public_llm
     
     

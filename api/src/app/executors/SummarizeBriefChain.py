@@ -17,7 +17,7 @@ class SummarizeBriefChain:
         if Globals.public_model_type == "OpenAI":
             public_llm = OpenAI(callbacks=callbacks, verbose=False, temperature=temp,max_tokens=1000)
         elif Globals.public_model_type == "VertexAI":
-            public_llm = VertexAI()
+            public_llm = VertexAI(max_output_tokens=1000, verbose=False)
         loader = PyPDFLoader(filepath)
         pages = loader.load_and_split()
 
