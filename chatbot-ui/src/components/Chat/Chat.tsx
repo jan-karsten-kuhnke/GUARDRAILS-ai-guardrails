@@ -18,7 +18,6 @@ import { updateConversation } from "@/utils/app/conversation";
 import { throttle } from "@/utils/data/throttle";
 
 import { ChatBody, Conversation, Message } from "@/types/chat";
-import { TilesList, Tile } from "@/types/tiles";
 
 import HomeContext from "@/pages/home/home.context";
 
@@ -34,7 +33,7 @@ import { anonymizeMessage, fetchPrompt, requestApproval } from "@/services";
 import PublicPrivateSwitch from "../PublicPrivateSwitch";
 import AdditionalInputs from "../AdditionalInputs/AdditionalInputs";
 import { summarizeBrief } from "@/services";
-
+import  Tiles from "../Tiles/Tiles";
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -390,9 +389,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   //   }
   // };
 
-  const handleTileSelect = (tile: Tile) => {
-    handleSelectedTile(tile);
-  };
 
   const scrollDown = () => {
     if (autoScrollEnabled) {
@@ -458,27 +454,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     "Chatbot UI"
                   )}
                 </div>
-                <div className="flex gap-10">
-                  {TilesList.map((curr_tile, index) => (
-                    <div
-                      key={index}
-                      className={`flex flex-col w-full gap-5 justify-center text-black  rounded-lg border border-neutral-200 p-4 dark:text-gray-400 dark:border-neutral-600 hover:bg-[#595959] dark:hover:bg-[#202123] cursor-pointer ${
-                        selectedTile === curr_tile &&
-                        "bg-[#595959] dark:bg-[#202123]"
-                      }`}
-                      onClick={(e) => {
-                        handleTileSelect(curr_tile);
-                      }}
-                    >
-                      <div className="flex justify-center">
-                        {curr_tile.icon}
-                      </div>
-                      <div className="text-center ">
-                        {curr_tile.displayName}
-                      </div>
-                    </div>
-                  ))}
+                <div className="flex w-full">
+                  <Tiles/>
                 </div>
+
                 {selectedTile?.additionalInputs && (
                   <div className="w-full justify-center rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
                     <AdditionalInputs inputs={selectedTile?.additionalInputs} handleSend={handleSend} />
