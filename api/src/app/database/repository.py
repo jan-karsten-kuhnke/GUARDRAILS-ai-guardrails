@@ -11,7 +11,7 @@ import logging
 
 from database.postgres import session , engine
 
-class SqlAudits:
+class Persistence:
     
     def insert_analysis_audits(text, user_email, flagged_text, analysed_entity, criticality):
         try:
@@ -74,8 +74,6 @@ class SqlAudits:
                     folder_id=1)
                 session.add(doc)
                 session.commit()
-            ingestion_service = IngestionService()
-            ingestion_service.ingest_files(location)
             return jsonify({"message": "success"}), 200
         except Exception as e: 
             session.rollback() 

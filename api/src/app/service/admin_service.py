@@ -1,4 +1,4 @@
-from database.query import SqlAudits
+from database.repository import Persistence
 from repo.db import conversation_context
 from globals import *
 from service.chat_service import chat_service
@@ -6,25 +6,24 @@ from service.chat_service import chat_service
 pg_schema = Globals.pg_schema
 class admin_service:
 
-    #SqlAudits
     def get_org():
-        return SqlAudits.get_org()
+        return Persistence.get_org()
     
     def save_org(request_data):
-        return SqlAudits.save_org(request_data)
+        return Persistence.save_org(request_data)
     
     def get_all_list(Entity, sort, range_, filter_):
-        return SqlAudits.get_list_query(Entity, sort, range_, filter_)
+        return Persistence.get_list_query(Entity, sort, range_, filter_)
     
 
     def get_one_data(Entity, id):
-        return SqlAudits.get_one_query(Entity, id)
+        return Persistence.get_one_query(Entity, id)
     
     def update_data(Entity, id, data):
-        return SqlAudits.update_query(Entity, id, data)
+        return Persistence.update_query(Entity, id, data)
     
     def insert_data(Entity, data):
-        return SqlAudits.create_query(Entity, data)
+        return Persistence.create_query(Entity, data)
 
     #mongodb
     def get_conversation_list(sort, range_, filter_):

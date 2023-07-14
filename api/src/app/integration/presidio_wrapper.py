@@ -1,6 +1,6 @@
 from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
-from database.query import SqlAudits
+from database.repository import Persistence
 from globals import *
 from database.models import  PredefinedRuleEntity
 
@@ -18,7 +18,7 @@ class presidio_wrapper:
         # and other PII recognizers
         
         # Get all enabled entities from predefined_rules table
-        enabled_entities=SqlAudits.get_all_enabled_entities(PredefinedRuleEntity,'presidio')
+        enabled_entities=Persistence.get_all_enabled_entities(PredefinedRuleEntity,'presidio')
         
         # Call analyzer to get results
         results = analyzer.analyze(

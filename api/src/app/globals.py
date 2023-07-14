@@ -2,10 +2,9 @@ import os
 import json
 import logging
 from langchain.embeddings import HuggingFaceEmbeddings
-from google.cloud import storage
 
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "api/keys/vertexai.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "keys/vertexai.json"
 os.environ["TOKENIZERS_PARALLELISM"]="false"
 
 

@@ -2,7 +2,7 @@ import os
 import logging
 from oidc import get_current_user_email
 from repo.db import conversation_context
-from database.query import SqlAudits
+from database.repository import Persistence
 from integration.openai_wrapper import openai_wrapper
 from integration.presidio_wrapper import presidio_wrapper
 from presidio_anonymizer.entities import RecognizerResult
@@ -17,6 +17,7 @@ import requests
 from executors.SummarizeBriefChain import SummarizeBriefChain
 from executors.ConversationalChain import ConversationalChain
 from executors.QaRetrievalChain import QaRetrievalChain
+from executors.SqlChain import SqlChain
 
 override_message = "You chose to Override the warning, proceeding to Open AI."
 nsfw_warning = "Warning From Guardrails: We've detected that your message contains NSFW content. Please refrain from posting such content in a work environment, You can choose to override this warning if you wish to continue the conversation, or you can get your manager's approval before continuing."
@@ -93,8 +94,8 @@ class chat_service:
             conversation_id = None
             manage_conversation_context = False
            
-            if(task == "conversation" or task == "qa-retreival"):
-                isOverride = True
+            # if(task == "conversation" or task == "qa-retreival"):
+            isOverride = True
             
             if('conversation_id'  in data and  data['conversation_id']):
                 conversation_id = data['conversation_id']
@@ -147,6 +148,15 @@ class chat_service:
                     try:
                         logging.info("calling qa retrieval executor")
                         executor=QaRetrievalChain()
+                        res = executor.execute(prompt,is_private,history)
+
+                    except Exception as e:
+                        yield("Sorry. Some error occured. Please try again.")
+                        logging.error("error: "+str(e))
+                elif(task == "qa-sql" ):
+                    try:
+                        logging.info("calling qa sql executor")
+                        executor=SqlChain()
                         res = executor.execute(prompt,is_private,history)
 
                     except Exception as e:
@@ -266,7 +276,7 @@ class chat_service:
         conversation_context.update_conversation(conversation_id, conversation)
 
     def save_chat_log(user_email, text):
-        SqlAudits.insert_chat_log(user_email, text)
+        Persistence.insert_chat_log(user_email, text)
 
     def get_conversations(user_email,flag = False):
         cursor = conversation_context.get_conversations_by_user_email(user_email,flag)

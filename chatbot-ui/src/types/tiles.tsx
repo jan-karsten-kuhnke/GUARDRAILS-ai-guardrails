@@ -1,4 +1,4 @@
-import { IconBolt, IconBook, IconNotebook } from '@tabler/icons-react'; 
+import { IconBolt, IconBook, IconNotebook,IconDatabase } from '@tabler/icons-react'; 
 
 export interface Tile {
     displayName: string;
@@ -19,9 +19,14 @@ export const TilesList: Tile[] = [
     task: 'qa-retreival'
   },
   {
-    displayName: 'Summarize Brief',
+    displayName: 'Summarize Real Estate Development Brief',
     icon: <IconNotebook size={80} />,
     task: 'summarize-brief',
     additionalInputs: ['fileUpload']
+  },
+  {
+    displayName: 'Q&A on SQL Database.',
+    icon: <IconDatabase size={80} />,
+    task: 'qa-sql'
   }
 ];
