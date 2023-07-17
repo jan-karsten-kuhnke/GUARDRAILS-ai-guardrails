@@ -1,6 +1,7 @@
 import json
 import random
 from langchain import OpenAI
+from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationChain
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.llms import  VertexAI
@@ -22,7 +23,7 @@ class ConversationalChain:
     callbacks = [StreamingStdOutCallbackHandler()]
 
     if Globals.public_model_type == "OpenAI":
-        public_llm = OpenAI(callbacks=callbacks, verbose=False, temperature=temp,max_tokens=4000)
+        public_llm = ChatOpenAI(callbacks=callbacks, verbose=False, temperature=temp,max_tokens=1000)
     elif Globals.public_model_type == "VertexAI":
         public_llm = VertexAI(max_output_tokens=1000)
     private_llm = public_llm

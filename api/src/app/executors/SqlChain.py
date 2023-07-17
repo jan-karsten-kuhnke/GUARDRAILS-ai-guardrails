@@ -24,7 +24,7 @@ class SqlChain:
             verbose=False,
             temperature=temp,
             model_name="gpt-3.5-turbo-0613",
-            max_tokens=15500,
+            max_tokens=15000,
         )
     elif Globals.public_model_type == "VertexAI":
         public_llm = VertexAI(max_output_tokens=1000, verbose=False)

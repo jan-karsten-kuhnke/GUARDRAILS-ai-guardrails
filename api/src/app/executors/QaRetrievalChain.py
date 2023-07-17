@@ -1,6 +1,7 @@
 import json
 import random
 from langchain import OpenAI
+from langchain.chat_models import ChatOpenAI
 from langchain.chains import ConversationalRetrievalChain
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.vectorstores import Chroma
@@ -23,7 +24,7 @@ class QaRetrievalChain:
     callbacks = [StreamingStdOutCallbackHandler()]
 
     if Globals.public_model_type == "OpenAI":
-        public_llm = OpenAI(callbacks=callbacks, verbose=False, temperature=temp,max_tokens=2000)
+        public_llm = ChatOpenAI(callbacks=callbacks, verbose=False, temperature=temp,max_tokens=1000)
     elif Globals.public_model_type == "VertexAI":
         public_llm = VertexAI(max_output_tokens=1000)
     private_llm = public_llm
