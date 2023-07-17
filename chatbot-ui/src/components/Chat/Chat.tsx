@@ -454,7 +454,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     "Chatbot UI"
                   )}
                 </div>
-                <div className="flex w-full">
+                <div className="flex w-full w-full justify-center rounded-lg border border-neutral-200 py-2 dark:border-neutral-600">
                   <Tiles/>
                 </div>
 

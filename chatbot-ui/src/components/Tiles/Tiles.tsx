@@ -1,5 +1,4 @@
 import React, { FC, useState, useRef } from "react";
-import gsap from "gsap";
 import { Tile, TilesList } from "../../types/tiles";
 import HomeContext from "@/pages/home/home.context";
 import { useContext } from "react";
@@ -56,10 +55,10 @@ const Tiles: FC = () => {
 
   return (
     <>
-      <div className="w-16 flex align-center">
+      <div className="flex align-center">
         {scrollX !== 0 && (
           <button
-            className="prev m-1 hover:scale-125 transition-transform duration-300 ease-in-out"
+            className="prev m-1 hover:scale-125 transition-transform duration-300 ease-in-out text-black dark:text-gray-300"
             onClick={() => slide(-300)}
           >
             <IconChevronLeft size={30} />
@@ -76,8 +75,9 @@ const Tiles: FC = () => {
             key={index}
             className={`flex flex-col gap-5 justify-center text-black  rounded-lg border border-neutral-200 p-4 dark:text-gray-400 dark:border-neutral-600 hover:bg-[#595959] dark:hover:bg-[#202123] cursor-pointer ${
               selectedTile === curr_tile && "bg-[#595959] dark:bg-[#202123]"
-            }`}
+            } ${!curr_tile.enabled && "opacity-30"}`}
             onClick={(e) => {
+              if(!curr_tile.enabled) return;
               handleTileSelect(curr_tile);
             }}
           >
@@ -86,10 +86,10 @@ const Tiles: FC = () => {
           </div>
         ))}
       </div>
-      <div className="w-16 flex align-center">
+      <div className="flex align-center">
         {!scrolEnd && (
           <button
-            className="next m-1 hover:scale-125 transition-transform duration-300 ease-in-out"
+            className="next m-1 hover:scale-125 transition-transform duration-300 ease-in-out text-black dark:text-gray-300"
             onClick={() => slide(+300)}
           >
             <IconChevronRight size={30} />
