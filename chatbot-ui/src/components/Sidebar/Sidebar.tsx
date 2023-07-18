@@ -1,23 +1,24 @@
-import { IconFolderPlus, IconMistOff, IconPlus } from '@tabler/icons-react';
-import { ReactNode } from 'react';
+import { IconFolderPlus, IconMistOff, IconPlus } from "@tabler/icons-react";
+import { ReactNode } from "react";
+import {theme} from "../../Styles/styles";
 
 import {
   CloseSidebarButton,
   OpenSidebarButton,
-} from './components/OpenCloseButton';
+} from "./components/OpenCloseButton";
 
-import Search from '../Search';
+import Search from "../Search";
 
 interface Props<T> {
   isOpen: boolean;
   addItemButtonTitle: string;
-  side: 'left' | 'right';
+  side: "left" | "right";
   items: T[];
   itemComponent: ReactNode;
   folderComponent: ReactNode;
   footerComponent?: ReactNode;
   searchTerm: string;
-  folderDisplayName:  string;
+  folderDisplayName: string;
   isArchiveView: boolean;
   itemDisplayName: string;
   handleSearchTerm: (searchTerm: string) => void;
@@ -45,74 +46,63 @@ const Sidebar = <T,>({
   handleCreateFolder,
   handleDrop,
 }: Props<T>) => {
-
   const allowDrop = (e: any) => {
     e.preventDefault();
   };
 
   const highlightDrop = (e: any) => {
-    e.target.style.background = '#343541';
+    e.target.style.background = "#343541";
   };
 
   const removeHighlight = (e: any) => {
-    e.target.style.background = 'none';
+    e.target.style.background = "none";
   };
 
   return isOpen ? (
     <div>
       <div
-        className={`fixed top-0 ${side}-0 z-40 flex h-full w-[260px] flex-none flex-col space-y-2 bg-[#202123] p-2 text-[14px] transition-all sm:relative sm:top-0`}
+        className={` ${theme.sideBarTheme} fixed top-0 ${side}-0 z-40 flex h-full w-[260px] flex-none flex-col space-y-2 p-2  text-[14px] transition-all sm:relative sm:top-0`}
       >
-       
         <div className="flex items-center">
-          { !isArhiveView && itemDisplayName !== 'Archive' ?  ( 
+          {!isArhiveView && itemDisplayName !== "Archive" ? (
             <>
-          <button
-            className="text-sidebar flex w-[190px] flex-shrink-0 cursor-pointer select-none items-center gap-3 rounded-md border border-white/20 p-3 text-white transition-colors duration-200 hover:bg-gray-500/10"
-            onClick={() => {
-              handleCreateItem();
-              handleSearchTerm('');
-            }}
-          >
-            <IconPlus size={16} />
-            {addItemButtonTitle}
-          </button>
+              <button
+                className={`${theme.primaryButtonTheme} text-sidebar flex w-[190px] flex-shrink-0 cursor-pointer select-none items-center gap-3 rounded-md border border-white/20 p-3  transition-colors duration-200 `}
+                onClick={() => {
+                  handleCreateItem();
+                  handleSearchTerm("");
+                }}
+              >
+                <IconPlus size={16} />
+                {addItemButtonTitle}
+              </button>
 
-          <button
-            className="ml-2 flex flex-shrink-0 cursor-pointer items-center gap-3 rounded-md border border-white/20 p-3 text-sm text-white transition-colors duration-200 hover:bg-gray-500/10"
-            onClick={handleCreateFolder}
-          >
-            <IconFolderPlus size={16} />
-          </button>
-          </> ) : 
-           <div className="flex items-center mt-2">
-           Archives
-          </div>
-           }
-        </div> 
-        
-       
+              <button
+                className={`${ theme.secondaryButtonTheme} ml-2 flex flex-shrink-0 cursor-pointer items-center gap-3  rounded-md border border-white/20 p-3 text-sm transition-colors duration-200 `}
+                onClick={handleCreateFolder}
+              >
+                <IconFolderPlus size={16} />
+              </button>
+            </>
+          ) : (
+            <div className="flex items-center mt-2">Archives</div>
+          )}
+        </div>
+
         <Search
-          placeholder={('Search...') || ''}
+          placeholder={"Search..." || ""}
           searchTerm={searchTerm}
           onSearch={handleSearchTerm}
         />
 
         <div className="flex-grow overflow-auto">
-         
-        <div className="flex items-center">
-          {folderDisplayName}
-         </div>
-            <div className="flex border-b border-white/20 pb-2">
-              
-              {folderComponent}
-            </div>
-          
-          <div className="flex items-center mt-2">
-          {itemDisplayName}
-         </div>
+          <div className="flex items-center">{folderDisplayName}</div>
+          <div className={`flex ${theme.dividerBottomTheme} pb-2`}>
+            {folderComponent}
+          </div>
+
+          <div className="flex items-center mt-2">{itemDisplayName}</div>
           {items?.length > 0 ? (
-            
             <div
               className="pt-2"
               onDrop={handleDrop}
@@ -123,10 +113,10 @@ const Sidebar = <T,>({
               {itemComponent}
             </div>
           ) : (
-            <div className="mt-8 select-none text-center text-white opacity-50">
+            <div className="mt-8 select-none text-center opacity-50">
               <IconMistOff className="mx-auto mb-3" />
               <span className="text-[14px] leading-normal">
-                {(`No ${itemDisplayName}`)}
+                {`No ${itemDisplayName}`}
               </span>
             </div>
           )}

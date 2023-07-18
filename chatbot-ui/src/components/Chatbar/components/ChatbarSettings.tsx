@@ -7,7 +7,7 @@ import {
   IconFileDescription,
 } from "@tabler/icons-react";
 import { useContext, useState } from "react";
-
+import { theme } from "@/Styles/styles";
 import HomeContext from "@/pages/home/home.context";
 
 import { SettingDialog } from "@/components/Settings/SettingDialog";
@@ -47,7 +47,7 @@ export const ChatbarSettings = () => {
   };
 
   return (
-    <div className="flex flex-col items-center space-y-1 border-t border-white/20 pt-1 text-sm">
+    <div className={`flex flex-col items-center space-y-1 ${theme.dividerTopTheme} pt-1 text-sm`}>
       {conversations.length > 0 && !isArchiveView ? (
         <ClearConversations onClearConversations={handleClearConversations} />
       ) : null}

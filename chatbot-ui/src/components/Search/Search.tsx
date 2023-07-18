@@ -1,6 +1,6 @@
 import { IconX } from '@tabler/icons-react';
 import { FC } from 'react';
-
+import {theme} from "../../Styles/styles";
 
 interface Props {
   placeholder: string;
@@ -20,7 +20,7 @@ const Search: FC<Props> = ({ placeholder, searchTerm, onSearch }) => {
   return (
     <div className="relative flex items-center">
       <input
-        className="w-full flex-1 rounded-md border border-neutral-600 bg-[#202123] px-4 py-3 pr-10 text-[14px] leading-3 text-white"
+        className={`${theme.searchBoxTheme} w-full flex-1 rounded-md border  px-4 py-3 pr-10 text-[14px] leading-3 `}
         type="text"
         placeholder={(placeholder) || ''}
         value={searchTerm}
