@@ -45,3 +45,10 @@ def upsert_prompts():
     user_email = get_current_user_email()
     userdata_service.upsert_prompts(data,user_email)
     return {"result":"success"}
+
+
+@userdataendpoints.route('/tiles', methods=['GET'])
+@oidc.accept_token(require_token=True)
+def get_tiles():
+    user_email = get_current_user_email()
+    return userdata_service.get_tiles(user_email)
