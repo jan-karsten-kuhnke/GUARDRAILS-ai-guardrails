@@ -1,16 +1,17 @@
-import React, { FC, useState, useRef } from "react";
-import { Tile, TilesList } from "../../types/tiles";
+import React, { FC, useState, useRef, useEffect } from "react";
+import { Tile } from "../../types/tiles";
 import HomeContext from "@/pages/home/home.context";
 import { useContext } from "react";
 import "./styles.scss";
-
+import { getTiles } from "@/services";
 import { IconChevronRight, IconChevronLeft } from "@tabler/icons-react";
+import * as Icons from '@tabler/icons-react'; 
 
 const Tiles: FC = () => {
   const {
-    state: { selectedTile },
+    state: { selectedTile,tiles },
     handleSelectedTile,
-    dispatch: homeDispatch,
+    dispatch
   } = useContext(HomeContext);
 
   const scrl = useRef<HTMLDivElement>(null);
@@ -53,6 +54,19 @@ const Tiles: FC = () => {
     handleSelectedTile(tile);
   };
 
+  useEffect(() => {
+  getTiles().then((res) => {
+    if(res && res.data && res.data) dispatch({ field: "tiles", value: res.data });
+  });
+  },[])
+
+  const getIcon = (val:string) => {
+    type ObjectKey = keyof typeof Icons;
+    const myVar = val as ObjectKey;
+    const Icon   = Icons[myVar];
+    return React.createElement(Icon,{size:50})
+  }
+
   return (
     <>
       <div className="flex align-center">
@@ -70,19 +84,19 @@ const Tiles: FC = () => {
         onScroll={scrollCheck}
         className="flex gap-5 overflow-x-scroll p-3 scroll-smooth hideScrollBar"
       >
-        {TilesList.map((curr_tile, index) => (
+        {tiles.map((curr_tile, index) => (
           <div
             key={index}
             className={`flex flex-col gap-5 justify-center text-black  rounded-lg border border-neutral-200 p-4 dark:text-gray-400 dark:border-neutral-600 hover:bg-[#595959] dark:hover:bg-[#202123] cursor-pointer ${
               selectedTile === curr_tile && "bg-[#595959] dark:bg-[#202123]"
-            } ${!curr_tile.enabled && "opacity-30"}`}
+            } ${!curr_tile.is_active && "opacity-30"}`}
             onClick={(e) => {
-              if(!curr_tile.enabled) return;
+              if(!curr_tile.is_active) return;
               handleTileSelect(curr_tile);
             }}
           >
-            <div className="flex justify-center">{curr_tile.icon}</div>
-            <div className="text-center ">{curr_tile.displayName}</div>
+            <div className="flex justify-center">{getIcon(curr_tile.icon)}</div>
+            <div className="text-center ">{curr_tile.title}</div>
           </div>
         ))}
       </div>

@@ -2,19 +2,19 @@ import { FC, useContext, ChangeEvent } from "react";
 import HomeContext from "@/pages/home/home.context";
 
 import PublicPrivateSwitch from "@/components/PublicPrivateSwitch";
-import { Tile, TilesList } from "@/types/tiles";
+import { Tile } from "@/types/tiles";
 
 interface Props {}
 
 export const PromptbarSettings: FC<Props> = () => {
   const {
-    state: { selectedConversation, selectedTile },
+    state: { selectedConversation, selectedTile,tiles },
     handleSelectedTile,
   } = useContext(HomeContext);
 
   const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     handleSelectedTile(
-      TilesList.find((tile) => tile.task == event.target.value) as Tile
+      tiles.find((tile) => tile.code == event.target.value) as Tile
     );
   };
 
@@ -30,14 +30,13 @@ export const PromptbarSettings: FC<Props> = () => {
           </label>
           <select
             id="tilelist"
-            value={selectedTile.task}
+            value={selectedTile.code}
             className="bg-[#343541]  text-white border border-gray-600 placeholder-gray-400 text-sm rounded-lg focus:ring-white-500 focus:border-white-500 block w-full p-2.5"
             onChange={handleChange}
           >
-            {TilesList.map((tile, index) => (
-                <option value={tile.task} key={index} className="py-2">{tile.displayName}
+            {tiles.map((tile, index) => (
+                <option value={tile.code} key={index} className="py-2">{tile.title}
                 </option>
-           
               ))}
           </select>
           <PublicPrivateSwitch size={25} />
