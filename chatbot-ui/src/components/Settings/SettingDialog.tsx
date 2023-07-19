@@ -42,7 +42,7 @@ export const SettingDialog: FC<Props> = ({ open, onClose }) => {
   }, [onClose]);
 
   const handleSave = () => {
-    homeDispatch({ field: 'lightMode', value: state.theme });
+    // homeDispatch({ field: 'lightMode', value: state.theme });
     saveSettings(state);
   };
 

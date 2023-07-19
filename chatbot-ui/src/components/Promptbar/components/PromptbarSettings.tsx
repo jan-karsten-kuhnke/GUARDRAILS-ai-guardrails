@@ -8,7 +8,7 @@ interface Props {}
 
 export const PromptbarSettings: FC<Props> = () => {
   const {
-    state: { selectedConversation, selectedTile },
+    state: { selectedConversation, selectedTile, theme },
     handleSelectedTile,
   } = useContext(HomeContext);
 
@@ -21,17 +21,17 @@ export const PromptbarSettings: FC<Props> = () => {
   return (
     <>
       {selectedConversation?.messages.length != 0 ? (
-        <div className="border-t border-white/40 pt-6">
+        <div className={`pt-6 ${theme.dividerTopTheme}`}>
           <label
             htmlFor="tilelist"
-            className="block mb-2 text-sm font-medium text-white"
+            className={`block mb-2 text-sm font-medium ${theme.textColor}`}
           >
             Select Task
           </label>
           <select
             id="tilelist"
             value={selectedTile.task}
-            className="bg-[#343541]  text-white border border-gray-600 placeholder-gray-400 text-sm rounded-lg focus:ring-white-500 focus:border-white-500 block w-full p-2.5"
+            className={`${theme.taskSelectTheme} outline-none text-sm rounded-lg block w-full p-2.5`}
             onChange={handleChange}
           >
             {TilesList.map((tile, index) => (

@@ -8,7 +8,7 @@ import { IconChevronRight, IconChevronLeft } from "@tabler/icons-react";
 
 const Tiles: FC = () => {
   const {
-    state: { selectedTile },
+    state: { selectedTile, theme },
     handleSelectedTile,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
@@ -58,7 +58,7 @@ const Tiles: FC = () => {
       <div className="flex align-center">
         {scrollX !== 0 && (
           <button
-            className="prev m-1 hover:scale-125 transition-transform duration-300 ease-in-out text-black dark:text-gray-300"
+            className={`prev m-1 hover:scale-125 transition-transform duration-300 ease-in-out ${theme.textColorSecondary}`}
             onClick={() => slide(-300)}
           >
             <IconChevronLeft size={30} />
@@ -73,8 +73,8 @@ const Tiles: FC = () => {
         {TilesList.map((curr_tile, index) => (
           <div
             key={index}
-            className={`flex flex-col gap-5 justify-center text-black  rounded-lg border border-neutral-200 p-4 dark:text-gray-400 dark:border-neutral-600 hover:bg-[#595959] dark:hover:bg-[#202123] cursor-pointer ${
-              selectedTile === curr_tile && "bg-[#595959] dark:bg-[#202123]"
+            className={`flex flex-col gap-5 justify-center  rounded-lg  p-4  cursor-pointer ${theme.tilesHoverTheme} ${theme.textColorSecondary} ${theme.chatItemsBorder} ${
+              selectedTile === curr_tile && theme.tileSelectedTheme
             } ${!curr_tile.enabled && "opacity-30"}`}
             onClick={(e) => {
               if(!curr_tile.enabled) return;
@@ -89,7 +89,7 @@ const Tiles: FC = () => {
       <div className="flex align-center">
         {!scrolEnd && (
           <button
-            className="next m-1 hover:scale-125 transition-transform duration-300 ease-in-out text-black dark:text-gray-300"
+            className={`next m-1 hover:scale-125 transition-transform duration-300 ease-in-out ${theme.textColorSecondary}`}
             onClick={() => slide(+300)}
           >
             <IconChevronRight size={30} />

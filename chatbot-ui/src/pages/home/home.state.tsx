@@ -11,7 +11,7 @@ export interface HomeInitialState {
   apiKey: string;
   pluginKeys: PluginKey[];
   loading: boolean;
-  lightMode: 'light' | 'dark';
+  theme: any;
   messageIsStreaming: boolean;
   modelError: ErrorMessage | null;
   models: OpenAIModel[];
@@ -39,7 +39,7 @@ export const initialState: HomeInitialState = {
   apiKey: '',
   loading: false,
   pluginKeys: [],
-  lightMode: theme.lightMode as 'light' | 'dark',
+  theme: theme,
   messageIsStreaming: false,
   modelError: null,
   models: [],
