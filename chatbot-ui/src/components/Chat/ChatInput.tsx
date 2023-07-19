@@ -53,7 +53,7 @@ export const ChatInput = ({
 
 }: Props) => {
   const {
-    state: { selectedConversation, messageIsStreaming, prompts },
+    state: { selectedConversation, messageIsStreaming, prompts,theme },
 
     dispatch: homeDispatch,
   } = useContext(HomeContext);
@@ -318,7 +318,7 @@ export const ChatInput = ({
   }, []);
 
   return (
-    <div className="absolute bottom-0 left-0 w-full border-transparent bg-gradient-to-b from-transparent via-white to-white pt-6 dark:border-white/20 dark:via-[#343541] dark:to-[#343541] md:pt-2">
+    <div className={`absolute bottom-0 left-0 w-full pt-6 md:pt-2  ${theme.chatInputTheme}`}>
       <div className="stretch mx-2 mt-4 flex flex-row gap-3 last:mb-2 md:mx-4 md:mt-[52px] md:last:mb-6 lg:mx-auto lg:max-w-3xl">
         {/* {messageIsStreaming && (
           <button
@@ -340,7 +340,7 @@ export const ChatInput = ({
             </button>
           )} */}
 
-        <div className="relative mx-2 flex w-full flex-grow flex-col rounded-md border border-black/10 bg-white shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:border-gray-900/50 dark:bg-[#40414F] dark:text-white dark:shadow-[0_0_15px_rgba(0,0,0,0.10)] sm:mx-4">
+        <div className={`relative mx-2 flex w-full flex-grow flex-col rounded-md  sm:mx-4`}>
           {/* <button
             className="absolute left-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
             onClick={() => toggleShowPluginSelect() }
@@ -375,7 +375,7 @@ export const ChatInput = ({
 
           <textarea
             ref={textareaRef} disabled={selectedConversation?.archived}
-            className="m-0 w-full resize-none border-0 bg-transparent p-0 py-2 pr-8 pl-10 text-black dark:bg-transparent dark:text-white md:py-3 md:pl-10"
+            className={`m-0 w-full resize-none  p-0 py-2 pr-8 pl-10 md:py-3 md:pl-10 ${theme.chatTextAreaTheme}`}
             style={{
               resize: "none",
               bottom: `${textareaRef?.current?.scrollHeight}px`,
@@ -397,11 +397,11 @@ export const ChatInput = ({
           />
 
           <button
-            className="absolute right-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
+            className={`absolute right-2 top-2 rounded-sm p-1 ${theme.chatSendButtonTheme}`}
             onClick={handleSend}
           >
             {messageIsStreaming ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-t-2 border-neutral-800 opacity-60 dark:border-neutral-100"></div>
+              <div className={`h-4 w-4 animate-spin rounded-full border-t-2 ${theme.chatLoadingTheme}`}></div>
             ) : (
               <IconSend size={18} />
             )}
@@ -410,7 +410,7 @@ export const ChatInput = ({
           {showScrollDownButton && (
             <div className="absolute bottom-12 right-0 lg:bottom-0 lg:-right-10">
               <button
-                className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-300 text-gray-800 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-neutral-200"
+                className={`flex h-7 w-7 items-center justify-center rounded-full ${theme.chatScrollDownButtonTheme}}`}
                 onClick={onScrollDownClick}
               >
                 <IconArrowDown size={18} />
@@ -440,7 +440,7 @@ export const ChatInput = ({
           )}
         </div>
       </div>
-      <div className="px-3 pt-2 pb-3 text-center text-[12px] text-black/50 dark:text-white/50 md:px-4 md:pt-3 md:pb-6">
+      <div className={`px-3 pt-2 pb-3 text-center text-[12px] md:px-4 md:pt-3 md:pb-6 ${theme.textColorSecondary}`}>
         {applicationName}
         <Chip label="Beta" variant="outlined" size="small" style={{ borderColor: '#DA9B14', color: '#DA9B14' ,width:'39px',height:'15px',fontSize:'10px', margin:'2px'}} />
         lets your organisation use public LLM models in a safe and secure way, ensuring your corporate confidential information remains protected.

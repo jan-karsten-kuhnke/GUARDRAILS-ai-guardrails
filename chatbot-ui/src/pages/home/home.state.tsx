@@ -5,7 +5,7 @@ import { OpenAIModel, OpenAIModelID } from '@/types/openai';
 import { PluginKey } from '@/types/plugin';
 import { Prompt } from '@/types/prompt';
 import { Tile, TilesList } from '@/types/tiles';
-import { theme } from '@/Styles/styles';
+import {theme} from '@/Styles/styles';
 
 export interface HomeInitialState {
   apiKey: string;

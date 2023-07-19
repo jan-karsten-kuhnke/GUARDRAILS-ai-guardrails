@@ -467,7 +467,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 <div className={`w-full justify-center rounded-lg p-4 ${theme.chatItemsBorder}`}>
                   <PublicPrivateSwitch size={40} />
                 </div>
-
+{/* 
                 {models.length > 0 && (
                   <div className={`flex h-full flex-col space-y-4 rounded-lg p-4 ${theme.chatItemsBorder}`}>
                     <ModelSelect />
@@ -493,7 +493,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       }
                     />
                   </div>
-                )}
+                )} */}
               </div>
             </>
           ) : (

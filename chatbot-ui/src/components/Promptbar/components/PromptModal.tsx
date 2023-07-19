@@ -2,6 +2,8 @@ import { FC, KeyboardEvent, useEffect, useRef, useState } from 'react';
 
 
 import { Prompt } from '@/types/prompt';
+import HomeContext from '@/pages/home/home.context';
+import { useContext } from 'react';
 
 interface Props {
   prompt: Prompt;
@@ -10,6 +12,8 @@ interface Props {
 }
 
 export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
+  const { state : { theme } } = useContext(HomeContext);
+
   const [name, setName] = useState(prompt.name);
   const [description, setDescription] = useState(prompt.description);
   const [content, setContent] = useState(prompt.content);
@@ -49,7 +53,7 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+      className="fixed inset-0 flex items-center justify-center bg-opacity-50 z-50"
       onKeyDown={handleEnter}
     >
       <div className="fixed inset-0 z-10 overflow-hidden">
@@ -61,37 +65,37 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
 
           <div
             ref={modalRef}
-            className="dark:border-netural-400 inline-block max-h-[400px] transform overflow-y-auto rounded-lg border border-gray-300 bg-white px-4 pt-5 pb-4 text-left align-bottom shadow-xl transition-all dark:bg-[#202123] sm:my-8 sm:max-h-[600px] sm:w-full sm:max-w-lg sm:p-6 sm:align-middle"
+            className={`${theme.modalDialogTheme} inline-block max-h-[400px] transform overflow-y-auto rounded-lg  px-4 pt-5 pb-4 text-left align-bottom shadow-xl transition-all  sm:my-8 sm:max-h-[600px] sm:w-full sm:max-w-lg sm:p-6 sm:align-middle`}
             role="dialog"
           >
-            <div className="text-sm font-bold text-black dark:text-neutral-200">
+            <div className={` ${theme.textColor} text-sm font-bold`}>
               {('Name')}
             </div>
             <input
               ref={nameInputRef}
-              className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
+              className={`${theme.chatTextAreaTheme} mt-2 w-full rounded-lg  px-4 py-2 text-neutral-900  `}
               placeholder={('A name for your prompt.') || ''}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
 
-            <div className="mt-6 text-sm font-bold text-black dark:text-neutral-200">
+            <div className={` ${theme.textColor} mt-6 text-sm font-bold`}>
               {('Description')}
             </div>
             <textarea
-              className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
+              className={`${theme.chatTextAreaTheme} mt-2 w-full rounded-lg  px-4 py-2 text-neutral-900  `}
               style={{ resize: 'none' }}
               placeholder={('A description for your prompt.') || ''}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-            />
+            /> 
 
-            <div className="mt-6 text-sm font-bold text-black dark:text-neutral-200">
+            <div className={` ${theme.textColor} mt-6 text-sm font-bold `}>
               {('Prompt')}
             </div>
             <textarea
-              className="mt-2 w-full rounded-lg border border-neutral-500 px-4 py-2 text-neutral-900 shadow focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-[#40414F] dark:text-neutral-100"
+              className={`${theme.chatTextAreaTheme} mt-2 w-full rounded-lg  px-4 py-2 text-neutral-900  `}
               style={{ resize: 'none' }}
               placeholder={
                   'Prompt content. Use {{}} to denote a variable. Ex: {{name}} is a {{adjective}} {{noun}}'
@@ -103,7 +107,7 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
 
             <button
               type="button"
-              className="w-full px-4 py-2 mt-6 border rounded-lg shadow border-neutral-500 text-neutral-900 hover:bg-neutral-100 focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-300"
+              className={`w-full px-4 py-2 mt-6 border rounded-lg ${theme.primaryButtonTheme}`}
               onClick={() => {
                 const updatedPrompt = {
                   ...prompt,

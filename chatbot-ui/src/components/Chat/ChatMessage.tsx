@@ -54,6 +54,7 @@ export const ChatMessage: FC<Props> = memo(
         selectedConversation,
         conversations,
         currentMessage,
+        theme,
         messageIsStreaming,
       },
       dispatch: homeDispatch,
@@ -174,8 +175,8 @@ export const ChatMessage: FC<Props> = memo(
       <div
         className={`group md:px-4 ${
           message.role === "assistant" || message.role === "guardrails"
-            ? "border-b border-black/10 bg-gray-50 text-gray-800 dark:border-gray-900/50 dark:bg-[#444654] dark:text-gray-100"
-            : "border-b border-black/10 bg-white text-gray-800 dark:border-gray-900/50 dark:bg-[#343541] dark:text-gray-100"
+            ? `border-b border-black/10  ${theme.chatMessageTheme}`
+            : `border-b border-black/10 ${theme.chatMessageThemeUser} `
         }`}
         style={{ overflowWrap: "anywhere" }}
       >
@@ -233,7 +234,7 @@ export const ChatMessage: FC<Props> = memo(
                     </div>
                   </div>
                 ) : (
-                  <div className="prose whitespace-pre-wrap dark:prose-invert flex-1">
+                  <div className={`prose whitespace-pre-wrap dark:prose-invert flex-1 ${theme.textColor}`}>
                     {message.content}
                   </div>
                 )}
@@ -257,14 +258,14 @@ export const ChatMessage: FC<Props> = memo(
               </div>
             ) : message.role === "guardrails" ? (
               <>
-                <div className="prose whitespace-pre-wrap dark:prose-invert flex-1">
+                <div className={`prose whitespace-pre-wrap dark:prose-invert flex-1 ${theme.textColor}`}>
                   {message.content}
                   {message.userActionRequired &&
                     messageIndex ===
                       (selectedConversation?.messages.length ?? 0) - 1 && (
                       <div className="flex">
                         <button
-                          className=" mt-1 flex w-[190px] flex-shrink-0 cursor-pointer gap-3 rounded-md border border-white/100 p-3 text-white bg-white dark:bg-[#343541] py-2 px-4 hover:opacity-50  md:mb-0 md:mt-2 "
+                          className={` mt-1 flex w-[190px] flex-shrink-0 cursor-pointer gap-3 rounded-md  p-3  py-2 px-4  md:mb-0 md:mt-2 ${theme.primaryButtonTheme}`}
                           onClick={() => {
                             if (onOverRide) onOverRide(message);
                           }}
@@ -273,7 +274,7 @@ export const ChatMessage: FC<Props> = memo(
                         </button>
 
                         <button
-                          className=" mt-1 ml-3 flex w-[190px] flex-shrink-0 cursor-pointer gap-3 rounded-md border border-white/100 p-3 text-white bg-white dark:bg-[#343541] py-2 px-4 hover:opacity-50  md:mb-0 md:mt-2 "
+                          className={` mt-1 ml-3 flex w-[190px] flex-shrink-0 cursor-pointer gap-3 rounded-md p-3 py-2 px-4   md:mb-0 md:mt-2  ${theme.primaryButtonTheme}`}
                           onClick={() => {
                             if (onRequestApproval && selectedConversation)
                               onRequestApproval(selectedConversation?.id);
@@ -295,7 +296,7 @@ export const ChatMessage: FC<Props> = memo(
                         sx={{
                           borderBottom: 1,
                           borderColor: "divider",
-                          color: "white",
+                          color: theme.tabTheme.color,
                         }}
                       >
                         <TabList
@@ -307,16 +308,16 @@ export const ChatMessage: FC<Props> = memo(
                             "& .MuiTab-root": {
                               fontFamily: "'Inter', sans-serif", // Set the font-family
                               fontWeight: 600,
-                              color: "white",
+                              color: theme.tabTheme.color,
                               textTransform: "Capitalize",
                               paddingTop: "0px",
                               overflowY: "scroll",
                             },
                             "& .MuiButtonBase-root.Mui-selected": {
-                              color: "white",
+                              color: theme.tabTheme.color,
                             },
                             "& .MuiTabs-indicator": {
-                              backgroundColor: "white",
+                              backgroundColor:theme.tabTheme.color,
                             },
                           }}
                         >
@@ -361,9 +362,14 @@ export const ChatMessage: FC<Props> = memo(
 );
 
 export const AssistantMessage: FC<AssistantProps> = ({ content }) => {
+  const {
+    state: {
+      theme
+    },
+  } = useContext(HomeContext);
   return (
     <MemoizedReactMarkdown
-      className="prose dark:prose-invert flex-1"
+      className={`prose dark:prose-invert flex-1 ${theme.textColor}`}
       remarkPlugins={[remarkGfm, remarkMath]}
       rehypePlugins={[rehypeMathjax]}
       components={{
