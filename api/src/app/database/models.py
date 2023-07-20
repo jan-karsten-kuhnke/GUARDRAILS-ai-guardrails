@@ -154,6 +154,7 @@ class ChainEntity(Base):
     title = Column(String(100), nullable=False)
     icon = Column(String(100), nullable=False)
     code = Column(String(100), nullable=False)
+    group_code = Column(String(100), nullable=True)
     params = Column(JSONB, nullable=False)
     is_active = Column(Boolean, nullable=False)
 
@@ -164,6 +165,7 @@ class ChainEntity(Base):
             'title': self.title,
             'icon': self.icon,
             'code': self.code,
+            'group_code': self.group_code,
             'params': self.params,
             'is_active': self.is_active
         }

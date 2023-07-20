@@ -127,7 +127,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         const controller = new AbortController();
         let response: any;
 
-        if(selectedTile.code === "summarize-brief"){
+        if(selectedTile.code === "summarize-brief" || selectedTile.code === "extraction"){
           try {
             const payload = {
             conversation_id: selectedConversation.id,

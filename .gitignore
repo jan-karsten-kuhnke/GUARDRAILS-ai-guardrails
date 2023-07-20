@@ -220,3 +220,4 @@ api/src/app/client_secrets.json
 api/keys/vertexai.json
 keys/
 db/
+api/src/app/service/userdata_service.py

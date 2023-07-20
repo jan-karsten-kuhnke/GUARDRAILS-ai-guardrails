@@ -12,13 +12,10 @@ os.environ["TOKENIZERS_PARALLELISM"]="false"
 class Globals:
     mongo_uri = os.environ.get("MONGO_URI")
     mongo_db_name = os.environ.get("MONGO_DB_NAME")
-    pg_host = os.environ.get("PG_HOST")
-    pg_port = os.environ.get("PG_PORT")
-    pg_user = os.environ.get("PG_USER")
-    pg_password = os.environ.get("PG_PASSWORD")
-    pg_db = os.environ.get("PG_DB")
     pg_schema = os.environ.get("PG_SCHEMA")
     DB_URL =os.environ.get("DB_URI")
+    METRIC_DB_URL =os.environ.get("METRIC_DB_URI")
+    METRIC_SCHEMA = os.environ.get("METRIC_SCHEMA")
 
     
      #Embeddings 
