@@ -4,13 +4,14 @@ import { FolderInterface } from '@/types/folder';
 import { OpenAIModel, OpenAIModelID } from '@/types/openai';
 import { PluginKey } from '@/types/plugin';
 import { Prompt } from '@/types/prompt';
-import { Tile, TilesList } from '@/types/tiles';
+import { Tile } from '@/types/tiles';
+import {theme} from '@/styles';
 
 export interface HomeInitialState {
   apiKey: string;
   pluginKeys: PluginKey[];
   loading: boolean;
-  lightMode: 'light' | 'dark';
+  theme: any;
   messageIsStreaming: boolean;
   modelError: ErrorMessage | null;
   models: OpenAIModel[];
@@ -32,13 +33,14 @@ export interface HomeInitialState {
   isArchiveView: boolean;
   isPrivate:boolean;
   selectedTile: Tile;
+  tiles: Tile[]
 }
 
 export const initialState: HomeInitialState = {
   apiKey: '',
   loading: false,
   pluginKeys: [],
-  lightMode: 'dark',
+  theme: theme,
   messageIsStreaming: false,
   modelError: null,
   models: [],
@@ -59,5 +61,6 @@ export const initialState: HomeInitialState = {
   refreshConversations: false,
   isArchiveView: false,
   isPrivate:false,
-  selectedTile: TilesList[0],
+  tiles:[],
+  selectedTile: {},
 };

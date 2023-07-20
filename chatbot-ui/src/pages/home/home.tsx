@@ -32,7 +32,7 @@ export const Home = () => {
   const {
     state: {
       apiKey,
-      lightMode,
+      theme,
       folders,
       conversations,
       selectedConversation,
@@ -92,7 +92,6 @@ export const Home = () => {
 
   useEffect(() => {
     dispatch({ field: "refreshConversations", value: true });
-   
   }, [isArchiveView]);
 
   const handleNewConversation = () => {
@@ -234,7 +233,7 @@ export const Home = () => {
       }}
     >
       <main
-        className={`flex h-screen w-screen flex-col text-sm text-white dark:text-white ${lightMode}`}
+        className={`flex h-screen w-screen flex-col text-sm text-white`}
       >
         <div className="fixed top-0 w-full sm:hidden">
           {/* <Navbar

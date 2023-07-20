@@ -1,14 +1,21 @@
-import { FC } from "react";
+import { FC, useContext } from "react";
 import { ChangeEvent } from "react";
 import { IconUpload } from "@tabler/icons-react";
 import { Message } from "@/types/chat";
+import HomeContext from "@/pages/home/home.context";
 
 interface Props {
-  inputs: string[];
+  inputs: [{
+    key : string,type:string
+  }];
   handleSend: Function;
 }
 
 const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
+  const {
+    state: { theme },
+  } = useContext(HomeContext);
+
   const handleDocumentUpload = async (
     event: ChangeEvent<HTMLInputElement>
   ) => {
@@ -32,9 +39,9 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
   return (
     <>
       {inputs.map((input, index) => {
-        if (input == "fileUpload") {
+        if (input.key === "files" && input.type === "fileInput") {
           return (
-              <label  key={index} className="flex gap-1 items-center w-32 p-2.5 rounded-md bg-[black] hover:bg-[#595959]  dark:bg-[#202123] dark:hover:bg-[#3e3f40] cursor-pointer">
+              <label  key={index} className={`flex gap-1 items-center w-32 p-2.5 rounded-md ${theme.secondaryButtonTheme} cursor-pointer`}>
                 <IconUpload />
                 Upload File
                 <input

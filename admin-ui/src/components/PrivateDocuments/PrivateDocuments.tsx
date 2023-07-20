@@ -4,6 +4,7 @@ import { CustomDataGrid } from "../DataGrids/CustomDataGrid";
 import UploadOutlinedIcon from "@mui/icons-material/UploadOutlined";
 import { uploadDocuments } from "@/services";
 import toast from "react-hot-toast";
+import { styles } from "@/styles";
 
 export const PrivateDocuments = () => {
   const [ refereshGridData, setRefereshGridData ] = useState<boolean>(true)
@@ -58,20 +59,17 @@ export const PrivateDocuments = () => {
           marginBottom: "0px",
         }}
       >
-        <Button
-          variant="contained"
-          component="label"
-          startIcon={<UploadOutlinedIcon />}
-        >
+        <label className={`flex gap-1 items-center w-55 p-2 rounded-md cursor-pointer bg-[${styles.primaryColor}] text-[#ffffff] opacity-80 hover:opacity-100`}>
+          <UploadOutlinedIcon />
           Upload Documents
           <input
             type="file"
             multiple
-            accept=".doc, .docx, .pdf"
+            accept=".doc, .docx, .pdf , .csv"
             hidden
             onChange={handleDocumentsUpload}
           />
-        </Button>
+        </label>
       </div>
       <CustomDataGrid
         columns={columns}

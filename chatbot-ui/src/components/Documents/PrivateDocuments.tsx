@@ -1,11 +1,14 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useState ,useContext } from "react";
 import { Button } from "@mui/material";
 import { CustomDataGrid } from "./CustomDataGrid";
 import { IconUpload } from '@tabler/icons-react';
 import { uploadDocuments ,deleteDocsGridData} from "@/services/DocsService";
 import toast from "react-hot-toast";
+import HomeContext from "@/pages/home/home.context";
 
 export const PrivateDocuments = () => {
+  const { state : { theme } } = useContext(HomeContext);
+
   const [ refereshGridData, setRefereshGridData ] = useState<boolean>(true)
 
   const handleDocumentsUpload = async (
@@ -90,11 +93,8 @@ export const PrivateDocuments = () => {
           marginBottom: "0px",
         }}
       >
-        <Button
-          variant="contained"
-          component="label"
-          startIcon={<IconUpload />}
-        >
+        <label className={`flex gap-1 items-center w-55 p-2 rounded-md ${theme.primaryButtonTheme} cursor-pointer`}>
+          <IconUpload />
           Upload Documents
           <input
             type="file"
@@ -103,7 +103,8 @@ export const PrivateDocuments = () => {
             hidden
             onChange={handleDocumentsUpload}
           />
-        </Button>
+        </label>
+        
       </div>
       <CustomDataGrid
         columns={columns}
