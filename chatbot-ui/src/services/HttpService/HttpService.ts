@@ -129,3 +129,7 @@ export const fetchPrompts = () => {
 export const updateUserPrompts = (prompts: any) => {
   return _axios.put("/user/prompts", prompts);
 };
+
+export const getTiles = () => {
+  return _axios.get(`/user/tiles`);
+};
