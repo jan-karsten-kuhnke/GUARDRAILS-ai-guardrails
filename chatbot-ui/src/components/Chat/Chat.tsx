@@ -83,7 +83,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     async (message: Message, deleteCount = 0, isOverRide: boolean = false , formData : FormData = new FormData()) => {
       if (containsOnlyWhitespacesOrNewlines(message.content)) return;
       message.content = message.content.trim();
-      if (selectedTile.task === "conversation") {
+      if (selectedTile.code === "conversation") {
         await anonymizeMessage(message.content)
           .then((res: any) => {
             message.content = res?.data?.result;
@@ -127,12 +127,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         const controller = new AbortController();
         let response: any;
 
-        if(selectedTile.task === "summarize-brief"){
+        if(selectedTile.code === "summarize-brief"){
           try {
             const payload = {
             conversation_id: selectedConversation.id,
             isOverride: isOverRide,
-            task: selectedTile.task,
+            task: selectedTile.code,
             }
             formData.append("data", JSON.stringify(payload));
             toast.loading("Summarization might be a time taking process depending on the size of your document", {
@@ -157,7 +157,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 ].content,
                 selectedConversation.id,
                 isOverRide,
-                selectedTile.task,
+                selectedTile.code,
                 isPrivate
               );
             } catch (err: any) {
@@ -172,7 +172,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 chatBody.message,
                 selectedConversation.id,
                 isOverRide,
-                selectedTile.task,
+                selectedTile.code,
                 isPrivate
               );
             } catch (err: any) {
@@ -458,10 +458,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 <div className={`flex w-full w-full justify-center rounded-lg py-2 ${theme.chatItemsBorder}`}>
                   <Tiles/>
                 </div>
-
-                {selectedTile?.additionalInputs && (
+                {selectedTile?.params && selectedTile?.params?.inputs?.length > 0 && (
                   <div className={`w-full justify-center rounded-lg p-4 ${theme.chatItemsBorder}`}>
-                    <AdditionalInputs inputs={selectedTile?.additionalInputs} handleSend={handleSend} />
+                    <AdditionalInputs inputs={selectedTile?.params?.inputs} handleSend={handleSend} />
                   </div>
                 )}
                 <div className={`w-full justify-center rounded-lg p-4 ${theme.chatItemsBorder}`}>
@@ -559,7 +558,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             </>
           )}
         </div>
-          {selectedTile?.task != "summarize-brief" && 
+          {selectedTile?.code != "summarize-brief" && 
             <ChatInput
             stopConversationRef={stopConversationRef}
             textareaRef={textareaRef}

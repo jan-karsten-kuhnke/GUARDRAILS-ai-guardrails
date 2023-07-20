@@ -92,7 +92,6 @@ export const Home = () => {
 
   useEffect(() => {
     dispatch({ field: "refreshConversations", value: true });
-   
   }, [isArchiveView]);
 
   const handleNewConversation = () => {

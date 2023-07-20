@@ -19,10 +19,11 @@ class presidio_wrapper:
         
         # Get all enabled entities from predefined_rules table
         enabled_entities=Persistence.get_all_enabled_entities(PredefinedRuleEntity,'presidio')
+        serialized_entitites = [doc.to_dict()['name'] for doc in enabled_entities]
         
         # Call analyzer to get results
         results = analyzer.analyze(
-            text=message, entities=enabled_entities, language="en"
+            text=message, entities=serialized_entitites, language="en"
         )
         return results
         

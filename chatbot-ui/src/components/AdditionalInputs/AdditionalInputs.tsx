@@ -5,7 +5,9 @@ import { Message } from "@/types/chat";
 import HomeContext from "@/pages/home/home.context";
 
 interface Props {
-  inputs: string[];
+  inputs: [{
+    key : string,type:string
+  }];
   handleSend: Function;
 }
 
@@ -37,7 +39,7 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
   return (
     <>
       {inputs.map((input, index) => {
-        if (input == "fileUpload") {
+        if (input.key === "files" && input.type === "fileInput") {
           return (
               <label  key={index} className={`flex gap-1 items-center w-32 p-2.5 rounded-md ${theme.secondaryButtonTheme} cursor-pointer`}>
                 <IconUpload />

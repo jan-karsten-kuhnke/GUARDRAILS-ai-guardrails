@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Text,MetaData,Boolean, TIMESTAMP
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 from globals import Globals
 
@@ -144,4 +145,25 @@ class DocumentEntity(Base):
             'description': self.description,
             'location': self.location,
             'folder_id': self.folder_id
+        }
+    
+
+class ChainEntity(Base):
+    __tablename__ = 'chain'
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
+    title = Column(String(100), nullable=False)
+    icon = Column(String(100), nullable=False)
+    code = Column(String(100), nullable=False)
+    params = Column(JSONB, nullable=False)
+    is_active = Column(Boolean, nullable=False)
+
+    
+    def to_dict(self):
+        return {
+            'id': str(self.id),
+            'title': self.title,
+            'icon': self.icon,
+            'code': self.code,
+            'params': self.params,
+            'is_active': self.is_active
         }

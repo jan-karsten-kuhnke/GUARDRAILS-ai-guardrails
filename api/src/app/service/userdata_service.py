@@ -1,5 +1,7 @@
 from oidc import get_current_user_email
 from repo.db import folders_context,prompts_context
+from database.models import ChainEntity
+from database.postgres import session
 
 class userdata_service:
     def get_all_folders(user_email):
@@ -27,4 +29,10 @@ class userdata_service:
         }
         prompts_context.upsert_prompts_by_user_email(user_prompts_data,user_email)
 
+
+
+    def get_tiles(user_email):
+        chains  = session.query(ChainEntity).all()
+        return [chain.to_dict() for chain in chains]
+        
 

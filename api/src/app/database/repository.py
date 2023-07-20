@@ -217,7 +217,7 @@ class Persistence:
         enabled_entities = []
         
         try:
-            enabled_entities = session.query(Entity).filter(and_(Entity.provider == provider_name,Entity.is_active==True)).first()
+            enabled_entities = session.query(Entity).filter(and_(Entity.provider == provider_name,Entity.is_active==True)).all()
             if not enabled_entities:
                 enabled_entities = []
             return enabled_entities
