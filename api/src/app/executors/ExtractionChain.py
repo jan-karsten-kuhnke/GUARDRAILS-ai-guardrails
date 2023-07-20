@@ -15,12 +15,6 @@ from langchain.chains import create_extraction_chain
 
 class ExtractionChain:
     def execute(self,filepath):
-        temp = Globals.model_temp
-        callbacks = [StreamingStdOutCallbackHandler()]
-        if Globals.public_model_type == "OpenAI":
-            public_llm = ChatOpenAI(temperature=temp, model="gpt-3.5-turbo",max_tokens=1000,callbacks=callbacks, verbose=False)
-        elif Globals.public_model_type == "VertexAI":
-            public_llm = ChatVertexAI(max_output_tokens=1000, verbose=False,callbacks=callbacks)
         loader = PyPDFLoader(filepath)
         pages = loader.load_and_split()
 
@@ -44,7 +38,7 @@ class ExtractionChain:
             },
             "required": ["SiteArea", "MaximumBuildingHeight", "GrossPlotRatio", "totalApartmentCount", "OneRoomApartmentPercentage", "TwoRoomApartmentPercentage", "ThreeRoomApartmentPercentage", "FourRoomApartmentPercentage"],
         }
-        llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo",max_tokens=1000)
+        llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k",max_tokens=1000)
 
         chain = create_extraction_chain(schema=schema, llm=llm)
 

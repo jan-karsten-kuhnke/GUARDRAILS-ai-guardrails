@@ -16,7 +16,7 @@ import json
 from sqlalchemy import create_engine,text
 from sqlalchemy.orm import sessionmaker
 
-class VegaChain:
+class VisualizationChain:
     private_llm: Any = None
     public_llm: Any = None
 
@@ -145,7 +145,7 @@ class VegaChain:
             session.close()
             engine.dispose()
 
-            return {"answer": "", "sources": sources, "vega_spec": config, "sql_result": json_data}
+            return {"answer": "", "sources": sources, "visualization": config, "dataset": json_data}
 
 
         except Exception as e:

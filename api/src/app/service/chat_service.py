@@ -19,7 +19,7 @@ from executors.ExtractionChain import ExtractionChain
 from executors.ConversationalChain import ConversationalChain
 from executors.QaRetrievalChain import QaRetrievalChain
 from executors.SqlChain import SqlChain
-from executors.VegaChain import VegaChain
+from executors.VisualizationChain import VisualizationChain
 
 override_message = "You chose to Override the warning, proceeding to Open AI."
 nsfw_warning = "Warning From Guardrails: We've detected that your message contains NSFW content. Please refrain from posting such content in a work environment, You can choose to override this warning if you wish to continue the conversation, or you can get your manager's approval before continuing."
@@ -170,7 +170,7 @@ class chat_service:
                 elif(task=="qa-viz"):
                     try:
                         logging.info("calling qa sql executor")
-                        executor=VegaChain()
+                        executor=VisualizationChain()
                         res = executor.execute(prompt,is_private,history)
 
                     except Exception as e:
@@ -183,9 +183,9 @@ class chat_service:
                 answer = res['answer']
                         
                 msg_info={
-                    "sources": res['sources'] if res['sources'] else [],
-                    "visualization": res['vega_spec'] if res['vega_spec'] else None,
-                    "dataset": res['sql_result'] if res['sql_result'] else None,
+                    "sources": res['sources'] if 'sources' in res else [],
+                    "visualization": res['visualization'] if 'visualization' in res else None,
+                    "dataset": res['dataset'] if 'dataset' in res else None,
                 }
                 chunk = json.dumps({
                                 "role": "assistant",
