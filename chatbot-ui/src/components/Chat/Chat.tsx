@@ -57,6 +57,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       serverSideApiKeyIsSet,
       messageIsStreaming,
       modelError,
+      theme,
       loading,
       prompts,
       isPrivate,
@@ -430,7 +431,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   }, [messagesEndRef]);
 
   return (
-    <div className="relative flex-1 overflow-hidden bg-white dark:bg-[#343541]">
+    <div className={`relative flex-1 overflow-hidden ${theme.chatBackground}`}>
       <>
         <div
           className="max-h-full overflow-x-hidden"
@@ -440,13 +441,13 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           {selectedConversation?.messages.length === 0 ? (
             <>
               <div className="mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-5 md:pt-12 sm:max-w-[600px]">
-                <div className="text-center text-3xl font-semibold text-gray-800 dark:text-gray-100">
+                <div className="text-center text-3xl font-semibold">
                   {models.length === 0 ? (
                     <div className="mx-auto flex h-full w-[300px] flex-col justify-center space-y-6 sm:w-[600px]">
-                      <div className="text-center text-4xl font-bold text-black dark:text-white">
+                      <div className={`text-center text-4xl font-bold ${theme.textColor}`}>
                         Welcome to {applicationName}
                       </div>
-                      <div className="text-center text-2xl font-bold text-black dark:text-gray-400">
+                      <div className={`text-center text-2xl font-bold ${theme.textColorSecondary}`}>
                         Protect your Confidential Information.
                       </div>
                     </div>
@@ -454,21 +455,20 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     "Chatbot UI"
                   )}
                 </div>
-                <div className="flex w-full w-full justify-center rounded-lg border border-neutral-200 py-2 dark:border-neutral-600">
+                <div className={`flex w-full w-full justify-center rounded-lg py-2 ${theme.chatItemsBorder}`}>
                   <Tiles/>
                 </div>
-
                 {selectedTile?.params && selectedTile?.params?.inputs?.length > 0 && (
-                  <div className="w-full justify-center rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
+                  <div className={`w-full justify-center rounded-lg p-4 ${theme.chatItemsBorder}`}>
                     <AdditionalInputs inputs={selectedTile?.params?.inputs} handleSend={handleSend} />
                   </div>
                 )}
-                <div className="w-full justify-center rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
+                <div className={`w-full justify-center rounded-lg p-4 ${theme.chatItemsBorder}`}>
                   <PublicPrivateSwitch size={40} />
                 </div>
-
+{/* 
                 {models.length > 0 && (
-                  <div className="flex h-full flex-col space-y-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-600">
+                  <div className={`flex h-full flex-col space-y-4 rounded-lg p-4 ${theme.chatItemsBorder}`}>
                     <ModelSelect />
 
                     <SystemPrompt
@@ -492,12 +492,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       }
                     />
                   </div>
-                )}
+                )} */}
               </div>
             </>
           ) : (
             <>
-              <div className="sticky top-0 z-10 flex justify-center border border-b-neutral-300 bg-neutral-100 py-2 text-sm text-neutral-500 dark:border-none dark:bg-[#444654] dark:text-neutral-200">
+              <div className={`sticky top-0 z-10 flex justify-center py-2 text-sm ${theme.chatTitleTheme}`}>
                 {selectedConversation?.title}
 
                 {/* <button
@@ -513,13 +513,13 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     <IconClearAll size={18} />
                   </button> */}
               </div>
-              {showSettings && (
+              {/* {showSettings && (
                 <div className="flex flex-col space-y-10 md:mx-auto md:max-w-xl md:gap-6 md:py-3 md:pt-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl">
                   <div className="flex h-full flex-col space-y-4 border-b border-neutral-200 p-4 dark:border-neutral-600 md:rounded-lg md:border">
                     <ModelSelect />
                   </div>
                 </div>
-              )}
+              )} */}
 
               {selectedConversation?.messages.map((message, index) => (
                 <MemoizedChatMessage
@@ -552,7 +552,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               {loading && <ChatLoader />}
 
               <div
-                className="h-[162px] bg-white dark:bg-[#343541]"
+                className={`h-[162px] ${theme.chatBackground}}`}
                 ref={messagesEndRef}
               />
             </>

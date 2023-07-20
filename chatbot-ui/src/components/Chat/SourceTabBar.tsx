@@ -3,8 +3,9 @@ import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
-import { FC, useState } from "react";
+import { FC, useContext, useState } from "react";
 import { AssistantMessage } from "./ChatMessage";
+import HomeContext from "@/pages/home/home.context";
 
 export interface TabsProps {
   sources: [];
@@ -12,7 +13,7 @@ export interface TabsProps {
 
 export const SourceTabBar: FC<TabsProps> = ({ sources }) => {
   const [value, setValue] = useState("0");
-
+  const { state : { theme } } = useContext(HomeContext);
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
   };
@@ -29,7 +30,7 @@ export const SourceTabBar: FC<TabsProps> = ({ sources }) => {
           sx={{
             borderBottom: 1,
             borderColor: "divider",
-            color: "white",
+            color: theme.tabTheme.color,
           }}
         >
           <TabList
@@ -39,15 +40,15 @@ export const SourceTabBar: FC<TabsProps> = ({ sources }) => {
               "& .MuiTab-root": {
                 fontFamily: "'Inter', sans-serif", // Set the font-family
                 fontWeight: 600,
-                color: "white",
+                color: theme.tabTheme.color,
                 textTransform: "Capitalize",
                 paddingTop: "0px",
               },
               "& .MuiButtonBase-root.Mui-selected": {
-                color: "white",
+                color: theme.tabTheme.color,
               },
               "& .MuiTabs-indicator": {
-                backgroundColor: "white",
+                backgroundColor: theme.tabTheme.color,
                 marginBottom: "8px",
               },
               "& .MuiTabs-scroller": {
@@ -56,13 +57,14 @@ export const SourceTabBar: FC<TabsProps> = ({ sources }) => {
                   height: "0.4em",
                 },
                 "&::-webkit-scrollbar-thumb": {
-                  backgroundColor: "#7e7e7e", // Change this to your desired color
+                  backgroundColor: theme.tabTheme.scrollBarThumb, // Change this to your desired color
                 },
                 "&::-webkit-scrollbar-thumb:hover": {
-                  backgroundColor: "#fff", // Change this to your desired color
+                  backgroundColor: theme.tabTheme.scrollBarThumbHover, // Change this to your desired color
                 },
                 "&::-webkit-scrollbar-track": {
-                  backgroundColor: "#343541", // Change this to your desired color
+                  borderRadius: "20px",
+                  backgroundColor: theme.tabTheme.scrollBarTrack, // Change this to your desired color
                 },
               },
             }}

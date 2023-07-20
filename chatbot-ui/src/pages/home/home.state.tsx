@@ -5,12 +5,13 @@ import { OpenAIModel, OpenAIModelID } from '@/types/openai';
 import { PluginKey } from '@/types/plugin';
 import { Prompt } from '@/types/prompt';
 import { Tile } from '@/types/tiles';
+import {theme} from '@/styles';
 
 export interface HomeInitialState {
   apiKey: string;
   pluginKeys: PluginKey[];
   loading: boolean;
-  lightMode: 'light' | 'dark';
+  theme: any;
   messageIsStreaming: boolean;
   modelError: ErrorMessage | null;
   models: OpenAIModel[];
@@ -39,7 +40,7 @@ export const initialState: HomeInitialState = {
   apiKey: '',
   loading: false,
   pluginKeys: [],
-  lightMode: 'dark',
+  theme: theme,
   messageIsStreaming: false,
   modelError: null,
   models: [],

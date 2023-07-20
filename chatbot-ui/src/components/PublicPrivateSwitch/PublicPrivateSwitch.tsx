@@ -10,15 +10,23 @@ import Tooltip from "@mui/material/Tooltip";
 interface Props {
   size: string | number | undefined;
 }
+let switchTheme:any;
 
-const CustomSwitch = styled((props: SwitchProps) => (
-  <Switch
-    focusVisibleClassName=".Mui-focusVisible"
-    disableRipple
-    {...props}
-    disabled
-  />
-))(({ theme }) => ({
+const CustomSwitch = styled((props: SwitchProps) => {
+  const {
+    state: { theme },
+    } = useContext(HomeContext);
+
+    switchTheme=theme.switchTheme;
+  return (
+      <Switch
+        focusVisibleClassName=".Mui-focusVisible"
+        disableRipple
+        {...props}
+      />
+  );
+  })
+(({ theme }) => ({
   width: 42,
   height: 26,
   padding: 0,
@@ -30,7 +38,7 @@ const CustomSwitch = styled((props: SwitchProps) => (
       transform: "translateX(16px)",
       color: "#fff",
       "& + .MuiSwitch-track": {
-        backgroundColor: theme.palette.mode === "dark" ? "#2ECA45" : "#65C466",
+        backgroundColor: switchTheme?.BgChecked,
         opacity: 1,
         border: 0,
       },
@@ -43,13 +51,11 @@ const CustomSwitch = styled((props: SwitchProps) => (
       border: "6px solid #fff",
     },
     "&.Mui-disabled .MuiSwitch-thumb": {
-      color:
-        theme.palette.mode === "light"
-          ? theme.palette.grey[100]
-          : theme.palette.grey[600],
+      color: theme.palette.grey[600]
+,
     },
     "&.Mui-disabled + .MuiSwitch-track": {
-      opacity: theme.palette.mode === "light" ? 0.7 : 0.3,
+      opacity: 0.4,
     },
   },
   "& .MuiSwitch-thumb": {
@@ -59,7 +65,7 @@ const CustomSwitch = styled((props: SwitchProps) => (
   },
   "& .MuiSwitch-track": {
     borderRadius: 26 / 2,
-    backgroundColor: theme.palette.mode === "light" ? "#E9E9EA" : "#39393D",
+    backgroundColor: switchTheme?.Bg,
     opacity: 1,
     transition: theme.transitions.create(["background-color"], {
       duration: 500,
@@ -69,7 +75,7 @@ const CustomSwitch = styled((props: SwitchProps) => (
 
 const PublicPrivateSwitch: FC<Props> = ({ size }) => {
   const {
-    state: { isPrivate },
+    state: { isPrivate,theme },
     handleIsPrivate,
   } = useContext(HomeContext);
 
@@ -78,7 +84,7 @@ const PublicPrivateSwitch: FC<Props> = ({ size }) => {
   };
   return (
     <>
-      <div className="flex justify-around  items-center pb-2 pt-4 text-sm text-black dark:text-gray-400">
+      <div className={`flex justify-around  items-center pb-2 pt-4 text-sm ${theme.publicPrivateSwitchTheme} `}>
         <div className="flex flex-col justify-around  items-center">
           <IconLockOpen size={size} />
           Public LLM
@@ -93,7 +99,7 @@ const PublicPrivateSwitch: FC<Props> = ({ size }) => {
           </IconButton>
         </Tooltip>
 
-        <div className="flex flex-col justify-around  items-center text-black dark:text-gray-400">
+        <div className={`flex flex-col justify-around  items-center ${theme.publicPrivateSwitchTheme} `}>
           <IconLock size={size} />
           Private LLM
         </div>

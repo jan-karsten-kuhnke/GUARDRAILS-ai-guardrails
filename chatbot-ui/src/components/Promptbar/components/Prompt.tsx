@@ -18,12 +18,14 @@ import SidebarActionButton from '@/components/Buttons/SidebarActionButton';
 
 import PromptbarContext from '../PromptBar.context';
 import { PromptModal } from './PromptModal';
+import HomeContext from '@/pages/home/home.context';
 
 interface Props {
   prompt: Prompt;
 }
 
 export const PromptComponent = ({ prompt }: Props) => {
+  const {state: {theme}} = useContext(HomeContext);
   const {
     dispatch: promptDispatch,
     handleUpdatePrompt,
@@ -78,7 +80,7 @@ export const PromptComponent = ({ prompt }: Props) => {
   return (
     <div className="relative flex items-center">
       <button
-        className="flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 hover:bg-[#343541]/90"
+        className={`flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-sm transition-colors duration-200 ${theme.itemHoverTheme}`}
         draggable="true"
         onClick={(e) => {
           e.stopPropagation();

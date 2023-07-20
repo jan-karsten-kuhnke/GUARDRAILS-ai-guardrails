@@ -19,7 +19,8 @@ export const SettingDialog: FC<Props> = ({ open, onClose }) => {
   const { state, dispatch } = useCreateReducer<Settings>({
     initialState: settings,
   });
-  const { dispatch: homeDispatch } = useContext(HomeContext);
+  const { state : { theme } } = useContext(HomeContext);
+
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -42,7 +43,7 @@ export const SettingDialog: FC<Props> = ({ open, onClose }) => {
   }, [onClose]);
 
   const handleSave = () => {
-    homeDispatch({ field: 'lightMode', value: state.theme });
+    // homeDispatch({ field: 'lightMode', value: state.theme });
     saveSettings(state);
   };
 
@@ -53,7 +54,7 @@ export const SettingDialog: FC<Props> = ({ open, onClose }) => {
 
   // Render the dialog.
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-opacity-50 z-50">
       <div className="fixed inset-0 z-10 overflow-hidden">
         <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
           <div
@@ -63,14 +64,14 @@ export const SettingDialog: FC<Props> = ({ open, onClose }) => {
 
           <div
             ref={modalRef}
-            className="dark:border-netural-400 inline-block max-h-[400px] transform overflow-y-auto rounded-lg border border-gray-300 bg-white px-4 pt-5 pb-4 text-left align-bottom shadow-xl transition-all dark:bg-[#202123] sm:my-8 sm:max-h-[600px] sm:w-full sm:max-w-lg sm:p-6 sm:align-middle"
+            className={`${theme.modalDialogTheme} inline-block max-h-[400px] transform overflow-y-auto rounded-lg px-4 pt-5 pb-4 text-left align-bottom shadow-xl transition-all sm:my-8 sm:max-h-[600px] sm:w-full sm:max-w-lg sm:p-6 sm:align-middle`}
             role="dialog"
           >
-            <div className="text-lg pb-4 font-bold text-black dark:text-neutral-200">
+            <div className={`text-lg pb-4 font-bold ${theme.textColor}`}>
               {('Settings')}
             </div>
 
-            <div className="text-sm font-bold mb-2 text-black dark:text-neutral-200">
+            {/* <div className="text-sm font-bold mb-2 text-black dark:text-neutral-200">
               {('Theme')}
             </div>
 
@@ -83,9 +84,9 @@ export const SettingDialog: FC<Props> = ({ open, onClose }) => {
             >
               <option value="dark">{('Dark mode')}</option>
               <option value="light">{('Light mode')}</option>
-            </select>
+            </select> */}
 
-            <button
+            {/* <button
               type="button"
               className="w-full px-4 py-2 mt-6 border rounded-lg shadow border-neutral-500 text-neutral-900 hover:bg-neutral-100 focus:outline-none dark:border-neutral-800 dark:border-opacity-50 dark:bg-white dark:text-black dark:hover:bg-neutral-300"
               onClick={() => {
@@ -94,7 +95,7 @@ export const SettingDialog: FC<Props> = ({ open, onClose }) => {
               }}
             >
               {('Save')}
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

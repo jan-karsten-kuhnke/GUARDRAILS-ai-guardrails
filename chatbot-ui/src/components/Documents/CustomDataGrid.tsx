@@ -1,10 +1,11 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useContext } from "react";
 import { DataGrid, GridToolbar, GridSortModel, useGridApiContext, useGridSelector, gridPageSelector, gridPageCountSelector,GridRowParams  } from "@mui/x-data-grid";
 import {  getDocsGridData } from "@/services/DocsService";
 import TablePagination from '@mui/material/TablePagination';
 
 import toast from "react-hot-toast";
+import HomeContext from "@/pages/home/home.context";
 interface CustomDataGridProps {
     columns: any;
     entity: string;
@@ -25,6 +26,7 @@ export interface Message {
   userActionRequired: boolean;
 }
 export const CustomDataGrid = (props: CustomDataGridProps) => {
+  const { state : { theme } } = useContext(HomeContext);
 
     const [rows, setRows] = useState([]);
     const [totalRows, setTotalRows] = useState(0);
@@ -176,11 +178,11 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
             sortModel={sortConfig}
             rowCount={totalRows}
             loading={loading}
-            slots={{ toolbar: GridToolbar, pagination : CustomPagination }}
+            slots={{ pagination : CustomPagination }}
             paginationModel={paginationModel}
             
             sx={{
-              backgroundColor: "#202123",
+              backgroundColor: theme.customDataGridTheme.bGcolor,
               borderRadius: '2px',
               width: "100%",
               marginTop: '20px',
@@ -189,7 +191,9 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
               '& .MuiDataGrid-menuIconButton,.MuiDataGrid-sortIcon,.MuiDataGrid-filterIcon': {
                 color: 'white',
               },
-              
+              '&.MuiButtonBase-root ,&.MuiButton-root':{
+                color: 'white !important',
+              },
               table: {
                 borderCollapse: "collapse",
                 borderSpacing: 0,
