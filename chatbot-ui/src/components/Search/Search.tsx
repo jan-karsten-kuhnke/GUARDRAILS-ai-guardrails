@@ -1,6 +1,6 @@
+import HomeContext from '@/pages/home/home.context';
 import { IconX } from '@tabler/icons-react';
-import { FC } from 'react';
-import {theme} from "../../styles/styles";
+import { FC, useContext } from 'react';
 
 interface Props {
   placeholder: string;
@@ -8,7 +8,7 @@ interface Props {
   onSearch: (searchTerm: string) => void;
 }
 const Search: FC<Props> = ({ placeholder, searchTerm, onSearch }) => {
-
+  const { state : { theme } } = useContext(HomeContext);
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onSearch(e.target.value);
   };

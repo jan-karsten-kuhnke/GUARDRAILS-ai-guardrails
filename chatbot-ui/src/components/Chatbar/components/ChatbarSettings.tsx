@@ -7,7 +7,6 @@ import {
   IconFileDescription,
 } from "@tabler/icons-react";
 import { useContext, useState } from "react";
-import { theme } from "@/styles/styles";
 import HomeContext from "@/pages/home/home.context";
 
 import { SettingDialog } from "@/components/Settings/SettingDialog";
@@ -32,6 +31,7 @@ export const ChatbarSettings = () => {
       apiKey,
       serverSideApiKeyIsSet,
       serverSidePluginKeysSet,
+      theme,
       conversations,
       isArchiveView,
     },

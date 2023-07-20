@@ -4,7 +4,7 @@ import { CustomDataGrid } from "../DataGrids/CustomDataGrid";
 import UploadOutlinedIcon from "@mui/icons-material/UploadOutlined";
 import { uploadDocuments } from "@/services";
 import toast from "react-hot-toast";
-import { styles } from "@/styles/styles";
+import { styles } from "@/styles";
 
 export const PrivateDocuments = () => {
   const [ refereshGridData, setRefereshGridData ] = useState<boolean>(true)

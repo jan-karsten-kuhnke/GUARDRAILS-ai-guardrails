@@ -14,7 +14,7 @@ import { getGridData, getDocsGridData } from "@/services";
 import TablePagination from "@mui/material/TablePagination";
 import { EscalationConversation } from "../Escalations/EscalationConversation";
 import toast from "react-hot-toast";
-import { styles } from "@/styles/styles";
+import { styles } from "@/styles";
 interface CustomDataGridProps {
   columns: any;
   entity: string;

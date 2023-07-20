@@ -18,7 +18,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppRoutes } from '@/AppRoutes';
 import { over } from 'lodash';
 import { AuthContext, AuthService } from '@/services/AuthService';
-import { styles } from '@/styles/styles';
+import { styles } from '@/styles';
 import { SidebarItems } from '../SidebarItems/SidebarItems';
 
 const drawerWidth = 280;
