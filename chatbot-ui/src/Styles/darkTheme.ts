@@ -9,7 +9,7 @@ export const darkTheme = {
   dividerBottomTheme: "border-b border-white/20",
   dividerTopTheme: "border-t border-white/20",
   sideBarTheme: "bg-[#202123] text-[#ffffff] ",
-  sideBarSettingButtonTheme: "text-white hover:text-gray-300 ",
+  sideBarSettingButtonTheme: "text-white hover:bg-[#343541]",
   sideBarOpenCloseButton: "text-white hover:bg-gray-500/10",
   itemHoverTheme: "hover:bg-[#343541]",
   itemMoveRenameTheme: "bg-[#343541] text-white",
