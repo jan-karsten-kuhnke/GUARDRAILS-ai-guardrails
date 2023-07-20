@@ -34,6 +34,8 @@ import { SourceTabBar } from "./SourceTabBar";
 import rehypeMathjax from "rehype-mathjax";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
+import Visualization from "./components/Visualization";
+import { IDataset } from "./components/getValidSpec";
 
 export interface Props {
   message: Message;
@@ -333,9 +335,15 @@ export const ChatMessage: FC<Props> = memo(
                       </TabPanel>
                     </TabContext>
                   </Box>
-                ) : (
-                  <AssistantMessage content={message.content} />
-                )}
+                ) : 
+                 <>
+                  {message.msg_info?.visualizations ? (
+                    <Visualization content={message.msg_info?.visualizations } dataset={message.msg_info?.dataset  as IDataset} />
+                    )
+                    :( <AssistantMessage content={message.content} />)
+                  }
+                 </>
+                }
 
                 <div className="md:-mr-8 ml-1 md:ml-0 flex flex-col md:flex-row gap-4 md:gap-1 items-center md:items-start justify-end md:justify-start">
                   {messagedCopied ? (
