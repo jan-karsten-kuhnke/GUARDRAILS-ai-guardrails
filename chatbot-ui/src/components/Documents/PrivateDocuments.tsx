@@ -93,7 +93,7 @@ export const PrivateDocuments = () => {
           marginBottom: "0px",
         }}
       >
-        <label className={`flex gap-1 items-center w-55 p-1.5 rounded-md ${theme.primaryButtonTheme} cursor-pointer`}>
+        <label className={`flex gap-1 items-center w-55 p-2 rounded-md ${theme.primaryButtonTheme} cursor-pointer`}>
           <IconUpload />
           Upload Documents
           <input

@@ -7,7 +7,7 @@ import {
   IconFileDescription,
 } from "@tabler/icons-react";
 import { useContext, useState } from "react";
-import { theme } from "@/Styles/styles";
+import { theme } from "@/styles/styles";
 import HomeContext from "@/pages/home/home.context";
 
 import { SettingDialog } from "@/components/Settings/SettingDialog";

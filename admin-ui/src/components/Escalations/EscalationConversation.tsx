@@ -6,6 +6,7 @@ import KeyboardBackspaceOutlinedIcon from "@mui/icons-material/KeyboardBackspace
 import HourglassBottomOutlinedIcon from '@mui/icons-material/HourglassBottomOutlined';
 import { IconRobot, IconUser, IconShieldExclamation} from "@tabler/icons-react";
 import toast from "react-hot-toast";
+import { styles } from "@/styles/styles";
 export interface Props {
   selectedRow: any;
   handleClose: any;
@@ -86,7 +87,8 @@ export const EscalationConversation = (props: Props) => {
   return (
     <Container
       sx={{
-        backgroundColor: "#202123",
+        color: styles.textColor,
+        backgroundColor: styles.bgColor,
         paddingBottom: "15px",
         paddingTop: "5px",
         marginTop: "20px",
@@ -102,10 +104,10 @@ export const EscalationConversation = (props: Props) => {
           margin: "10px",
         }}
       >
-        <div style={{ fontSize: "1.8em", color: "#d1cac5", cursor: "pointer" }}>
+        <div style={{ fontSize: "1.8em", cursor: "pointer" }}>
           <KeyboardBackspaceOutlinedIcon onClick={handleClose} />
         </div>
-        <div style={{ fontSize: "1.8em", color: "#d1cac5" }}>
+        <div style={{ fontSize: "1.8em"}}>
           {props.selectedRow?.title}
         </div>
         <div></div>
@@ -118,13 +120,13 @@ export const EscalationConversation = (props: Props) => {
             overflowWrap: "anywhere",
             borderBottom: "1px solid rgba(0, 0, 0, 0.1)",
             borderBottomColor: "rgba(0, 0, 0, 0.1)",
-            color: "#d1cac5",
+            color: styles.textColor,
             width: "100%",
             borderRadius: "2px",
             backgroundColor:
               message.role === "assistant" || message.role === "guardrails"
-                ? "#444654"
-                : "#343541",
+                ? styles.escalationChatTheme.assistantBgColor
+                : styles.escalationChatTheme.userBgColor,
           }}
         >
           <div className="relative m-auto flex p-4 text-base md:max-w-2xl md:gap-6 md:py-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl">
@@ -143,7 +145,7 @@ export const EscalationConversation = (props: Props) => {
                 <div className="flex w-full">
                   <div
                     className="prose whitespace-pre-wrap dark:prose-invert flex-1"
-                    style={{ color: "#d1cac5" }}
+                    style={{ color: styles.textColor }}
                   >
                     {message.content}
                   </div>
@@ -152,7 +154,7 @@ export const EscalationConversation = (props: Props) => {
                 <>
                   <div
                     className="prose whitespace-pre-wrap dark:prose-invert flex-1"
-                    style={{ color: "#d1cac5" }}
+                    style={{ color: styles.textColor }}
                   >
                     {message.content}
                   </div>

@@ -1,6 +1,6 @@
 import { IconX } from '@tabler/icons-react';
 import { FC } from 'react';
-import {theme} from "../../Styles/styles";
+import {theme} from "../../styles/styles";
 
 interface Props {
   placeholder: string;

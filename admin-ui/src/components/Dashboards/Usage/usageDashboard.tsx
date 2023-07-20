@@ -1,8 +1,8 @@
-
+import { styles } from "@/styles/styles"
 
 export const UsageDashboard = () => {
     return(
-    <div className="text-white text-center text-3xl  pt-10 align-middle">
+    <div className="text-center text-3xl  pt-10 align-middle" style={{color:styles.textColor}}>
         <h1>Usage Dashboard</h1>
     </div>)
 }
