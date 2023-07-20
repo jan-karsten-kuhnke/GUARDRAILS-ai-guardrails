@@ -34,5 +34,9 @@ class userdata_service:
     def get_tiles(user_email):
         chains  = session.query(ChainEntity).all()
         return [chain.to_dict() for chain in chains]
+    
+    def get_tile_by_code(user_email,code):
+        chain  = session.query(ChainEntity).filter(ChainEntity.code == code ).first()
+        return chain.to_dict()
         
 

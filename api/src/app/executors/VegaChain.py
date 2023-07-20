@@ -10,9 +10,13 @@ from typing import Any
 import logging
 from langchain.chains import SQLDatabaseSequentialChain
 from executors.SqlWrapper import SqlWrapper
+from langchain.chains import LLMChain
+import sqlalchemy
+import json
+from sqlalchemy import create_engine,text
+from sqlalchemy.orm import sessionmaker
 
-
-class SqlChain:
+class VegaChain:
     private_llm: Any = None
     public_llm: Any = None
 
@@ -80,12 +84,12 @@ class SqlChain:
             logging.info(f"using private model: {Globals.private_model_type}")
             chain = SQLDatabaseSequentialChain.from_llm(
                 self.private_llm, db, verbose=True, return_intermediate_steps=True,
-                query_prompt=self.PROMPT,**{'top_k':10}
+                query_prompt=self.PROMPT,**{'top_k':1000}
             )
         else:
             logging.info(f"using public model: {Globals.public_model_type}")
             chain = SQLDatabaseSequentialChain.from_llm(
-                self.public_llm, db, verbose=True, return_intermediate_steps=True, query_prompt=self.PROMPT,**{'top_k':10}
+                self.public_llm, db, verbose=True, return_intermediate_steps=True, query_prompt=self.PROMPT,**{'top_k':1000}
             )
 
         sources = []
@@ -100,19 +104,50 @@ class SqlChain:
             )
             sql_query = sql_results[0]
             sql_data = sql_results[1].split("\nAnswer:")[0]
+            VEGA_LITE_PROMPT = """You are a great assistant at vega-lite visualization creation. No matter what the user ask, you should always response with a valid vega-lite specification in JSON.
 
+            You have been given a user question and  a sql query that answers that question, you also have been given a sample result of the sql query.
+
+            You should create the vega-lite specification based on user's query.
+
+            Besides, Here are some requirements:
+            1. Do not contain the key called 'data' in vega-lite specification.
+            2. If the user ask many times, you should generate the specification based on the previous context.
+            3. You should consider to aggregate the field if it is quantitative and the chart has a mark type of react, bar, line, area or arc.
+            5. Do not contain any text in the response apart from the vega-lite specification in JSON.
+
+            User Question: {question}
+            SQL Query: {sql_query}
+            SQL Result: {sql_data}
+"""
+
+            vega_prompt = PromptTemplate(
+                input_variables=["question", "sql_query", "sql_data"],
+                template=VEGA_LITE_PROMPT,
+            )
+                        
+            vega_chain = LLMChain(llm=self.public_llm, prompt=vega_prompt)
+            config = vega_chain.run({'sql_data':sql_data, 'sql_query':sql_query, 'question':query})
+
+            modified_sql_query = sql_query.replace("\n", " ")
+
+            engine = create_engine(conn_str)
             
+            Session = sessionmaker(bind=engine)
+            session = Session()
 
-            sql_query_source = {
-                "type": "source",
-                "doc": sql_query,
-                "metadata": {"source": "Generated SQL Query"},
-            }
-            sql_result_source = {
-                "type": "source",
-                "doc": sql_data,
-                "metadata": {"source": "Data From DB"},
-            }
+
+            sql_result = session.execute(text(modified_sql_query))
+            rows = sql_result.fetchall()
+            column_names = sql_result.keys()
+            json_data = json.dumps([dict(zip(column_names, row)) for row in rows],indent=4, sort_keys=True, default=str)
+
+            session.close()
+            engine.dispose()
+
+            return {"answer": "", "sources": sources, "vega_spec": config, "sql_result": json_data}
+
+
         except Exception as e:
             logging.error(e)
             answer = "Sorry, I don't know the answer to that."
