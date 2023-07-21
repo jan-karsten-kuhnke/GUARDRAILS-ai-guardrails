@@ -2,6 +2,8 @@ from oidc import get_current_user_email
 from repo.db import folders_context,prompts_context
 from database.models import ChainEntity
 from database.postgres import session
+from oidc import get_current_user_groups
+from integration.flowable_wrapper import flowable_wrapper
 
 class userdata_service:
     def get_all_folders(user_email):
@@ -32,11 +34,34 @@ class userdata_service:
 
 
     def get_tiles(user_email):
-        chains  = session.query(ChainEntity).all()
-        return [chain.to_dict() for chain in chains]
+        user_groups = get_current_user_groups()
+        previous_requests = flowable_wrapper.get_submitted_requests_code(user_email)
+        print(previous_requests)
+
+        all_chains  = session.query(ChainEntity).all()
+        res = []
+
+        for chain in all_chains:
+            chain_dict = chain.to_dict()
+            group_code = chain_dict['group_code']
+            if group_code is None or group_code == "":
+                chain_dict['has_access'] = True
+            elif group_code in user_groups:
+                chain_dict['has_access'] = True
+            else:
+                chain_dict['has_access'] = False
+            
+            chain_dict['request_submitted'] = True if group_code in previous_requests else False
+            res.append(chain_dict)
+        return res
+
+
     
     def get_tile_by_code(user_email,code):
         chain  = session.query(ChainEntity).filter(ChainEntity.code == code ).first()
         return chain.to_dict()
+    
+    def request_tile_by_code(user_email,code,name):
+        return flowable_wrapper.submit_request(user_email=user_email, tile_code=code,tile_name=name)
         
 
