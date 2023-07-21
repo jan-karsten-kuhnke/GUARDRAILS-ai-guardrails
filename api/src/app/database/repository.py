@@ -191,7 +191,7 @@ class Persistence:
             }
             
             return jsonify({"data":data,"success":True,"message":"Successfully retrieved data"})
-        except Exception as e:
+        except Exception as ex:
             logging.error(f"Exception while getting list: {ex}")
             return jsonify({"data":{},"success":False,"message": "Error in retrieving data"}), 500
         finally:

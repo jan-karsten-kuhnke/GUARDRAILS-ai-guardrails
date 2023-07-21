@@ -8,6 +8,7 @@ import {PredefinedRulesGrid} from './components/PII Entities/PredifnedRulesGrid'
 import { ConversationGrid } from './components/DataGrids/ConversationGrid';
 import { Escalation } from './components/Escalations/Escalation';
 import { PrivateDocuments } from './components/PrivateDocuments/PrivateDocuments';
+import {AccessRequests} from './components/AccessRequests/AccessRequests';
 
 export const AppRoutes = [
 
@@ -62,6 +63,10 @@ export const AppRoutes = [
     {
         path:'/private-documents',
         component:<PrivateDocuments/>
+    },
+    {
+        path:'access-requests',
+        component:<AccessRequests/>
     }
 ];
 

@@ -195,6 +195,6 @@ def complete_request():
     data = request.json
     request_id = data['request_id']
     approved = data['approved']
-    admin_service.complete_request(request_id, approved)
+    return admin_service.complete_request(request_id, approved)
 
     

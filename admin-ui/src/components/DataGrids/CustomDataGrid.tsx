@@ -21,6 +21,7 @@ interface CustomDataGridProps {
   initialSort: any;
   onGridDataUpdate?: any;
   refereshGridData?: boolean;
+  hideDataGridToolbar?: boolean;
 }
 
 interface RowData {
@@ -216,7 +217,7 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
             sortModel={sortConfig}
             rowCount={totalRows}
             loading={loading}
-            slots={{ toolbar: GridToolbar, pagination: CustomPagination }}
+            slots={{...(!props.hideDataGridToolbar) && {toolbar:  GridToolbar}, pagination: CustomPagination }}
             paginationModel={paginationModel}
             onRowClick={handleRowClick}
             sx={{
