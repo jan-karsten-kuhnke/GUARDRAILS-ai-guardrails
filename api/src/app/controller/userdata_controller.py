@@ -56,6 +56,6 @@ def get_tiles():
 
 @userdataendpoints.route('/tiles/<code>', methods=['GET'])
 @oidc.accept_token(require_token=True)
-def get_tile_by_code(tile_id):
+def get_tile_by_code(code):
     user_email = get_current_user_email()
-    return userdata_service.get_tile_by_code(user_email,tile_id)
+    return userdata_service.get_tile_by_code(user_email,code)

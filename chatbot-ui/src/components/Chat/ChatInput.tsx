@@ -21,7 +21,7 @@ import toast from "react-hot-toast";
 import Chip from '@mui/material/Chip';
 
 import { Message } from "@/types/chat";
-import { Tile,TilesList } from "@/types/tiles";
+import { Tile } from "@/types/tiles";
 import { Prompt } from "@/types/prompt";
 
 import HomeContext from "@/pages/home/home.context";

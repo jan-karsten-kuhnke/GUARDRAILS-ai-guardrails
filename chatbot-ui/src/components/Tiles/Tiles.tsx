@@ -60,10 +60,12 @@ const Tiles: FC = () => {
   });
   },[])
 
+  
   const getIcon = (val:string) => {
     type ObjectKey = keyof typeof Icons;
     const myVar = val as ObjectKey;
     const Icon   = Icons[myVar];
+    //@ts-ignore
     return React.createElement(Icon,{size:50})
   }
 

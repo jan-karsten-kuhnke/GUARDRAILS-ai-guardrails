@@ -6,13 +6,13 @@ import { getValidVegaSpec } from "./getValidSpec";
 
 interface ReactVegaProps {
     content: any;
-    dataset?: IDataset;
+    dataset?: any;
 }
 
 const Visualization: React.FC<ReactVegaProps> = ({ content, dataset }) => {
 
-    const spec :any = getValidVegaSpec(content, dataset as IDataset);
-    const data=dataset?.dataSource ?? [];
+    const spec :any = JSON.parse(content);
+    const data=JSON.parse(dataset);
 
     const container = useRef<HTMLDivElement>(null);
 

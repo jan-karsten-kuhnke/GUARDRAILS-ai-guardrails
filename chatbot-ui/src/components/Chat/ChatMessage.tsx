@@ -337,8 +337,8 @@ export const ChatMessage: FC<Props> = memo(
                   </Box>
                 ) : 
                  <>
-                  {message.msg_info?.visualizations ? (
-                    <Visualization content={message.msg_info?.visualizations } dataset={message.msg_info?.dataset  as IDataset} />
+                  {message.msg_info?.visualization ? (
+                    <Visualization content={message.msg_info?.visualization } dataset={message.msg_info?.dataset} />
                     )
                     :( <AssistantMessage content={message.content} />)
                   }
