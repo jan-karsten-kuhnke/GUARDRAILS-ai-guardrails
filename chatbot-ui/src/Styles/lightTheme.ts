@@ -22,8 +22,8 @@ export const lightTheme = {
   chatItemsBorder: "border border-neutral-200",
   chatTitleTheme:
     "border border-b-neutral-300 bg-neutral-100  text-neutral-500",
-  tilesHoverTheme: "hover:bg-[#23b4c3] hover:text-white",
-  tileSelectedTheme: "bg-[#23b4c3] text-white",
+  tilesHoverTheme: "hover:bg-[#d8f5ff]",
+  tileSelectedTheme: "bg-[#1c96a3] text-white",
   publicPrivateSwitchTheme: "text-neutral-500",
   switchTheme: {
     Bg: "#75777A",
@@ -46,7 +46,10 @@ export const lightTheme = {
   },
   modalDialogTheme:
     "bg-[#ffffff] text-[#75777A] border-l-2 border-r-2 border-gray-300",
-  customDataGridTheme: {
-    bGcolor: "#1c96a3",
-  },
+  dataGridTheme: {
+    primaryColor: "#18B4EA",
+    bgColor: "white",
+    color: "black",
+    disabledIconColor: "#BBBBBB",
+  }
 };

@@ -23,6 +23,7 @@ const CustomSwitch = styled((props: SwitchProps) => {
         focusVisibleClassName=".Mui-focusVisible"
         disableRipple
         {...props}
+        disabled
       />
   );
   })
@@ -95,6 +96,7 @@ const PublicPrivateSwitch: FC<Props> = ({ size }) => {
               sx={{ m: 1 }}
               checked={isPrivate}
               onChange={handleChange}
+              // disabled
             />
           </IconButton>
         </Tooltip>

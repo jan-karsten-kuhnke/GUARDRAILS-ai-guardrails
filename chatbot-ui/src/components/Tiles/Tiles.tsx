@@ -13,7 +13,6 @@ const Tiles: FC = () => {
     handleSelectedTile,
     dispatch
   } = useContext(HomeContext);
-
   const scrl = useRef<HTMLDivElement>(null);
   const [scrollX, setscrollX] = useState(0);
   const [scrolEnd, setscrolEnd] = useState(false);
@@ -55,9 +54,16 @@ const Tiles: FC = () => {
   };
 
   useEffect(() => {
-  getTiles().then((res) => {
-    if(res && res.data && res.data) dispatch({ field: "tiles", value: res.data });
-  });
+    if(tiles.length) return;
+    console.log("fetching tiles");
+    getTiles().then((res) => {
+      if(res && res.data) {
+        dispatch({ field: "tiles", value: res.data });
+        dispatch({ field: "selectedTile", value: res.data[0] ?? {} });
+        console.log("tiles fetched");
+      }
+    });
+
   },[])
 
   
@@ -86,11 +92,11 @@ const Tiles: FC = () => {
         onScroll={scrollCheck}
         className="flex gap-5 overflow-x-scroll p-3 scroll-smooth hideScrollBar"
       >
-        {tiles.map((curr_tile, index) => (
+        {tiles && tiles.map((curr_tile, index) => (
           <div
             key={index}
-            className={`flex flex-col gap-5 justify-center  rounded-lg  p-4  cursor-pointer ${theme.tilesHoverTheme} ${theme.textColorSecondary} ${theme.chatItemsBorder} ${
-              selectedTile === curr_tile && theme.tileSelectedTheme
+            className={`flex flex-col gap-5 justify-center  rounded-lg  p-4  cursor-pointer ${selectedTile.code !== curr_tile.code && theme.tilesHoverTheme} ${theme.textColorSecondary} ${theme.chatItemsBorder} ${
+              selectedTile.code === curr_tile.code && theme.tileSelectedTheme
             } ${!curr_tile.is_active && "opacity-30"}`}
             onClick={(e) => {
               if(!curr_tile.is_active) return;
