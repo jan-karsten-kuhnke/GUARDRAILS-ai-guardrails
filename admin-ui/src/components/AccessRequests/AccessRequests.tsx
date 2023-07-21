@@ -54,12 +54,12 @@ export const AccessRequests = () => {
       sortable: false,
     },
     { field: "tile_name", headerName: "Tile Name", flex: 4, sortable: false },
-    { field: "status", headerName: "Status", flex: 4, sortable: false },
+    { field: "status", headerName: "Status", flex: 3, sortable: false },
     {
       field: "actions",
       headerName: "Actions",
       sortable: false,
-      flex: 2,
+      flex: 3,
       width: 100,
       renderCell: (params: any) =>
         params.row.status == "Pending" ? (
