@@ -3,9 +3,9 @@ import { Tile } from "../../types/tiles";
 import HomeContext from "@/pages/home/home.context";
 import { useContext } from "react";
 import "./styles.scss";
-import { getTiles } from "@/services";
+import { RequestAccess, getTiles } from "@/services";
 import { IconChevronRight, IconChevronLeft } from "@tabler/icons-react";
-import * as Icons from '@tabler/icons-react'; 
+import * as Icons from '@tabler/icons-react';
 
 const Tiles: FC = () => {
   const {
@@ -16,6 +16,7 @@ const Tiles: FC = () => {
   const scrl = useRef<HTMLDivElement>(null);
   const [scrollX, setscrollX] = useState(0);
   const [scrolEnd, setscrolEnd] = useState(false);
+
 
   //Slide click
   const slide = (shift: number) => {
@@ -54,25 +55,24 @@ const Tiles: FC = () => {
   };
 
   useEffect(() => {
-    if(tiles.length) return;
-    console.log("fetching tiles");
+    if (tiles.length) return;
     getTiles().then((res) => {
-      if(res && res.data) {
-        dispatch({ field: "tiles", value: res.data });
-        dispatch({ field: "selectedTile", value: res.data[0] ?? {} });
-        console.log("tiles fetched");
+      if (res && res.data) {
+        let defaultTile = res.data.find((item: Tile) => item.code === "conversation")
+        let sortedData = res.data.sort((a: any, b: any) => Number(b.has_access) - Number(a.has_access))
+        dispatch({ field: "tiles", value: sortedData });
+        dispatch({ field: "selectedTile", value: defaultTile ?? {} });
       }
     });
+  }, [])
 
-  },[])
 
-  
-  const getIcon = (val:string) => {
+  const getIcon = (val: string) => {
     type ObjectKey = keyof typeof Icons;
     const myVar = val as ObjectKey;
-    const Icon   = Icons[myVar];
+    const Icon = Icons[myVar];
     //@ts-ignore
-    return React.createElement(Icon,{size:50})
+    return React.createElement(Icon, { size: 50 })
   }
 
   return (
@@ -90,16 +90,22 @@ const Tiles: FC = () => {
       <div
         ref={scrl}
         onScroll={scrollCheck}
-        className="flex gap-5 overflow-x-scroll p-3 scroll-smooth hideScrollBar"
+        className="flex gap-5 overflow-x-scroll p-3 scroll-smooth hideScrollBar pos-relative"
       >
         {tiles && tiles.map((curr_tile, index) => (
           <div
             key={index}
-            className={`flex flex-col gap-5 justify-center  rounded-lg  p-4  cursor-pointer ${selectedTile.code !== curr_tile.code && theme.tilesHoverTheme} ${theme.textColorSecondary} ${theme.chatItemsBorder} ${
-              selectedTile.code === curr_tile.code && theme.tileSelectedTheme
-            } ${!curr_tile.is_active && "opacity-30"}`}
+            className={
+              `flex flex-col gap-5 justify-center rounded-lg p-4 cursor-pointer tile
+              ${selectedTile.code !== curr_tile.code && theme.tilesHoverTheme}
+              ${theme.textColorSecondary}
+              ${theme.chatItemsBorder}
+              ${selectedTile.code === curr_tile.code && theme.tileSelectedTheme}
+              ${!curr_tile.is_active && "opacity-30"}
+              ${!curr_tile.has_access && 'disabled-tile'}`
+            }
             onClick={(e) => {
-              if(!curr_tile.is_active) return;
+              if (!curr_tile.is_active) return;
               handleTileSelect(curr_tile);
             }}
           >

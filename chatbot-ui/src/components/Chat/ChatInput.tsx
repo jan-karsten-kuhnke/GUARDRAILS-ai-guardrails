@@ -53,7 +53,7 @@ export const ChatInput = ({
 
 }: Props) => {
   const {
-    state: { selectedConversation, messageIsStreaming, prompts,theme },
+    state: { selectedConversation, messageIsStreaming, prompts, theme, selectedTile },
 
     dispatch: homeDispatch,
   } = useContext(HomeContext);
@@ -66,7 +66,7 @@ export const ChatInput = ({
   const [variables, setVariables] = useState<string[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [showPluginSelect, setShowPluginSelect] = useState(false);
-  
+
   const [analysisResponse, setAnalysisResponse] = useState<AnalysisObject[]>(
     []
   );
@@ -118,10 +118,10 @@ export const ChatInput = ({
           }
         }
       })
-      .catch((err:any) => {
-        toast.error(err.message,{
-          position:"bottom-right",
-          duration:3000
+      .catch((err: any) => {
+        toast.error(err.message, {
+          position: "bottom-right",
+          duration: 3000
         })
         console.log(err.message, "API ERROR");
       })
@@ -137,7 +137,7 @@ export const ChatInput = ({
       return;
     }
 
-    onSend({ role: "user", content: content , msg_info: null, userActionRequired: false });
+    onSend({ role: "user", content: content, msg_info: null, userActionRequired: false });
     setContent("");
 
     if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
@@ -176,8 +176,7 @@ export const ChatInput = ({
   };
 
   const toggleShowPluginSelect = () => {
-    if(selectedConversation?.messages?.length && showPluginSelect == false)
-    {
+    if (selectedConversation?.messages?.length && showPluginSelect == false) {
       return
     }
     setShowPluginSelect(!showPluginSelect)
@@ -328,7 +327,7 @@ export const ChatInput = ({
             <IconPlayerStop size={16} /> {"Stop Generating"}
           </button>
         )} */}
-{/* 
+        {/* 
         {!messageIsStreaming && !selectedConversation?.archived &&
           selectedConversation &&
           selectedConversation.messages.length > 0 && (
@@ -374,15 +373,16 @@ export const ChatInput = ({
           )} */}
 
           <textarea
-            ref={textareaRef} disabled={selectedConversation?.archived}
+            ref={textareaRef}
+            disabled={selectedConversation?.archived || !selectedTile?.has_access}
             className={`m-0 w-full resize-none  p-0 py-2 pr-8 pl-10 md:py-3 md:pl-10 ${theme.chatTextAreaTheme}`}
             style={{
               resize: "none",
               bottom: `${textareaRef?.current?.scrollHeight}px`,
               maxHeight: "400px",
               overflow: `${textareaRef.current && textareaRef.current.scrollHeight > 400
-                  ? "auto"
-                  : "hidden"
+                ? "auto"
+                : "hidden"
                 }`,
             }}
             placeholder={
@@ -442,7 +442,7 @@ export const ChatInput = ({
       </div>
       <div className={`px-3 pt-2 pb-3 text-center text-[12px] md:px-4 md:pt-3 md:pb-6 ${theme.textColorSecondary}`}>
         {applicationName}
-        <Chip label="Beta" variant="outlined" size="small" style={{ borderColor: '#DA9B14', color: '#DA9B14' ,width:'39px',height:'15px',fontSize:'10px', margin:'2px'}} />
+        <Chip label="Beta" variant="outlined" size="small" style={{ borderColor: '#DA9B14', color: '#DA9B14', width: '39px', height: '15px', fontSize: '10px', margin: '2px' }} />
         lets your organisation use public LLM models in a safe and secure way, ensuring your corporate confidential information remains protected.
       </div>
     </div>

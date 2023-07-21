@@ -6,14 +6,14 @@ import HomeContext from "@/pages/home/home.context";
 
 interface Props {
   inputs: [{
-    key : string,type:string
+    key: string, type: string
   }];
   handleSend: Function;
 }
 
 const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
   const {
-    state: { theme },
+    state: { theme, selectedTile },
   } = useContext(HomeContext);
 
   const handleDocumentUpload = async (
@@ -24,16 +24,16 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
       return;
     }
 
-    const formData = new FormData(); 
+    const formData = new FormData();
     formData.append("files", files[0]);
-    
+
     let message: Message = {
       role: "user",
       content: `Summarize ${files[0].name}`,
       userActionRequired: false,
       msg_info: null
     }
-    handleSend(message,0,false,formData);
+    handleSend(message, 0, false, formData);
   };
 
   return (
@@ -41,16 +41,18 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
       {inputs.map((input, index) => {
         if (input.key === "files" && input.type === "fileInput") {
           return (
-              <label  key={index} className={`flex gap-1 items-center w-32 p-2.5 rounded-md ${theme.secondaryButtonTheme} cursor-pointer`}>
-                <IconUpload />
-                Upload File
+            <label key={index} className={`flex gap-1 items-center w-32 p-2.5 rounded-md ${selectedTile.has_access && theme.secondaryButtonTheme} 
+            ${selectedTile.has_access ? 'cursor-pointer' : 'cursor-not-allowed text-gray-400'}`}>
+              <IconUpload />
+              Upload File
+              {selectedTile.has_access ?
                 <input
                   type="file"
                   accept=".pdf "
                   hidden
                   onChange={handleDocumentUpload}
-                />
-              </label>
+                /> : ""}
+            </label>
 
           );
         }
