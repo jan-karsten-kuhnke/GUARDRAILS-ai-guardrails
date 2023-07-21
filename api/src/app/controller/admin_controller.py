@@ -176,3 +176,25 @@ def reject_escalation(conversation_id):
     user_email = request.json
     data=admin_service.reject_escalation( conversation_id, user_email )
     return data,200
+
+
+@adminendpoints.route('/approval_requests', methods=['GET'])
+@oidc.accept_token(require_token=True)
+def get_all_access_request_list():
+    # sort = request.args.get('sort', default=None, type=str)
+    # range_ = request.args.get('range', default=None, type=str)
+    # filter_ = request.args.get('filter', default=None, type=str)
+    # user_email = get_current_user_email()
+
+    data=admin_service.get_all_access_request_list()
+    return data,200
+
+@adminendpoints.route('/complete_request', methods=['POST'])
+@oidc.accept_token(require_token=True)
+def complete_request():
+    data = request.json
+    request_id = data['request_id']
+    approved = data['approved']
+    admin_service.complete_request(request_id, approved)
+
+    
