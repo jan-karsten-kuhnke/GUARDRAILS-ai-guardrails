@@ -17,6 +17,10 @@ class Globals:
     METRIC_DB_URL =os.environ.get("METRIC_DB_URI")
     METRIC_SCHEMA = os.environ.get("METRIC_SCHEMA")
 
+    #Flowable
+    FLOWABLE_BASE_URL = os.environ.get("FLOWABLE_BASE_URL")
+    FLOWABLE_KEY = os.environ.get("FLOWABLE_KEY")
+    FlOWABLE_ADMIN_USERNAME = os.environ.get("FLOWABLE_ADMIN_USERNAME")
     
      #Embeddings 
 

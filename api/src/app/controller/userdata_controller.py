@@ -59,3 +59,12 @@ def get_tiles():
 def get_tile_by_code(code):
     user_email = get_current_user_email()
     return userdata_service.get_tile_by_code(user_email,code)
+
+
+@userdataendpoints.route('/tiles/access', methods=['POST'])
+@oidc.accept_token(require_token=True)
+def request_access():
+    data = request.get_json()
+    user_email = get_current_user_email()
+    return userdata_service.request_tile_by_code(user_email,data['tile_code'],data['tile_name'])
+
