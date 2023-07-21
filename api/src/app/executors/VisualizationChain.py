@@ -27,9 +27,10 @@ class VisualizationChain:
     Question: {input}"""
 
     _DEFAULT_TEMPLATE = """Given an input question, first create a syntactically correct {dialect} query to run, then look at the results of the query and return the answer.
-    Unless the user specifies in his question a specific number of examples he wishes to obtain, always limit your query to at most {top_k} results.
     You can order the results by a relevant column to return the most interesting examples in the database.
-    Pay attention to the following details while creating the query:
+    Pay attention to the following details while creating the query and consider all the points below :
+     -Unless the user specifies in his question a specific number of examples he wishes to obtain, always limit your query to at most {top_k} results.
+     - Try to build the simplest query to solve the problem.
     - DO NOT CREATE ANY QUERIES THAT CAN MANIPULATE THE DATABASE, like INSERT, UPDATE, DELETE, ALTER, if the user asks for a query that manipulates the database, return an error message in the answer.
     - Use Aggregations if required to answer questions on the basis of the question.
     - When creating aliases and then using those aliases to create joins, make sure that the aliases are unique.
@@ -84,12 +85,12 @@ class VisualizationChain:
             logging.info(f"using private model: {Globals.private_model_type}")
             chain = SQLDatabaseSequentialChain.from_llm(
                 self.private_llm, db, verbose=True, return_intermediate_steps=True,
-                query_prompt=self.PROMPT,**{'top_k':1000}
+                query_prompt=self.PROMPT,**{'top_k':50}
             )
         else:
             logging.info(f"using public model: {Globals.public_model_type}")
             chain = SQLDatabaseSequentialChain.from_llm(
-                self.public_llm, db, verbose=True, return_intermediate_steps=True, query_prompt=self.PROMPT,**{'top_k':1000}
+                self.public_llm, db, verbose=True, return_intermediate_steps=True, query_prompt=self.PROMPT,**{'top_k':50}
             )
 
         sources = []

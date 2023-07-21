@@ -32,7 +32,7 @@ export interface HomeInitialState {
   refreshConversations: boolean;
   isArchiveView: boolean;
   isPrivate:boolean;
-  selectedTile: Tile;
+  selectedTile: Tile | any;
   tiles: Tile[]
 }
 
