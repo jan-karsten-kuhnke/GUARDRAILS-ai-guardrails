@@ -10,6 +10,7 @@ from typing import Any
 import logging
 from langchain.chains import SQLDatabaseSequentialChain
 from executors.SqlWrapper import SqlWrapper
+from langchain.output_parsers.list import CommaSeparatedListOutputParser
 
 
 class SqlChain:
@@ -22,33 +23,58 @@ class SqlChain:
 
     Question: {input}"""
 
-    _DEFAULT_TEMPLATE = """Given an input question, first create a syntactically correct {dialect} query to run, then look at the results of the query and return the answer.
-    Unless the user specifies in his question a specific number of examples he wishes to obtain, always limit your query to at most {top_k} results.
-    You can order the results by a relevant column to return the most interesting examples in the database.
-    Pay attention to the following details while creating the query:
-    - DO NOT CREATE ANY QUERIES THAT CAN MANIPULATE THE DATABASE, like INSERT, UPDATE, DELETE, ALTER, if the user asks for a query that manipulates the database, return an error message in the answer.
-    - Use Aggregations if required to answer questions on the basis of the question.
-    - When creating aliases and then using those aliases to create joins, make sure that the aliases are unique.
-    - When using aliases to refer to the columns of that table, make sure to use the correct alias names.
-    - When 2 tables have the same column name, make sure to build the query in such a way that there is no ambiguity in which column is being referred to.
-    - Try to not use subqueries unless absolutely necessary.
-    - When querying on the metric_values table, always use metrics table as a reference to get the correct metric_id.
-    - If using subquery in the having clause, make sure the subquery returns only one row. 
-    - Always terminate your SQL Query with a semi-colon
-    - When  building a query , always include the name columns of the entity instead of the entity id in the select clause.
-    - If the result dataset is more than 20 rows, return only the top 5 rows, as a markdown table and ignore the rest of the rows, also add the following statement to the response 'Result dataset is too large, showing only the top 5 rows, please use the query in a sql agent to see the full result dataset.'
-    Never query for all the columns from a specific table, only ask for a the few relevant columns given the question.
+    _DEFAULT_TEMPLATE = """Given an input question, the SQL Agent should create a syntactically correct {dialect} query to run and return the answer based on the query results.
 
+Here are the guidelines for building the query:
 
-    Pay attention to use only the column names that you can see in the schema description. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table.
+1. Always limit the query to at most {top_k} results, unless the user specifies a specific number of examples they wish to obtain.
+2. Order the results by a relevant column to return the most interesting examples in the database.
+3. Do NOT create any queries that can manipulate the database, such as INSERT, UPDATE, DELETE, ALTER. If the user asks for a query that manipulates the database, return an error message in the answer.
+4. Use the correct join type and join condition when using joins. Make sure to refer to the correct column names.
+5. Handle situations where two tables have the same column name to avoid ambiguity in the query.
+6. Utilize subqueries to break down the problem into smaller steps when necessary.
+7. For string comparisons, perform a lookup in the table to find the best match for the string, and then use the ID of the best match in the query.
+8. Always terminate the SQL Query with a semi-colon.
+9. In the resultset, include the name columns of the entity instead of the entity ID in the select clause.
+10. If the result dataset is more than 20 rows, return only the top 5 rows as a markdown table and ignore the rest of the rows. Add the following statement to the response: 'Result dataset is too large, showing only a part of the resultset, please use the query in a SQL agent to see the full result dataset.'
+11. Never query for all the columns from a specific table; only ask for a few relevant columns given the question.
+12. Pay attention to using only the column names visible in the schema description. Avoid querying for columns that do not exist. Also, be mindful of which column is in which table.
 
-    Use the following format:
+Use the following format for the query:
+
 
     Question: Question here
     SQLQuery: SQL Query to run
     SQLResult: Result of the SQLQuery
     Answer: Final answer here
     """
+
+
+    _DECIDER_TEMPLATE = """Given the below input question and list of  tables that could be used to get the results, consider the following instructions which will be used to generate a query, based on the input, list of tables and the instructions,  output a comma separated list of the table names that may be necessary to answer this question.
+
+    Instructions:
+    2. Order the results by a relevant column to return the most interesting examples in the database.
+    3. Do NOT create any queries that can manipulate the database, such as INSERT, UPDATE, DELETE, ALTER. If the user asks for a query that manipulates the database, return an error message in the answer.
+    4. Use the correct join type and join condition when using joins. Make sure to refer to the correct column names.
+    5. Handle situations where two tables have the same column name to avoid ambiguity in the query.
+    6. Utilize subqueries to break down the problem into smaller steps when necessary.
+    7. For string comparisons, perform a lookup in the table to find the best match for the string, and then use the ID of the best match in the query.
+    8. Always terminate the SQL Query with a semi-colon.
+    9. In the resultset, include the name columns of the entity instead of the entity ID in the select clause.
+    10. If the result dataset is more than 20 rows, return only the top 5 rows as a markdown table and ignore the rest of the rows. Add the following statement to the response: 'Result dataset is too large, showing only a part of the resultset, please use the query in a SQL agent to see the full result dataset.'
+    11. Never query for all the columns from a specific table; only ask for a few relevant columns given the question.
+    12. Pay attention to using only the column names visible in the schema description. Avoid querying for columns that do not exist. Also, be mindful of which column is in which table.
+
+    Question: {query}
+
+    Table Names: {table_names}
+
+    Relevant Table Names:"""
+    DECIDER_PROMPT = PromptTemplate(
+        input_variables=["query", "table_names"],
+        template=_DECIDER_TEMPLATE,
+        output_parser=CommaSeparatedListOutputParser(),
+    )
 
     PROMPT = PromptTemplate(
         input_variables=["input", "table_info", "dialect", "top_k"],
@@ -79,13 +105,13 @@ class SqlChain:
         if is_private:
             logging.info(f"using private model: {Globals.private_model_type}")
             chain = SQLDatabaseSequentialChain.from_llm(
-                self.private_llm, db, verbose=True, return_intermediate_steps=True,
-                query_prompt=self.PROMPT,**{'top_k':10}
+                self.private_llm, db, verbose=True, return_intermediate_steps=True,decider_prompt=SqlChain.DECIDER_PROMPT,
+                query_prompt=SqlChain.PROMPT ,**{'top_k':10}
             )
         else:
             logging.info(f"using public model: {Globals.public_model_type}")
             chain = SQLDatabaseSequentialChain.from_llm(
-                self.public_llm, db, verbose=True, return_intermediate_steps=True, query_prompt=self.PROMPT,**{'top_k':10}
+                self.public_llm, db, verbose=True, return_intermediate_steps=True, query_prompt=self.PROMPT,**{'top_k':10},decider_prompt=SqlChain.DECIDER_PROMPT
             )
 
         sources = []

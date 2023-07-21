@@ -23,7 +23,7 @@ class ConversationalChain:
     callbacks = [StreamingStdOutCallbackHandler()]
 
     if Globals.public_model_type == "OpenAI":
-        public_llm = ChatOpenAI(callbacks=callbacks, verbose=False, temperature=temp,max_tokens=1000)
+        public_llm = ChatOpenAI(callbacks=callbacks, verbose=False, temperature=temp,max_tokens=1000, model= "gpt-3.5-turbo-16k")
     elif Globals.public_model_type == "VertexAI":
         public_llm = VertexAI(max_output_tokens=1000)
     private_llm = public_llm

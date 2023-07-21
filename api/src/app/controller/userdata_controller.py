@@ -61,7 +61,7 @@ def get_tile_by_code(code):
     return userdata_service.get_tile_by_code(user_email,code)
 
 
-@userdataendpoints.route('/tiles/access', methods=['POST'])
+@userdataendpoints.route('/access_request', methods=['POST'])
 @oidc.accept_token(require_token=True)
 def request_access():
     data = request.get_json()
