@@ -19,7 +19,7 @@ export const darkTheme = {
   chatBackground: "bg-[#343541]",
   chatItemsBorder: "border border-neutral-600",
   chatTitleTheme: "bg-[#444654] text-neutral-200",
-  tilesHoverTheme: "hover:bg-[#202123]",
+  tilesHoverTheme: "hover:bg-[#2d2f32]",
   tileSelectedTheme: "bg-[#202123]",
   publicPrivateSwitchTheme: "text-neutral-400",
   switchTheme: {
@@ -43,8 +43,11 @@ export const darkTheme = {
     scrollBarTrack: "white",
     scrollBarThumbHover: "#7e7e7e",
   },
-  modalDialogTheme: "bg-[#202123] text-[#ffffff] ",
-  customDataGridTheme: {
-    bGcolor: "#343541",
-  },
+  modalDialogTheme: "bg-[#202123] text-[#ffffff]",
+  dataGridTheme: {
+    primaryColor: "#fff",
+    bgColor: "#202123",
+    color: "white",
+    disabledIconColor: "#5A5A5A",
+  }
 };

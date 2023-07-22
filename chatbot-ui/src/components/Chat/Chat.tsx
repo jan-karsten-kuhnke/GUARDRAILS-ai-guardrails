@@ -29,11 +29,12 @@ import { ModelSelect } from "./ModelSelect";
 import { SystemPrompt } from "./SystemPrompt";
 import { TemperatureSlider } from "./Temperature";
 import { MemoizedChatMessage } from "./MemoizedChatMessage";
-import { anonymizeMessage, fetchPrompt, requestApproval } from "@/services";
+import { RequestAccess, anonymizeMessage, fetchPrompt, requestApproval } from "@/services";
 import PublicPrivateSwitch from "../PublicPrivateSwitch";
 import AdditionalInputs from "../AdditionalInputs/AdditionalInputs";
 import { summarizeBrief } from "@/services";
-import  Tiles from "../Tiles/Tiles";
+import Tiles from "../Tiles/Tiles";
+import RequestAccessComponent from "../Tiles/RequestAccess";
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -80,7 +81,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSend = useCallback(
-    async (message: Message, deleteCount = 0, isOverRide: boolean = false , formData : FormData = new FormData()) => {
+    async (message: Message, deleteCount = 0, isOverRide: boolean = false, formData: FormData = new FormData()) => {
       if (containsOnlyWhitespacesOrNewlines(message.content)) return;
       message.content = message.content.trim();
       if (selectedTile.code === "conversation") {
@@ -127,12 +128,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         const controller = new AbortController();
         let response: any;
 
-        if(selectedTile.code === "summarize-brief" || selectedTile.code === "extraction"){
+        if (selectedTile.code === "summarize-brief" || selectedTile.code === "extraction") {
           try {
             const payload = {
-            conversation_id: selectedConversation.id,
-            isOverride: isOverRide,
-            task: selectedTile.code,
+              conversation_id: selectedConversation.id,
+              isOverride: isOverRide,
+              task: selectedTile.code,
             }
             formData.append("data", JSON.stringify(payload));
             toast.loading("Summarization might be a time taking process depending on the size of your document", {
@@ -148,7 +149,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             console.log(err)
           }
         }
-        else{
+        else {
           if (isOverRide) {
             try {
               response = await fetchPrompt(
@@ -456,17 +457,22 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   )}
                 </div>
                 <div className={`flex w-full w-full justify-center rounded-lg py-2 ${theme.chatItemsBorder}`}>
-                  <Tiles/>
+                  <Tiles />
                 </div>
+                {!selectedTile?.has_access ?
+                  <div className={`flex w-full w-full justify-center rounded-lg py-2 ${theme.chatItemsBorder}`}>
+                    <RequestAccessComponent />
+                  </div> : ""}
                 {selectedTile?.params && selectedTile?.params?.inputs?.length > 0 && (
                   <div className={`w-full justify-center rounded-lg p-4 ${theme.chatItemsBorder}`}>
                     <AdditionalInputs inputs={selectedTile?.params?.inputs} handleSend={handleSend} />
                   </div>
                 )}
-                <div className={`w-full justify-center rounded-lg p-4 ${theme.chatItemsBorder}`}>
-                  <PublicPrivateSwitch size={40} />
-                </div>
-{/* 
+                {selectedTile?.has_access ?
+                  <div className={`w-full justify-center rounded-lg p-4 ${theme.chatItemsBorder}`}>
+                    <PublicPrivateSwitch size={40} />
+                  </div> : ""}
+                {/* 
                 {models.length > 0 && (
                   <div className={`flex h-full flex-col space-y-4 rounded-lg p-4 ${theme.chatItemsBorder}`}>
                     <ModelSelect />
@@ -558,8 +564,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             </>
           )}
         </div>
-          {selectedTile?.code != "summarize-brief" && 
-            <ChatInput
+        {selectedTile?.code != "summarize-brief" &&
+          <ChatInput
             stopConversationRef={stopConversationRef}
             textareaRef={textareaRef}
             onSend={(message) => {
@@ -568,12 +574,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             }}
             onScrollDownClick={handleScrollDown}
             onRegenerate={() => {
-                if (currentMessage) {
-                  handleSend(currentMessage, 2);
-                }
-              }}
-              showScrollDownButton={showScrollDownButton}
-            />
+              if (currentMessage) {
+                handleSend(currentMessage, 2);
+              }
+            }}
+            showScrollDownButton={showScrollDownButton}
+          />
         }
       </>
     </div>

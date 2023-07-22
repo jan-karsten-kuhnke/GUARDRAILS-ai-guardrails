@@ -72,8 +72,10 @@ class admin_service:
                 if d['tile'] == chain['code']:
                     d['tile_name'] = chain['title']
                     break
-
-        return data
+                
+        sorted_data = sorted(data, key=lambda item:(item["status"]), reverse=True)
+        formatted_data={"rows":sorted_data,"totalRows":len(data)}
+        return {"data":formatted_data,"success":True,"message":"Successfully retrieved the data"}
     
     def complete_request(request_id, approved:bool):
         flowable_wrapper.complete_request(request_id, approved)

@@ -23,6 +23,7 @@ import PsychologyOutlinedIcon from '@mui/icons-material/PsychologyOutlined';
 import ReportOutlinedIcon from '@mui/icons-material/ReportOutlined';
 import ResetTvOutlinedIcon from '@mui/icons-material/ResetTvOutlined';
 import SummarizeOutlinedIcon from '@mui/icons-material/SummarizeOutlined';
+import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 import { useState } from "react";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
@@ -142,6 +143,11 @@ export const SidebarItems = () => {
       name: "Private Documents",
       link: "/private-documents",
       icon: <SummarizeOutlinedIcon sx={{ color: "white" }}/>,
+    },
+    {
+      name: "Access Requests",
+      link: "/access-requests",
+      icon: <AdminPanelSettingsOutlinedIcon sx={{ color: "white" }}/>,
     }
   ];
   const [sidebarList, setSidebarList] = useState(initialSidebarList);

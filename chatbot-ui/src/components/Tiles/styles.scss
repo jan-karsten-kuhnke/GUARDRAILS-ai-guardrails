@@ -1,8 +1,34 @@
 .hideScrollBar {
-    &::-webkit-scrollbar {
-        background : transparent; /* make scrollbar transparent */
-        -webkit-appearance: none;
-        width: 0;
-        height: 0;
-      }
+  &::-webkit-scrollbar {
+    background: transparent;
+    /* make scrollbar transparent */
+    -webkit-appearance: none;
+    width: 0;
+    height: 0;
+  }
+}
+
+.disabled-tile {
+  opacity: 0.5;
+}
+
+.tile {
+  height: 200px;
+  align-items: center;
+}
+
+.request_btn {
+  border-radius: 12px;
+  padding: 10px 8px;
+}
+
+.disable_request_btn {
+  @extend .request_btn;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pos-relative {
+  position: relative;
+  align-items: center;
 }

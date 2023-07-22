@@ -47,3 +47,7 @@ export const approveEscalation = ( conversationId:string, user_email:string ) =>
 export const rejectEscalation = ( conversationId:string, user_email:string ) => {
   return _axios.put(`/reject_escalation/${conversationId}`, user_email);
 }
+
+export const accessRequests= ( request_id:string, approved:boolean ) => {
+  return _axios.post('/complete_request', {request_id, approved});
+}

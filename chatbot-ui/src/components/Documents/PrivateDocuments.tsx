@@ -67,8 +67,9 @@ export const PrivateDocuments = () => {
         <Button
           variant="outlined"
           size="small"
-          sx={{ backgroundColor: '#ba071f', color: 'white', fontSize: '12px' 
-          ,padding: '3px',textTransform: 'Capitalize', borderColor: '#ba071f'}}
+          color="error"
+          sx={{  fontSize: '12px' 
+          ,padding: '3px',textTransform: 'Capitalize'}}
           onClick={() => handleDelete(params.row.id)}
         >
           Delete

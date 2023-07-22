@@ -14,17 +14,15 @@ const MainComponent = (props: any) => {
       <Helmet>
         <title>{title}</title>
       </Helmet>
-      <React.StrictMode>
-        <AuthContext.Provider
-          value={{
-            userInfo: props.userInfo,
-            logout: props.doLogout,
-            hasRole: props.hasRole
-          }}
-        >
-          <App />
-        </AuthContext.Provider>
-      </React.StrictMode>
+      <AuthContext.Provider
+        value={{
+          userInfo: props.userInfo,
+          logout: props.doLogout,
+          hasRole: props.hasRole
+        }}
+      >
+        <App />
+      </AuthContext.Provider>
     </>
   )
 }

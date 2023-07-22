@@ -19,7 +19,7 @@ _axios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   // eslint-disable-next-line no-param-reassign
   config.headers.Authorization = `Bearer ${AuthService.getToken()}`;
   config.headers["Content-Type"] = "application/json";
-  if(config.url=='/chat/summarizebrief' && config.method=='post'){
+  if (config.url == '/chat/summarizebrief' && config.method == 'post') {
     config.headers["Content-Type"] = "multipart/form-data";
   }
   config.headers["Access-Control-Allow-Origin"] = "*";
@@ -46,11 +46,11 @@ export const fetchPrompt = (
     body: JSON.stringify(
       conversationId
         ? {
-            message: message,
-            conversation_id: conversationId,
-            isOverride: isOverride,
-            task: task,
-          }
+          message: message,
+          conversation_id: conversationId,
+          isOverride: isOverride,
+          task: task,
+        }
         : { message: message }
     ),
   });
@@ -132,4 +132,8 @@ export const updateUserPrompts = (prompts: any) => {
 
 export const getTiles = () => {
   return _axios.get(`/user/tiles`);
+};
+
+export const RequestAccess = (params: any) => {
+  return _axios.post(`/user/access_request`, params);
 };
