@@ -1,7 +1,5 @@
 import { useEffect, useRef } from "react";
 import embed, { vega } from 'vega-embed';
-import { IRow,IDataset } from "./getValidSpec";
-import { getValidVegaSpec } from "./getValidSpec";
 
 
 interface ReactVegaProps {

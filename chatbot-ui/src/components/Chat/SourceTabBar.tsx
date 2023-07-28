@@ -13,7 +13,9 @@ export interface TabsProps {
 
 export const SourceTabBar: FC<TabsProps> = ({ sources }) => {
   const [value, setValue] = useState("0");
-  const { state : { theme } } = useContext(HomeContext);
+  const {
+    state: { theme },
+  } = useContext(HomeContext);
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
   };
