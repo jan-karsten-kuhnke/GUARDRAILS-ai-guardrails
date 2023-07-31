@@ -1,16 +1,18 @@
-import HomeContext from '@/pages/home/home.context';
-import { IconRobot } from '@tabler/icons-react';
-import { FC ,useContext} from 'react';
+import HomeContext from "@/pages/home/home.context";
+import { IconRobot } from "@tabler/icons-react";
+import { FC, useContext } from "react";
 
-interface Props { }
+interface Props {}
 
 export const ChatLoader: FC<Props> = () => {
-  const { state : { theme } } = useContext(HomeContext);
+  const {
+    state: { theme },
+  } = useContext(HomeContext);
 
   return (
     <div
       className={`group border-b border-black/10  ${theme.chatMessageTheme}`}
-      style={{ overflowWrap: 'anywhere' }}
+      style={{ overflowWrap: "anywhere" }}
     >
       <div className="m-auto flex gap-4 p-4 text-base md:max-w-2xl md:gap-6 md:py-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl">
         <div className="min-w-[40px] items-end">

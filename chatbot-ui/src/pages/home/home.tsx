@@ -31,13 +31,11 @@ export const Home = () => {
   const stopConversationRef = useRef<boolean>(false);
   const {
     state: {
-      apiKey,
       theme,
       folders,
       conversations,
       selectedConversation,
       prompts,
-      temperature,
       refreshConversations,
       isArchiveView,
     },

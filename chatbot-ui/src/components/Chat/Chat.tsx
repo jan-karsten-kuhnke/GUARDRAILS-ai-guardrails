@@ -1,8 +1,4 @@
 import {
-  IconClearAll,
-  IconSettings,
-} from "@tabler/icons-react";
-import {
   MutableRefObject,
   memo,
   useCallback,
@@ -13,28 +9,22 @@ import {
 } from "react";
 import toast from "react-hot-toast";
 
-// import { getEndpoint } from '@/utils/app/api';
-import { updateConversation } from "@/utils/app/conversation";
 import { throttle } from "@/utils/data/throttle";
-
-import { ChatBody, Conversation, Message } from "@/types/chat";
-
+import { Conversation, Message } from "@/types/chat";
 import HomeContext from "@/pages/home/home.context";
-
-import Spinner from "../Spinner";
 import { ChatInput } from "./ChatInput";
 import { ChatLoader } from "./ChatLoader";
-import { ErrorMessageDiv } from "./ErrorMessageDiv";
-import { ModelSelect } from "./ModelSelect";
-import { SystemPrompt } from "./SystemPrompt";
-import { TemperatureSlider } from "./Temperature";
 import { MemoizedChatMessage } from "./MemoizedChatMessage";
-import { RequestAccess, anonymizeMessage, fetchPrompt, requestApproval } from "@/services";
 import PublicPrivateSwitch from "../PublicPrivateSwitch";
 import AdditionalInputs from "../AdditionalInputs/AdditionalInputs";
-import { summarizeBrief } from "@/services";
 import Tiles from "../Tiles/Tiles";
 import RequestAccessComponent from "../Tiles/RequestAccess";
+import {
+  anonymizeMessage,
+  fetchPrompt,
+  requestApproval,
+  summarizeBrief,
+} from "@/services";
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -52,27 +42,17 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     state: {
       selectedConversation,
       conversations,
-      models,
-      apiKey,
-      pluginKeys,
-      serverSideApiKeyIsSet,
-      messageIsStreaming,
-      modelError,
       theme,
       loading,
-      prompts,
       isPrivate,
       selectedTile,
+      tiles,
     },
-    handleUpdateConversation,
-    handleIsPrivate,
-    handleSelectedTile,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
   const [currentMessage, setCurrentMessage] = useState<Message>();
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
-  const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showScrollDownButton, setShowScrollDownButton] =
     useState<boolean>(false);
 
@@ -81,7 +61,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSend = useCallback(
-    async (message: Message, deleteCount = 0, isOverRide: boolean = false, formData: FormData = new FormData()) => {
+    async (
+      message: Message,
+      deleteCount = 0,
+      isOverRide: boolean = false,
+      formData: FormData = new FormData()
+    ) => {
       if (containsOnlyWhitespacesOrNewlines(message.content)) return;
       message.content = message.content.trim();
       if (selectedTile.code === "conversation") {
@@ -128,28 +113,33 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         const controller = new AbortController();
         let response: any;
 
-        if (selectedTile.code === "summarize-brief" || selectedTile.code === "extraction") {
+        if (
+          selectedTile.code === "summarize-brief" ||
+          selectedTile.code === "extraction"
+        ) {
           try {
             const payload = {
               conversation_id: selectedConversation.id,
               isOverride: isOverRide,
               task: selectedTile.code,
-            }
+            };
             formData.append("data", JSON.stringify(payload));
-            toast.loading("Summarization might be a time taking process depending on the size of your document", {
-              position: "bottom-right",
-              duration: 5000,
-            });
+            toast.loading(
+              "Summarization might be a time taking process depending on the size of your document",
+              {
+                position: "bottom-right",
+                duration: 5000,
+              }
+            );
             response = await summarizeBrief(formData);
           } catch (err: any) {
             toast.error(err.message, {
               position: "bottom-right",
               duration: 3000,
             });
-            console.log(err)
+            console.log(err);
           }
-        }
-        else {
+        } else {
           if (isOverRide) {
             try {
               response = await fetchPrompt(
@@ -309,9 +299,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       }
     },
     [
-      apiKey,
       conversations,
-      pluginKeys,
       selectedConversation,
       stopConversationRef,
       isPrivate,
@@ -375,23 +363,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     });
   };
 
-  // const handleSettings = () => {
-  //   setShowSettings(!showSettings);
-  // };
-
-  // const onClearAll = () => {
-  //   if (
-  //     confirm(('Are you sure you want to clear all messages?')) &&
-  //     selectedConversation
-  //   ) {
-  //     handleUpdateConversation(selectedConversation, {
-  //       key: 'messages',
-  //       value: [],
-  //     });
-  //   }
-  // };
-
-
   const scrollDown = () => {
     if (autoScrollEnabled) {
       messagesEndRef.current?.scrollIntoView(true);
@@ -443,90 +414,62 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             <>
               <div className="mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-5 md:pt-12 sm:max-w-[600px]">
                 <div className="text-center text-3xl font-semibold">
-                  {models.length === 0 ? (
-                    <div className="mx-auto flex h-full w-[300px] flex-col justify-center space-y-6 sm:w-[600px]">
-                      <div className={`text-center text-4xl font-bold ${theme.textColor}`}>
-                        Welcome to {applicationName}
-                      </div>
-                      <div className={`text-center text-2xl font-bold ${theme.textColorSecondary}`}>
-                        Protect your Confidential Information.
-                      </div>
+                  <div className="mx-auto flex h-full w-[300px] flex-col justify-center space-y-6 sm:w-[600px]">
+                    <div
+                      className={`text-center text-4xl font-bold ${theme.textColor}`}
+                    >
+                      Welcome to {applicationName}
                     </div>
-                  ) : (
-                    "Chatbot UI"
-                  )}
+                    <div
+                      className={`text-center text-2xl font-bold ${theme.textColorSecondary}`}
+                    >
+                      Protect your Confidential Information.
+                    </div>
+                  </div>
                 </div>
-                <div className={`flex w-full w-full justify-center rounded-lg py-2 ${theme.chatItemsBorder}`}>
+                <div
+                  className={`flex w-full w-full justify-center rounded-lg py-2 ${theme.chatItemsBorder}`}
+                >
                   <Tiles />
                 </div>
-                {!selectedTile?.has_access ?
-                  <div className={`flex w-full w-full justify-center rounded-lg py-2 ${theme.chatItemsBorder}`}>
+                {Object.keys(selectedTile).length && !selectedTile?.has_access ? (
+                  <div
+                    className={`flex w-full w-full justify-center rounded-lg py-2 ${theme.chatItemsBorder}`}
+                  >
                     <RequestAccessComponent />
-                  </div> : ""}
-                {selectedTile?.params && selectedTile?.params?.inputs?.length > 0 && (
-                  <div className={`w-full justify-center rounded-lg p-4 ${theme.chatItemsBorder}`}>
-                    <AdditionalInputs inputs={selectedTile?.params?.inputs} handleSend={handleSend} />
                   </div>
+                ) : (
+                  ""
                 )}
-                {selectedTile?.has_access ?
-                  <div className={`w-full justify-center rounded-lg p-4 ${theme.chatItemsBorder}`}>
+                {selectedTile?.params &&
+                  selectedTile?.params?.inputs?.length > 0 && (
+                    <div
+                      className={`w-full justify-center rounded-lg p-4 ${theme.chatItemsBorder}`}
+                    >
+                      <AdditionalInputs
+                        inputs={selectedTile?.params?.inputs}
+                        handleSend={handleSend}
+                      />
+                    </div>
+                  )}
+                {selectedTile?.has_access ? (
+                  <div
+                    className={`w-full justify-center rounded-lg p-4 ${theme.chatItemsBorder}`}
+                  >
                     <PublicPrivateSwitch size={40} />
-                  </div> : ""}
-                {/* 
-                {models.length > 0 && (
-                  <div className={`flex h-full flex-col space-y-4 rounded-lg p-4 ${theme.chatItemsBorder}`}>
-                    <ModelSelect />
-
-                    <SystemPrompt
-                      conversation={selectedConversation}
-                      prompts={prompts}
-                      onChangePrompt={(prompt) =>
-                        handleUpdateConversation(selectedConversation, {
-                          key: "prompt",
-                          value: prompt,
-                        })
-                      }
-                    />
-
-                    <TemperatureSlider
-                      label={"Temperature"}
-                      onChangeTemperature={(temperature) =>
-                        handleUpdateConversation(selectedConversation, {
-                          key: "temperature",
-                          value: temperature,
-                        })
-                      }
-                    />
                   </div>
-                )} */}
+                ) : (
+                  ""
+                )}
               </div>
             </>
           ) : (
             <>
-              <div className={`sticky top-0 z-10 flex justify-center py-2 text-sm ${theme.chatTitleTheme}`}>
+              <div
+                className={`sticky top-0 z-10 flex justify-center py-2 text-sm ${theme.chatTitleTheme}`}
+              >
                 {selectedConversation?.title}
-
-                {/* <button
-                    className="ml-2 cursor-pointer hover:opacity-50"
-                    onClick={handleSettings}
-                  >
-                    <IconSettings size={18} />
-                  </button>
-                  <button
-                    className="ml-2 cursor-pointer hover:opacity-50"
-                    onClick={onClearAll}
-                  >
-                    <IconClearAll size={18} />
-                  </button> */}
               </div>
-              {/* {showSettings && (
-                <div className="flex flex-col space-y-10 md:mx-auto md:max-w-xl md:gap-6 md:py-3 md:pt-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl">
-                  <div className="flex h-full flex-col space-y-4 border-b border-neutral-200 p-4 dark:border-neutral-600 md:rounded-lg md:border">
-                    <ModelSelect />
-                  </div>
-                </div>
-              )} */}
-
               {selectedConversation?.messages.map((message, index) => (
                 <MemoizedChatMessage
                   key={index}
@@ -564,7 +507,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             </>
           )}
         </div>
-        {selectedTile?.code != "summarize-brief" &&
+        {selectedTile?.code != "summarize-brief" && (
           <ChatInput
             stopConversationRef={stopConversationRef}
             textareaRef={textareaRef}
@@ -580,7 +523,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             }}
             showScrollDownButton={showScrollDownButton}
           />
-        }
+        )}
       </>
     </div>
   );

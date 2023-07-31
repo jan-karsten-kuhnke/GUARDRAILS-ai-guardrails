@@ -23,7 +23,7 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import { updateConversation } from "@/utils/app/conversation";
 
-import { Conversation, Message } from "@/types/chat";
+import { Message } from "@/types/chat";
 
 import HomeContext from "@/pages/home/home.context";
 
@@ -35,7 +35,6 @@ import rehypeMathjax from "rehype-mathjax";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import Visualization from "./components/Visualization";
-import { IDataset } from "./components/getValidSpec";
 
 export interface Props {
   message: Message;
@@ -236,7 +235,9 @@ export const ChatMessage: FC<Props> = memo(
                     </div>
                   </div>
                 ) : (
-                  <div className={`prose whitespace-pre-wrap dark:prose-invert flex-1 ${theme.textColor}`}>
+                  <div
+                    className={`prose whitespace-pre-wrap dark:prose-invert flex-1 ${theme.textColor}`}
+                  >
                     {message.content}
                   </div>
                 )}
@@ -260,7 +261,9 @@ export const ChatMessage: FC<Props> = memo(
               </div>
             ) : message.role === "guardrails" ? (
               <>
-                <div className={`prose whitespace-pre-wrap dark:prose-invert flex-1 ${theme.textColor}`}>
+                <div
+                  className={`prose whitespace-pre-wrap dark:prose-invert flex-1 ${theme.textColor}`}
+                >
                   {message.content}
                   {message.userActionRequired &&
                     messageIndex ===
@@ -290,8 +293,7 @@ export const ChatMessage: FC<Props> = memo(
               </>
             ) : (
               <div className="flex flex-row">
-                {sources && sources.length>0 ? (
-                  
+                {sources && sources.length > 0 ? (
                   <Box sx={{ width: "100%", typography: "body1" }}>
                     <TabContext value={value}>
                       <Box
@@ -319,7 +321,7 @@ export const ChatMessage: FC<Props> = memo(
                               color: theme.tabTheme.color,
                             },
                             "& .MuiTabs-indicator": {
-                              backgroundColor:theme.tabTheme.color,
+                              backgroundColor: theme.tabTheme.color,
                             },
                           }}
                         >
@@ -335,15 +337,18 @@ export const ChatMessage: FC<Props> = memo(
                       </TabPanel>
                     </TabContext>
                   </Box>
-                ) : 
-                 <>
-                  {message.msg_info?.visualization ? (
-                    <Visualization content={message.msg_info?.visualization } dataset={message.msg_info?.dataset} />
-                    )
-                    :( <AssistantMessage content={message.content} />)
-                  }
-                 </>
-                }
+                ) : (
+                  <>
+                    {message.msg_info?.visualization ? (
+                      <Visualization
+                        content={message.msg_info?.visualization}
+                        dataset={message.msg_info?.dataset}
+                      />
+                    ) : (
+                      <AssistantMessage content={message.content} />
+                    )}
+                  </>
+                )}
 
                 <div className="md:-mr-8 ml-1 md:ml-0 flex flex-col md:flex-row gap-4 md:gap-1 items-center md:items-start justify-end md:justify-start">
                   {messagedCopied ? (
@@ -371,9 +376,7 @@ export const ChatMessage: FC<Props> = memo(
 
 export const AssistantMessage: FC<AssistantProps> = ({ content }) => {
   const {
-    state: {
-      theme
-    },
+    state: { theme },
   } = useContext(HomeContext);
   return (
     <MemoizedReactMarkdown

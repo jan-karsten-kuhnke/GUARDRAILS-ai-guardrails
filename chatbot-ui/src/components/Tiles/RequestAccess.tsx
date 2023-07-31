@@ -3,7 +3,7 @@ import { Tile } from "../../types/tiles";
 import HomeContext from "@/pages/home/home.context";
 import { useContext } from "react";
 import "./styles.scss";
-import { RequestAccess, getTiles } from "@/services";
+import { RequestAccess } from "@/services";
 
 const RequestAccessComponent: FC = () => {
     const [loading, setLoading] = useState(false);

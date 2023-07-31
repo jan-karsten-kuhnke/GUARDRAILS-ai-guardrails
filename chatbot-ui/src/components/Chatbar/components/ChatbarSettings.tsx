@@ -12,12 +12,9 @@ import HomeContext from "@/pages/home/home.context";
 import { SettingDialog } from "@/components/Settings/SettingDialog";
 import { DocumentDialog } from "@/components/Documents/DocumentDialog";
 
-import { Import } from "../../Settings/Import";
-import { Key } from "../../Settings/Key";
 import { SidebarButton } from "../../Sidebar/SidebarButton";
 import ChatbarContext from "../Chatbar.context";
 import { ClearConversations } from "./ClearConversations";
-import { PluginKeys } from "./PluginKeys";
 import { AuthContext } from "@/services/AuthService";
 
 export const ChatbarSettings = () => {
@@ -28,9 +25,6 @@ export const ChatbarSettings = () => {
 
   const {
     state: {
-      apiKey,
-      serverSideApiKeyIsSet,
-      serverSidePluginKeysSet,
       theme,
       conversations,
       isArchiveView,
