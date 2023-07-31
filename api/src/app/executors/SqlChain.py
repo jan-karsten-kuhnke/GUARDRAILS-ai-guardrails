@@ -33,9 +33,9 @@ Here are the guidelines for building the query:
 4. Use the correct join type and join condition when using joins. Make sure to refer to the correct column names.
 5. Handle situations where two tables have the same column name to avoid ambiguity in the query.
 6. Utilize subqueries to break down the problem into smaller steps when necessary.
-7. For string comparisons, perform a lookup in the table to find the best match for the string, and then use the ID of the best match in the query.
+7. Use case insensitive string comparisons when doing string comparisons in where or join conditions.
 8. Always terminate the SQL Query with a semi-colon.
-9. In the resultset, include the name columns of the entity instead of the entity ID in the select clause.
+9. When querying or joining from the metric_value tables in the database, use the metric_name table to find the metric_id for the metric_name, and then use the metric_id in the query.
 10. If the result dataset is more than 20 rows, return only the top 5 rows as a markdown table and ignore the rest of the rows. Add the following statement to the response: 'Result dataset is too large, showing only a part of the resultset, please use the query in a SQL agent to see the full result dataset.'
 11. Never query for all the columns from a specific table; only ask for a few relevant columns given the question.
 12. Pay attention to using only the column names visible in the schema description. Avoid querying for columns that do not exist. Also, be mindful of which column is in which table.
@@ -125,6 +125,7 @@ Use the following format for the query:
                 .split("\nSQLResult:")
             )
             sql_query = sql_results[0]
+            sql_query = "```\n" + sql_query.replace("\n", "\n\n") + "\n```"
             sql_data = sql_results[1].split("\nAnswer:")[0]
 
             

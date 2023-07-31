@@ -8,7 +8,7 @@ from langchain.memory import ConversationBufferMemory
 from globals import Globals
 from typing import Any
 import logging
-from langchain.chains import SQLDatabaseSequentialChain
+from executors.SQLSequentialChainWrapper import SQLDatabaseSequentialChain
 from executors.SqlWrapper import SqlWrapper
 from langchain.chains import LLMChain
 import sqlalchemy
@@ -109,12 +109,12 @@ class VisualizationChain:
             logging.info(f"using private model: {Globals.private_model_type}")
             chain = SQLDatabaseSequentialChain.from_llm(
                 self.private_llm, db, verbose=True, return_intermediate_steps=True,
-                query_prompt=self.PROMPT,**{'top_k':50},decider_prompt=self.DECIDER_PROMPT
+                query_prompt=self.PROMPT,**{'top_k':10000000000},decider_prompt=self.DECIDER_PROMPT
             )
         else:
             logging.info(f"using public model: {Globals.public_model_type}")
             chain = SQLDatabaseSequentialChain.from_llm(
-                self.public_llm, db, verbose=True, return_intermediate_steps=True, query_prompt=self.PROMPT,**{'top_k':50},decider_prompt=self.DECIDER_PROMPT
+                self.public_llm, db, verbose=True, return_intermediate_steps=True, query_prompt=self.PROMPT,**{'top_k':1000000000},decider_prompt=self.DECIDER_PROMPT
             )
 
         sources = []
@@ -139,7 +139,8 @@ class VisualizationChain:
             1. Do not contain the key called 'data' in vega-lite specification.
             2. If the user ask many times, you should generate the specification based on the previous context.
             3. You should consider to aggregate the field if it is quantitative and the chart has a mark type of react, bar, line, area or arc.
-            5. Do not contain any text in the response apart from the vega-lite specification in JSON.
+            4. Do not contain any text in the response apart from the vega-lite specification in JSON.
+            5. Do not use any aggregations on the datasets in the vega-lite specification, the aggregation should have been already done in the SQL query.
 
             User Question: {question}
             SQL Query: {sql_query}

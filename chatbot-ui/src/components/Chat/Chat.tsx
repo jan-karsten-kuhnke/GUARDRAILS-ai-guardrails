@@ -448,8 +448,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       <div className={`text-center text-4xl font-bold ${theme.textColor}`}>
                         Welcome to {applicationName}
                       </div>
-                      <div className={`text-center text-2xl font-bold ${theme.textColorSecondary}`}>
-                        Protect your Confidential Information.
+                      <div className={`text-center text-xl font-bold ${theme.textColorSecondary}`}>
+                        Powered By AI-Guardrails™ 
                       </div>
                     </div>
                   ) : (

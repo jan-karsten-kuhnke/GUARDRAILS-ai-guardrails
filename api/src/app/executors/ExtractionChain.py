@@ -1,51 +1,54 @@
-from globals import Globals 
+from globals import Globals
 
 from langchain.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.chat_models import ChatOpenAI,ChatVertexAI
+from langchain.chat_models import ChatOpenAI, ChatVertexAI
 
 
 from globals import Globals
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains.summarize import load_summarize_chain
 
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import create_extraction_chain
+import json
+
 
 class ExtractionChain:
-    def execute(self,filepath):
+    def execute(self, filepath):
         loader = PyPDFLoader(filepath)
-        pages = loader.load_and_split()
+        pages = loader.load()
 
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
-        docs = text_splitter.split_documents(pages)
-        all_content = ""
-
-        for doc in docs:
-            all_content += doc.page_content
+        input_text = ''
+        for page in pages:
+            input_text += page.page_content
 
         schema = {
             "properties": {
-                "SiteArea": {"type": "string"},
-                "MaximumBuildingHeight": {"type": "string"},
-                "GrossPlotRatio": {"type": "integer"},
-                "totalApartmentCount": {"type": "integer"},
-                "OneRoomApartmentPercentage": {"type": "string"},
-                "TwoRoomApartmentPercentage": {"type": "string"},
-                "ThreeRoomApartmentPercentage": {"type": "string"},
-                "FourRoomApartmentPercentage": {"type": "string"},
+                "project_site_area": {"type": "string"},
+                "project_maximum_building_height": {"type": "string"},
+                "project_gross_plot_ratio": {"type": "string"},
+                "flat_data_type": {"type": "string"},
+                "flat_data_flat_type": {"type": "string"},
+                "flat_data_ifa": {"type": "string"},
+                "flat_data_flat_percentage": {"type": "string"},
             },
-            "required": ["SiteArea", "MaximumBuildingHeight", "GrossPlotRatio", "totalApartmentCount", "OneRoomApartmentPercentage", "TwoRoomApartmentPercentage", "ThreeRoomApartmentPercentage", "FourRoomApartmentPercentage"],
+            "required": [],
         }
-        llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k",max_tokens=1000)
+        llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k", max_tokens=1000)
 
         chain = create_extraction_chain(schema=schema, llm=llm)
 
-        result = chain.run(all_content)
+        result = chain.run(input_text)
+        
 
+        # answer = "Here are the extracted fields: " "```\n" + json.dumps(result[0]) + "\n```"
+        answer = """Sure! Here's the extracted JSON:
 
-        answer = result[0]
-        sources = []
-        return {"answer": answer, "sources": sources}
-
+```
+""" + json.dumps(result, indent=4, sort_keys=True )+ """
+```
+"""
+      
+        return answer

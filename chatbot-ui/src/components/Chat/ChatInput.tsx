@@ -440,11 +440,11 @@ export const ChatInput = ({
           )}
         </div>
       </div>
-      <div className={`px-3 pt-2 pb-3 text-center text-[12px] md:px-4 md:pt-3 md:pb-6 ${theme.textColorSecondary}`}>
+      {/* <div className={`px-3 pt-2 pb-3 text-center text-[12px] md:px-4 md:pt-3 md:pb-6 ${theme.textColorSecondary}`}>
         {applicationName}
         <Chip label="Beta" variant="outlined" size="small" style={{ borderColor: '#DA9B14', color: '#DA9B14', width: '39px', height: '15px', fontSize: '10px', margin: '2px' }} />
         lets your organisation use public LLM models in a safe and secure way, ensuring your corporate confidential information remains protected.
-      </div>
+      </div> */}
     </div>
   );
 };

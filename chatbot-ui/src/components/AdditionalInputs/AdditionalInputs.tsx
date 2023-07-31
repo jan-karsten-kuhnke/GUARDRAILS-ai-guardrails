@@ -29,7 +29,7 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
 
     let message: Message = {
       role: "user",
-      content: `Summarize ${files[0].name}`,
+      content: selectedTile.code === "summarize-brief" ?  `Summarize ${files[0].name}` : `Extract key metrics from ${files[0].name}`,
       userActionRequired: false,
       msg_info: null
     }

@@ -55,8 +55,13 @@ class chat_service:
         try:
             msg_info = {}
             task=str(data["task"]) if "task" in data else "summarize-brief"
-            prompt=f"Summarize {filename}"
-            title=f"Summmary of {filename}."
+            if task == "summarize-brief":
+                prompt=f"Summarize {filename}"
+                title=f"Summmary of {filename}."
+            elif task == "extraction":
+                prompt=f"Extract Key Metrics from {filename}"
+                title=f"Key Metrics of {filename}."
+            
             conversation_id = None
             if('conversation_id'  in data and  data['conversation_id']):
                 conversation_id = data['conversation_id']

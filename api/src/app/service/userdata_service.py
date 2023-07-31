@@ -44,6 +44,7 @@ class userdata_service:
         for chain in all_chains:
             chain_dict = chain.to_dict()
             group_code = chain_dict['group_code']
+            chain_dict['dispalyOrder'] = int(chain.params['displayOrder'])
             if group_code is None or group_code == "":
                 chain_dict['has_access'] = True
             elif group_code in user_groups:
@@ -53,6 +54,7 @@ class userdata_service:
             
             chain_dict['request_submitted'] = True if group_code in previous_requests else False
             res.append(chain_dict)
+        res.sort(key=lambda x: x['dispalyOrder'])
         return res
 
 
