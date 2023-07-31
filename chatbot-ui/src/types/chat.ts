@@ -7,17 +7,6 @@ export interface Message {
 }
 
 export type Role = 'assistant' | 'user' | 'guardrails';
-
-export interface ChatBody {
-  messages: Message[];
-  key: string;
-  prompt: string;
-  temperature: number;
- 
-}
-
-
-
 export interface Conversation {
   model: string;
   id: string;

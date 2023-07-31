@@ -1,12 +1,4 @@
-import {
-  IconArrowDown,
-  IconBolt,
-  IconBrandGoogle,
-  IconPlayerStop,
-  IconRepeat,
-  IconSend,
-  IconBook
-} from "@tabler/icons-react";
+import { IconArrowDown, IconSend } from "@tabler/icons-react";
 
 import {
   KeyboardEvent,
@@ -18,10 +10,9 @@ import {
   useState,
 } from "react";
 import toast from "react-hot-toast";
-import Chip from '@mui/material/Chip';
+import Chip from "@mui/material/Chip";
 
 import { Message } from "@/types/chat";
-import { Tile } from "@/types/tiles";
 import { Prompt } from "@/types/prompt";
 
 import HomeContext from "@/pages/home/home.context";
@@ -50,10 +41,15 @@ export const ChatInput = ({
   stopConversationRef,
   textareaRef,
   showScrollDownButton,
-
 }: Props) => {
   const {
-    state: { selectedConversation, messageIsStreaming, prompts, theme, selectedTile },
+    state: {
+      selectedConversation,
+      messageIsStreaming,
+      prompts,
+      theme,
+      selectedTile,
+    },
 
     dispatch: homeDispatch,
   } = useContext(HomeContext);
@@ -109,9 +105,9 @@ export const ChatInput = ({
         if (res?.data) {
           for (var d of res.data) {
             toast.error(`${d.entity_type} detected : ${d.flagged_text}`, {
-              position: 'bottom-right',
+              position: "bottom-right",
               style: {
-                color: 'red',
+                color: "red",
               },
               duration: 7000,
             });
@@ -121,11 +117,11 @@ export const ChatInput = ({
       .catch((err: any) => {
         toast.error(err.message, {
           position: "bottom-right",
-          duration: 3000
-        })
+          duration: 3000,
+        });
         console.log(err.message, "API ERROR");
       })
-      .finally(() => { });
+      .finally(() => {});
   }, 1000);
   const handleSend = () => {
     if (messageIsStreaming) {
@@ -137,7 +133,12 @@ export const ChatInput = ({
       return;
     }
 
-    onSend({ role: "user", content: content, msg_info: null, userActionRequired: false });
+    onSend({
+      role: "user",
+      content: content,
+      msg_info: null,
+      userActionRequired: false,
+    });
     setContent("");
 
     if (window.innerWidth < 640 && textareaRef && textareaRef.current) {
@@ -174,13 +175,6 @@ export const ChatInput = ({
     }
     setShowPromptList(false);
   };
-
-  const toggleShowPluginSelect = () => {
-    if (selectedConversation?.messages?.length && showPluginSelect == false) {
-      return
-    }
-    setShowPluginSelect(!showPluginSelect)
-  }
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (showPromptList) {
@@ -269,21 +263,6 @@ export const ChatInput = ({
     }
   };
 
-  // useEffect(() => {
-  //   if(!selectedConversation?.messages.length || selectedConversation.model == "gpt-3.5-turbo")
-  //   {
-  //     setTile(TilesList[0])
-  //   }
-  //   else if(selectedConversation?.model == "private-docs"){
-  //     setTile(TilesList[1])
-  //   }
-  //   else if(selectedConversation?.model == "private-docs-private-llm"){
-  //     setTile(TilesList[2])
-  //   }
-
-  // }, [selectedConversation]);
-
-
   useEffect(() => {
     if (promptListRef.current) {
       promptListRef.current.scrollTop = activePromptIndex * 30;
@@ -294,8 +273,9 @@ export const ChatInput = ({
     if (textareaRef && textareaRef.current) {
       textareaRef.current.style.height = "inherit";
       textareaRef.current.style.height = `${textareaRef.current?.scrollHeight}px`;
-      textareaRef.current.style.overflow = `${textareaRef?.current?.scrollHeight > 400 ? "auto" : "hidden"
-        }`;
+      textareaRef.current.style.overflow = `${
+        textareaRef?.current?.scrollHeight > 400 ? "auto" : "hidden"
+      }`;
     }
   }, [content]);
 
@@ -317,7 +297,9 @@ export const ChatInput = ({
   }, []);
 
   return (
-    <div className={`absolute bottom-0 left-0 w-full pt-6 md:pt-2  ${theme.chatInputTheme}`}>
+    <div
+      className={`absolute bottom-0 left-0 w-full pt-6 md:pt-2  ${theme.chatInputTheme}`}
+    >
       <div className="stretch mx-2 mt-4 flex flex-row gap-3 last:mb-2 md:mx-4 md:mt-[52px] md:last:mb-6 lg:mx-auto lg:max-w-3xl">
         {/* {messageIsStreaming && (
           <button
@@ -339,51 +321,24 @@ export const ChatInput = ({
             </button>
           )} */}
 
-        <div className={`relative mx-2 flex w-full flex-grow flex-col rounded-md  sm:mx-4`}>
-          {/* <button
-            className="absolute left-2 top-2 rounded-sm p-1 text-neutral-800 opacity-60 hover:bg-neutral-200 hover:text-neutral-900 dark:bg-opacity-50 dark:text-neutral-100 dark:hover:text-neutral-200"
-            onClick={() => toggleShowPluginSelect() }
-            onKeyDown={(e) => { }}
-            style={{opacity: selectedConversation?.messages?.length!=0? "10%" : ""}}
-          >
-            {plugin.id == PluginList[0].id ? <IconBolt size={20} /> : <IconBook size={20} />}
-          </button> */}
-          {/* {plugin can only be changed if conversation is empty} */}
-          {/* {showPluginSelect && (
-            <div className="absolute left-0 bottom-14 rounded bg-white dark:bg-[#343541]">
-              <PluginSelect
-                plugin={plugin}
-                onKeyDown={(e: any) => {
-                  if (e.key === "Escape") {
-                    e.preventDefault();
-                    setShowPluginSelect(false);
-                    textareaRef.current?.focus();
-                  }
-                }}
-                onPluginChange={(plugin: Plugin) => {
-                  setPlugin(plugin);
-                  setShowPluginSelect(false);
-
-                  if (textareaRef && textareaRef.current) {
-                    textareaRef.current.focus();
-                  }
-                }}
-              />
-            </div>
-          )} */}
-
+        <div
+          className={`relative mx-2 flex w-full flex-grow flex-col rounded-md  sm:mx-4`}
+        >
           <textarea
             ref={textareaRef}
-            disabled={selectedConversation?.archived || !selectedTile?.has_access}
+            disabled={
+              selectedConversation?.archived || !selectedTile?.has_access
+            }
             className={`m-0 w-full resize-none  p-0 py-2 pr-8 pl-10 md:py-3 md:pl-10 ${theme.chatTextAreaTheme}`}
             style={{
               resize: "none",
               bottom: `${textareaRef?.current?.scrollHeight}px`,
               maxHeight: "400px",
-              overflow: `${textareaRef.current && textareaRef.current.scrollHeight > 400
-                ? "auto"
-                : "hidden"
-                }`,
+              overflow: `${
+                textareaRef.current && textareaRef.current.scrollHeight > 400
+                  ? "auto"
+                  : "hidden"
+              }`,
             }}
             placeholder={
               'Type a message or type "/" to select a prompt...' || ""
@@ -401,7 +356,9 @@ export const ChatInput = ({
             onClick={handleSend}
           >
             {messageIsStreaming ? (
-              <div className={`h-4 w-4 animate-spin rounded-full border-t-2 ${theme.chatLoadingTheme}`}></div>
+              <div
+                className={`h-4 w-4 animate-spin rounded-full border-t-2 ${theme.chatLoadingTheme}`}
+              ></div>
             ) : (
               <IconSend size={18} />
             )}

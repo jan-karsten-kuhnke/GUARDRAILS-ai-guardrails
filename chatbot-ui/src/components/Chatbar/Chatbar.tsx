@@ -2,13 +2,10 @@ import { useCallback, useContext, useEffect } from "react";
 
 import { useCreateReducer } from "@/hooks/useCreateReducer";
 
-import { DEFAULT_SYSTEM_PROMPT, DEFAULT_TEMPERATURE } from "@/utils/app/const";
 import { exportData, importData } from "@/utils/app/importExport";
 
 import { Conversation } from "@/types/chat";
 import { LatestExportFormat, SupportedExportFormats } from "@/types/export";
-import { OpenAIModels } from "@/types/openai";
-import { PluginKey } from "@/types/plugin";
 
 import HomeContext from "@/pages/home/home.context";
 
@@ -29,7 +26,7 @@ export const Chatbar = () => {
   });
 
   const {
-    state: { conversations, showChatbar, defaultModelId, folders, pluginKeys, isArchiveView },
+    state: { conversations, showChatbar, folders, isArchiveView },
     dispatch: homeDispatch,
     handleCreateFolder,
     handleNewConversation,

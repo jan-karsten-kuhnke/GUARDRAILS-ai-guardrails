@@ -96,7 +96,6 @@ const PublicPrivateSwitch: FC<Props> = ({ size }) => {
               sx={{ m: 1 }}
               checked={isPrivate}
               onChange={handleChange}
-              // disabled
             />
           </IconButton>
         </Tooltip>

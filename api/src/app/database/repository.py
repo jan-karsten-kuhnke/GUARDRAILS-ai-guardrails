@@ -227,6 +227,18 @@ class Persistence:
         finally:
             session.close()
 
+    def update_query(Entity, id, data):
+        try:
+            predefined_rule = session.query(Entity).filter(Entity.id == id).first()
+            predefined_rule.is_active = data['is_active']
+            session.commit()
+            return jsonify({"success":True,"message":"Successfully updated predefined rules"})
+        except Exception as ex:
+            session.rollback()
+            logging.error(f"Exception while updating predefined rules: {ex}")
+            return jsonify({"success":False,"message": "Error in updating predefined rules"}), 500
+        finally:
+            session.close()
 
     def update_document(document_id, title, description, location, folder_id):
         try:

@@ -8,15 +8,6 @@
   }
 }
 
-.disabled-tile {
-  opacity: 0.5;
-}
-
-.tile {
-  height: 200px;
-  align-items: center;
-}
-
 .request_btn {
   border-radius: 12px;
   padding: 10px 8px;
@@ -26,9 +17,4 @@
   @extend .request_btn;
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.pos-relative {
-  position: relative;
-  align-items: center;
 }

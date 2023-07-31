@@ -95,24 +95,24 @@ class chat_service:
     def chat_completion(data,current_user_email,token):
         try:
             task = str(data["task"]) if "task" in data else None
-            isPrivate = bool(data["isPrivate"]) if "isPrivate" in data else False
-            piiScan = True 
-            nsfwScan = True
+            is_private = bool(data["isPrivate"]) if "isPrivate" in data else False
+            pii_scan = True 
+            nsfw_scan = True
 
             prompt = str(data["message"])
-            isOverride = bool(data["isOverride"])
+            is_override = bool(data["isOverride"])
             conversation_id = None
             manage_conversation_context = False
            
             # if(task == "conversation" or task == "qa-retreival"):
-            isOverride = True
+            is_override = True
             
             if('conversation_id'  in data and  data['conversation_id']):
                 conversation_id = data['conversation_id']
                 manage_conversation_context = True
 
 
-            stop_conversation,stop_response,updated_prompt,role = chat_service.validate_prompt(prompt,isOverride,piiScan,nsfwScan,current_user_email,conversation_id)
+            stop_conversation,stop_response,updated_prompt,role = chat_service.validate_prompt(prompt,is_override,pii_scan,nsfw_scan,current_user_email,conversation_id)
             chat_service.update_conversation(conversation_id,updated_prompt,'user',current_user_email,task,None)
             
             current_completion = ''
@@ -207,15 +207,15 @@ class chat_service:
             logging.error("error: ", e)
             return
 
-    def validate_prompt(prompt,isOverride, pii_scan, nsfw_scan,current_user_email,conversation_id):
-        logging.info("piiScan: ", pii_scan)
-        logging.info("nsfwScan: ", nsfw_scan)
+    def validate_prompt(prompt,is_override, pii_scan, nsfw_scan,current_user_email,conversation_id):
+        logging.info("pii_scan: ", pii_scan)
+        logging.info("nsfw_scan: ", nsfw_scan)
         stop_conversation = False
         stop_response = ""
         role = "guardrails"
         nsfw_threshold = 0.94
 
-        if(isOverride):
+        if(is_override):
             return stop_conversation,stop_response,prompt,role
 
         if(nsfw_scan):
