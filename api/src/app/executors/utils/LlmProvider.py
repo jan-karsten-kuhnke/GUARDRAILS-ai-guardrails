@@ -1,5 +1,5 @@
 from globals import Globals
-from langchain.chat_models import ChatOpenAI
+from langchain.chat_models import ChatOpenAI, ChatVertexAI
 from langchain.llms import  VertexAI
 from langchain import OpenAI
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
@@ -26,6 +26,9 @@ class LlmProvider:
                 else:
                     public_llm = OpenAI(callbacks=callbacks, verbose=False, temperature=temp,max_tokens=max_output_token)
         elif Globals.public_model_type == "VertexAI":
-            public_llm = VertexAI(max_output_tokens=max_output_token, verbose=False)
+            if use_chat_model:
+                public_llm=ChatVertexAI(max_output_tokens=max_output_token, verbose=False)
+            else:    
+                public_llm = VertexAI(max_output_tokens=max_output_token, verbose=False)
         
         return public_llm
