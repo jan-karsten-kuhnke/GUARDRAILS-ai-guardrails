@@ -8,8 +8,10 @@ from langchain.memory import ConversationBufferMemory
 from globals import Globals
 from typing import Any
 import logging
-from executors.SQLSequentialChainWrapper import SQLDatabaseSequentialChain
-from executors.SqlWrapper import SqlWrapper
+from executors.wrappers.SQLSequentialChainWrapper import SQLDatabaseSequentialChain
+from executors.wrappers.SqlWrapper import SqlWrapper
+from executors.utils.LlmProvider import LlmProvider
+
 from langchain.chains import LLMChain
 import sqlalchemy
 import json
@@ -18,10 +20,7 @@ from sqlalchemy.orm import sessionmaker
 from langchain.output_parsers.list import CommaSeparatedListOutputParser
 
 class VisualizationChain:
-    private_llm: Any = None
-    public_llm: Any = None
-
-    temp = Globals.model_temp
+    
     PROMPT_SUFFIX = """Only use the following tables:
     {table_info}
 
@@ -83,18 +82,7 @@ class VisualizationChain:
         input_variables=["input", "table_info", "dialect", "top_k"],
         template=_DEFAULT_TEMPLATE + PROMPT_SUFFIX,
     )
-    callbacks = [StreamingStdOutCallbackHandler()]
-    if Globals.public_model_type == "OpenAI":
-        public_llm = OpenAI(
-            callbacks=callbacks,
-            verbose=False,
-            temperature=temp,
-            model_name="gpt-3.5-turbo-16k",
-            
-        )
-    elif Globals.public_model_type == "VertexAI":
-        public_llm = VertexAI(max_output_tokens=1000, verbose=False)
-    private_llm = public_llm
+    
 
     def execute(self, query, is_private, chat_history):
         # conn_str = f"postgresql+psycopg2://postgres:1234@localhost:5432/AdventureWorks"
@@ -105,17 +93,14 @@ class VisualizationChain:
             # schemas=['humanresources','person','production','purchasing','sales'],
             schemas=[Globals.METRIC_SCHEMA],
         )
-        if is_private:
-            logging.info(f"using private model: {Globals.private_model_type}")
-            chain = SQLDatabaseSequentialChain.from_llm(
-                self.private_llm, db, verbose=True, return_intermediate_steps=True,
-                query_prompt=self.PROMPT,**{'top_k':10000000000},decider_prompt=self.DECIDER_PROMPT
-            )
-        else:
-            logging.info(f"using public model: {Globals.public_model_type}")
-            chain = SQLDatabaseSequentialChain.from_llm(
-                self.public_llm, db, verbose=True, return_intermediate_steps=True, query_prompt=self.PROMPT,**{'top_k':1000000000},decider_prompt=self.DECIDER_PROMPT
-            )
+        
+        llm=LlmProvider.get_llm(is_private=is_private,use_chat_model=False,max_output_token=1000,increase_model_token_limit=True)
+        
+        chain = SQLDatabaseSequentialChain.from_llm(
+            llm, db, verbose=True, return_intermediate_steps=True,
+            query_prompt=self.PROMPT,**{'top_k':10000000000},decider_prompt=self.DECIDER_PROMPT
+        )
+    
 
         sources = []
         # Prepare the chain
