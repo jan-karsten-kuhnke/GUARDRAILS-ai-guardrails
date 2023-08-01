@@ -2,13 +2,11 @@ from globals import Globals
 
 from langchain.document_loaders import PyPDFLoader
 from langchain.chat_models import ChatOpenAI, ChatVertexAI
-
-
-from globals import Globals
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains.summarize import load_summarize_chain
+from executors.utils.LlmProvider import LlmProvider
 
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import create_extraction_chain
@@ -36,7 +34,8 @@ class ExtractionChain:
             },
             "required": [],
         }
-        llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k", max_tokens=1000)
+
+        llm=LlmProvider.get_llm(is_private=False, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
 
         chain = create_extraction_chain(schema=schema, llm=llm)
 

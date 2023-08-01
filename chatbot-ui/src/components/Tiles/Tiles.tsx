@@ -99,7 +99,7 @@ const Tiles: FC = () => {
           tiles.map((curr_tile, index) => (
             <div
               key={index}
-              className={`flex flex-col gap-5 rounded-lg p-4 cursor-pointer tile min-w-[125px]
+              className={`flex flex-col gap-5 rounded-lg p-4 cursor-pointer tile 
               ${selectedTile.code !== curr_tile.code && theme.tilesHoverTheme}
               ${theme.textColorSecondary}
               ${theme.chatItemsBorder}

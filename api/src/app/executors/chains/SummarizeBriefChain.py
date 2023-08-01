@@ -6,18 +6,15 @@ from langchain.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain import PromptTemplate
 from langchain.chains.summarize import load_summarize_chain
-
-
+from executors.utils.LlmProvider import LlmProvider
 
 
 class SummarizeBriefChain:
     def execute(self,filepath):
         temp = Globals.model_temp
-        callbacks = [StreamingStdOutCallbackHandler()]
-        if Globals.public_model_type == "OpenAI":
-            public_llm = OpenAI(callbacks=callbacks, verbose=False, temperature=temp,max_tokens=1000)
-        elif Globals.public_model_type == "VertexAI":
-            public_llm = VertexAI(max_output_tokens=1000, verbose=False)
+        
+        llm=LlmProvider.get_llm(is_private=False, use_chat_model=False, max_output_token=1000, increase_model_token_limit=False)
+        
         loader = PyPDFLoader(filepath)
         pages = loader.load_and_split()
 
@@ -42,7 +39,7 @@ class SummarizeBriefChain:
 
         MAP_PROMPT = PromptTemplate(template=map_prompt_template, input_variables=["text"])
         REDUCE_PROMPT = PromptTemplate(template=reduce_prompt_template, input_variables=["text"])
-        chain = load_summarize_chain(public_llm, chain_type="map_reduce",  map_prompt=MAP_PROMPT, combine_prompt=REDUCE_PROMPT,verbose=True)
+        chain = load_summarize_chain(llm, chain_type="map_reduce",  map_prompt=MAP_PROMPT, combine_prompt=REDUCE_PROMPT,verbose=True)
         result = chain({"input_documents": docs}, return_only_outputs=True)
         return result["output_text"]
 

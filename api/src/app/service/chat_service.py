@@ -14,12 +14,12 @@ from typing import TypedDict,Optional
 from datetime import datetime
 import json
 import requests
-from executors.SummarizeBriefChain import SummarizeBriefChain
-from executors.ExtractionChain import ExtractionChain
-from executors.ConversationalChain import ConversationalChain
-from executors.QaRetrievalChain import QaRetrievalChain
-from executors.SqlChain import SqlChain
-from executors.VisualizationChain import VisualizationChain
+from executors.chains.SummarizeBriefChain import SummarizeBriefChain
+from executors.chains.ExtractionChain import ExtractionChain
+from executors.chains.ConversationalChain import ConversationalChain
+from executors.chains.QaRetrievalChain import QaRetrievalChain
+from executors.chains.SqlChain import SqlChain
+from executors.chains.VisualizationChain import VisualizationChain
 
 override_message = "You chose to Override the warning, proceeding to Open AI."
 nsfw_warning = "Warning From Guardrails: We've detected that your message contains NSFW content. Please refrain from posting such content in a work environment, You can choose to override this warning if you wish to continue the conversation, or you can get your manager's approval before continuing."
