@@ -14,6 +14,7 @@ class SummarizeBriefChain:
     params=ParamsProvider.get_params('summarize-brief')
     map_prompt_template = params['mapPromptTemplate']
     reduce_prompt_template = params['reducePromptTemplate']
+    chain_type = params['chainType']
 
     def execute(self,filepath):
         temp = Globals.model_temp
@@ -28,7 +29,7 @@ class SummarizeBriefChain:
 
         MAP_PROMPT = PromptTemplate(template=SummarizeBriefChain.map_prompt_template, input_variables=["text"])
         REDUCE_PROMPT = PromptTemplate(template=SummarizeBriefChain.reduce_prompt_template, input_variables=["text"])
-        chain = load_summarize_chain(llm, chain_type="map_reduce",  map_prompt=MAP_PROMPT, combine_prompt=REDUCE_PROMPT,verbose=True)
+        chain = load_summarize_chain(llm, chain_type=SummarizeBriefChain.chain_type,  map_prompt=MAP_PROMPT, combine_prompt=REDUCE_PROMPT,verbose=True)
         result = chain({"input_documents": docs}, return_only_outputs=True)
         return result["output_text"]
 
