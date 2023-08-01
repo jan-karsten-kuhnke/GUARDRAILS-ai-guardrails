@@ -7,9 +7,14 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain import PromptTemplate
 from langchain.chains.summarize import load_summarize_chain
 from executors.utils.LlmProvider import LlmProvider
+from executors.utils.ParamsProvider import ParamsProvider
 
 
 class SummarizeBriefChain:
+    params=ParamsProvider.get_params('summarize-brief')
+    map_prompt_template = params['map_prompt_template']
+    reduce_prompt_template = params['reduce_prompt_template']
+
     def execute(self,filepath):
         temp = Globals.model_temp
         
@@ -20,25 +25,9 @@ class SummarizeBriefChain:
 
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
         docs = text_splitter.split_documents(pages)
-        map_prompt_template ="""You are a building developer and you need to create an executive summary to present to your board members and stake holders , all the related info of that project lies in  a development brief, You are being given a part of that brief as an input,
-        extract the pieces of information that you'd like to keep in the result summary, information that can be presented in tables and lists are top priority do not add any other information from any other source to the result.
 
-
-        {text}
-
-
-        Key Information:
-        """
-
-        reduce_prompt_template = """Given the following extracts of key pieces of information extracted from a development brief, write a detailed executive summary for the board members and the stakeholders of the project , use markdown tables and lists if needed.
-        {text}
-
-        Executive Summary:
-        """
-
-
-        MAP_PROMPT = PromptTemplate(template=map_prompt_template, input_variables=["text"])
-        REDUCE_PROMPT = PromptTemplate(template=reduce_prompt_template, input_variables=["text"])
+        MAP_PROMPT = PromptTemplate(template=SummarizeBriefChain.map_prompt_template, input_variables=["text"])
+        REDUCE_PROMPT = PromptTemplate(template=SummarizeBriefChain.reduce_prompt_template, input_variables=["text"])
         chain = load_summarize_chain(llm, chain_type="map_reduce",  map_prompt=MAP_PROMPT, combine_prompt=REDUCE_PROMPT,verbose=True)
         result = chain({"input_documents": docs}, return_only_outputs=True)
         return result["output_text"]
