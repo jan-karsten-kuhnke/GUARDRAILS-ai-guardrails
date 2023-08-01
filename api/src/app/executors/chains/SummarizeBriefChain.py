@@ -12,8 +12,8 @@ from executors.utils.ParamsProvider import ParamsProvider
 
 class SummarizeBriefChain:
     params=ParamsProvider.get_params('summarize-brief')
-    map_prompt_template = params['map_prompt_template']
-    reduce_prompt_template = params['reduce_prompt_template']
+    map_prompt_template = params['mapPromptTemplate']
+    reduce_prompt_template = params['reducePromptTemplate']
 
     def execute(self,filepath):
         temp = Globals.model_temp
