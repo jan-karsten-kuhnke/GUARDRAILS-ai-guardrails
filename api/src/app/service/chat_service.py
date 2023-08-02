@@ -200,7 +200,7 @@ class chat_service:
                 conversation_id, current_completion, role, current_user_email, task, None, msg_info, user_action_required)
         except Exception as e:
             yield (json.dumps({"error": "error"}))
-            logging.error("error: ", e)
+            logging.error("Error in chat completion: "+str(e))
             return
         finally:
             if filepath:
