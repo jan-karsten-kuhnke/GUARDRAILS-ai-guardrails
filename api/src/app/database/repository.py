@@ -1,7 +1,7 @@
 import json
 from sqlalchemy import create_engine, text, func ,or_,and_
 from sqlalchemy.orm import sessionmaker
-from database.models import Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity,DocumentEntity, OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity
+from database.models import Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity,DocumentEntity, OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity,ChainEntity
 from globals import Globals
 from utils.apiResponse import ApiResponse
 from flask import jsonify
@@ -270,5 +270,15 @@ class Persistence:
         except Exception as e:
             session.rollback()
             return jsonify({"message": "error"}), 500
+        finally:
+            session.close()
+    
+    def get_chain_by_code(chain_code):
+        try:
+            chain = session.query(ChainEntity).filter(ChainEntity.code == chain_code).first()
+            serialized_chain = chain.to_dict()
+            return serialized_chain
+        except Exception as ex:
+            logging.error(f"Exception while getting chain params: {ex}")
         finally:
             session.close()

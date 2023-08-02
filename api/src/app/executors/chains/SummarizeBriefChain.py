@@ -7,17 +7,18 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain import PromptTemplate
 from langchain.chains.summarize import load_summarize_chain
 from executors.utils.LlmProvider import LlmProvider
-from executors.utils.ParamsProvider import ParamsProvider
-
+from database.repository import Persistence
 
 class SummarizeBriefChain:
-    params=ParamsProvider.get_params('summarize-brief')
-    map_prompt_template = params['mapPromptTemplate']
-    reduce_prompt_template = params['reducePromptTemplate']
-    chain_type = params['chainType']
 
     def execute(self,filepath):
-        temp = Globals.model_temp
+        
+        chain=Persistence.get_chain_by_code('summarize-brief')
+        params=chain['params']
+        
+        map_prompt_template = params['mapPromptTemplate']
+        reduce_prompt_template = params['reducePromptTemplate']
+        chain_type = params['chainType']
         
         llm=LlmProvider.get_llm(is_private=False, use_chat_model=False, max_output_token=1000, increase_model_token_limit=False)
         

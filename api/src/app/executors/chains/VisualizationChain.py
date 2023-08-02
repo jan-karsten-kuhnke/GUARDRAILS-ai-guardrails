@@ -17,29 +17,31 @@ import json
 from sqlalchemy import create_engine,text
 from sqlalchemy.orm import sessionmaker
 from langchain.output_parsers.list import CommaSeparatedListOutputParser
-from executors.utils.ParamsProvider import ParamsProvider
+from database.repository import Persistence
 
 class VisualizationChain:
-    params=ParamsProvider.get_params('qa-viz')
-    PROMPT_SUFFIX =params['promptSuffix']
-
-    _DEFAULT_TEMPLATE = params['defaultTemplate']
-    
-    _DECIDER_TEMPLATE = params['deciderTemplate']
-
-    DECIDER_PROMPT = PromptTemplate(
-        input_variables=["query", "table_names"],
-        template=_DECIDER_TEMPLATE,
-        output_parser=CommaSeparatedListOutputParser(),
-    )
-
-    PROMPT = PromptTemplate(
-        input_variables=["input", "table_info", "dialect", "top_k"],
-        template=_DEFAULT_TEMPLATE + PROMPT_SUFFIX,
-    )
-    print(params['vegaLitePrompt'],"params")
 
     def execute(self, query, is_private, chat_history):
+        chain=Persistence.get_chain_by_code('qa-viz')
+        params=chain['params']
+        
+        PROMPT_SUFFIX =params['promptSuffix']
+
+        _DEFAULT_TEMPLATE = params['defaultTemplate']
+        
+        _DECIDER_TEMPLATE = params['deciderTemplate']
+        
+        DECIDER_PROMPT = PromptTemplate(
+            input_variables=["query", "table_names"],
+            template=_DECIDER_TEMPLATE,
+            output_parser=CommaSeparatedListOutputParser(),
+        )
+
+        PROMPT = PromptTemplate(
+            input_variables=["input", "table_info", "dialect", "top_k"],
+            template=_DEFAULT_TEMPLATE + PROMPT_SUFFIX,
+        )
+        
         # conn_str = f"postgresql+psycopg2://postgres:1234@localhost:5432/AdventureWorks"
         conn_str = Globals.METRIC_DB_URL
 
