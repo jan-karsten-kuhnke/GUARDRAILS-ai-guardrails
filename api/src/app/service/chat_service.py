@@ -14,12 +14,12 @@ from typing import TypedDict, Optional
 from datetime import datetime
 import json
 import requests
-from executors.chains.SummarizeBriefChain import SummarizeBriefChain
-from executors.chains.ExtractionChain import ExtractionChain
-from executors.chains.ConversationalChain import ConversationalChain
-from executors.chains.QaRetrievalChain import QaRetrievalChain
-from executors.chains.SqlChain import SqlChain
-from executors.chains.VisualizationChain import VisualizationChain
+from executors.applet.Summarize import Summarize
+from executors.applet.Extraction import Extraction
+from executors.applet.Conversation import Conversation
+from executors.applet.QaRetrieval import QaRetrieval
+from executors.applet.Sql import Sql
+from executors.applet.Visualization import Visualization
 
 override_message = "You chose to Override the warning, proceeding to Open AI."
 nsfw_warning = "Warning From Guardrails: We've detected that your message contains NSFW content. Please refrain from posting such content in a work environment, You can choose to override this warning if you wish to continue the conversation, or you can get your manager's approval before continuing."
@@ -122,7 +122,7 @@ class chat_service:
                 if (task == "summarize-brief"):
                     try:
                         logging.info("calling summarize brief executor")
-                        executor = SummarizeBriefChain()
+                        executor = Summarize()
                         result = executor.execute(filepath=filepath)
                         res = {"answer": result}
 
@@ -133,7 +133,7 @@ class chat_service:
                 elif (task == "extraction"):
                     try:
                         logging.info("calling summarize brief executor")
-                        executor = ExtractionChain()
+                        executor = Extraction()
                         result = executor.execute(filepath=filepath)
                         res = {"answer": result}
 
@@ -143,7 +143,7 @@ class chat_service:
                 elif (task == "conversation"):
                     try:
                         logging.info("calling conversation executor")
-                        executor = ConversationalChain()
+                        executor = Conversation()
                         res = executor.execute(prompt, is_private, history)
 
                     except Exception as e:
@@ -152,7 +152,7 @@ class chat_service:
                 elif (task == "qa-retreival"):
                     try:
                         logging.info("calling qa retrieval executor")
-                        executor = QaRetrievalChain()
+                        executor = QaRetrieval()
                         res = executor.execute(prompt, is_private, history)
 
                     except Exception as e:
@@ -161,7 +161,7 @@ class chat_service:
                 elif (task == "qa-sql"):
                     try:
                         logging.info("calling qa sql executor")
-                        executor = SqlChain()
+                        executor = Sql()
                         res = executor.execute(prompt, is_private, history)
 
                     except Exception as e:
@@ -170,7 +170,7 @@ class chat_service:
                 elif (task == "qa-viz"):
                     try:
                         logging.info("calling qa sql executor")
-                        executor = VisualizationChain()
+                        executor = Visualization()
                         res = executor.execute(prompt, is_private, history)
 
                     except Exception as e:
@@ -203,7 +203,8 @@ class chat_service:
             logging.error("error: ", e)
             return
         finally:
-            os.remove(filepath)
+            if filepath:
+                os.remove(filepath)
 
     def validate_prompt(prompt, is_override, pii_scan, nsfw_scan, current_user_email, conversation_id):
         logging.info("pii_scan: ", pii_scan)

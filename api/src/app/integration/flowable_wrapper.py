@@ -55,7 +55,6 @@ class flowable_wrapper:
         'Authorization': f'Basic {Globals.FLOWABLE_KEY}'
         }
 
-        print(payload)
         response = requests.request("POST", url, headers=headers, data=payload)
 
         return response.json()
@@ -79,7 +78,7 @@ class flowable_wrapper:
         'Content-Type': 'application/json',
         'Authorization': f'Basic {Globals.FLOWABLE_KEY}'
         }
-        print(payload)
+
         response = requests.request("POST", url, headers=headers, data=payload)
         
         data  = response.json()['data']

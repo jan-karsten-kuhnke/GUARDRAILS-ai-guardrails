@@ -16,7 +16,7 @@ from executors.wrappers.SqlWrapper import SqlWrapper
 from langchain.output_parsers.list import CommaSeparatedListOutputParser
 
 
-class SqlChain:
+class Sql:
    
     def execute(self, query, is_private, chat_history):
         chain=Persistence.get_chain_by_code('qa-sql')
@@ -27,15 +27,19 @@ class SqlChain:
         _DEFAULT_TEMPLATE = params['defaultTemplate']
         
         _DECIDER_TEMPLATE = params['deciderTemplate']
-        
+
+        DECIDER_PROMPT_INPUT_VARIABLES = params['deciderPromptInputVariables']
+
+        PROMPT_INPUT_VARIABLES = params['promptInputVariables']
+
         DECIDER_PROMPT = PromptTemplate(
-            input_variables=["query", "table_names"],
+            input_variables=DECIDER_PROMPT_INPUT_VARIABLES,
             template=_DECIDER_TEMPLATE,
             output_parser=CommaSeparatedListOutputParser(),
         )
 
         PROMPT = PromptTemplate(
-            input_variables=["input", "table_info", "dialect", "top_k"],
+            input_variables=PROMPT_INPUT_VARIABLES,
             template=_DEFAULT_TEMPLATE + PROMPT_SUFFIX,
         )
         # conn_str = f"postgresql+psycopg2://postgres:1234@localhost:5432/AdventureWorks"

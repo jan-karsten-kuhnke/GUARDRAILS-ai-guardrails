@@ -9,12 +9,12 @@ from langchain.chains.summarize import load_summarize_chain
 from executors.utils.LlmProvider import LlmProvider
 from database.repository import Persistence
 
-class SummarizeBriefChain:
+class Summarize:
 
     def execute(self,filepath):
         
-        chain=Persistence.get_chain_by_code('summarize-brief')
-        params=chain['params']
+        chain = Persistence.get_chain_by_code('summarize-brief')
+        params = chain['params']
         
         map_prompt_template = params['mapPromptTemplate']
         reduce_prompt_template = params['reducePromptTemplate']

@@ -19,26 +19,30 @@ from sqlalchemy.orm import sessionmaker
 from langchain.output_parsers.list import CommaSeparatedListOutputParser
 from database.repository import Persistence
 
-class VisualizationChain:
+class Visualization:
 
     def execute(self, query, is_private, chat_history):
-        chain=Persistence.get_chain_by_code('qa-viz')
-        params=chain['params']
+        chain = Persistence.get_chain_by_code('qa-viz')
+        params = chain['params']
         
-        PROMPT_SUFFIX =params['promptSuffix']
+        PROMPT_SUFFIX = params['promptSuffix']
 
         _DEFAULT_TEMPLATE = params['defaultTemplate']
         
         _DECIDER_TEMPLATE = params['deciderTemplate']
+
+        DECIDER_PROMPT_INPUT_VARIABLES = params['deciderPromptInputVariables']
+
+        PROMPT_INPUT_VARIABLES = params['promptInputVariables']
         
         DECIDER_PROMPT = PromptTemplate(
-            input_variables=["query", "table_names"],
+            input_variables=DECIDER_PROMPT_INPUT_VARIABLES,
             template=_DECIDER_TEMPLATE,
             output_parser=CommaSeparatedListOutputParser(),
         )
 
         PROMPT = PromptTemplate(
-            input_variables=["input", "table_info", "dialect", "top_k"],
+            input_variables=PROMPT_INPUT_VARIABLES,
             template=_DEFAULT_TEMPLATE + PROMPT_SUFFIX,
         )
         
@@ -73,8 +77,10 @@ class VisualizationChain:
             sql_data = sql_results[1].split("\nAnswer:")[0]
             VEGA_LITE_PROMPT = params['vegaLitePrompt']
 
+            VEGA_PROMPT_INPUT_VARIABLES = params['vegaPromptInputVariables']
+
             vega_prompt = PromptTemplate(
-                input_variables=["question", "sql_query", "sql_data"],
+                input_variables=VEGA_PROMPT_INPUT_VARIABLES,
                 template=VEGA_LITE_PROMPT,
             )
                         

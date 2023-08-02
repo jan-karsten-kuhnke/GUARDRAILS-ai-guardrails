@@ -36,7 +36,6 @@ class userdata_service:
     def get_tiles(user_email):
         user_groups = get_current_user_groups()
         previous_requests = flowable_wrapper.get_submitted_requests_code(user_email)
-        print(previous_requests)
 
         all_chains  = session.query(ChainEntity).all()
         res = []
