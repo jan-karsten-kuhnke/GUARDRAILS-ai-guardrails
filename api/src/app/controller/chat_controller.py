@@ -96,9 +96,9 @@ def create_document():
     file.save(filepath)
     file.close()
 
-    def summarize_brief_stream(data, user_email, filename, filepath, token):
+    def summarize_brief_stream(data, user_email, token, filename, filepath):
         response = chat_service.chat_completion(
             data, user_email, token, filename, filepath)
         for chunk in response:
             yield chunk
-    return Response(summarize_brief_stream(data, user_email, filename, filepath, token), mimetype='text/event-stream')
+    return Response(summarize_brief_stream(data, user_email, token, filename, filepath), mimetype='text/event-stream')

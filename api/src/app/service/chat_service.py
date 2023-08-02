@@ -53,50 +53,6 @@ class message_obj(TypedDict):
 
 class chat_service:
 
-    def summarize_brief(data, current_user_email, filename, filepath, token):
-
-        try:
-            msg_info = {}
-            task = str(data["task"]) if "task" in data else "summarize-brief"
-            if task == "summarize-brief":
-                prompt = f"Summarize {filename}"
-                title = f"Summmary of {filename}."
-            elif task == "extraction":
-                prompt = f"Extract Key Metrics from {filename}"
-                title = f"Key Metrics of {filename}."
-
-            conversation_id = None
-            if ('conversation_id' in data and data['conversation_id']):
-                conversation_id = data['conversation_id']
-
-            chat_service.update_conversation(
-                conversation_id, prompt, 'user', current_user_email, task, title)
-
-            if task == "summarize-brief":
-                executor = SummarizeBriefChain()
-            elif task == "extraction":
-                executor = ExtractionChain()
-
-            result = executor.execute(filepath=filepath)
-            current_completion = result
-            chunk = json.dumps({
-                "role": "assistant",
-                "content": result,
-                "msg_info": msg_info,
-            })
-            yield (chunk)
-            user_action_required = False
-
-            chat_service.save_chat_log(current_user_email, prompt)
-            chat_service.update_conversation(
-                conversation_id, current_completion, 'assistant', current_user_email, task, None, msg_info, user_action_required)
-        except Exception as e:
-            yield (json.dumps({"error": "error"}))
-            logging.error("error: ", e)
-            return
-        finally:
-            os.remove(filepath)
-
     def chat_completion(data, current_user_email, token, filename=None, filepath=None):
         try:
             task = str(data["task"]) if "task" in data else None
@@ -105,7 +61,6 @@ class chat_service:
             pii_scan = True
             nsfw_scan = True
 
-            prompt = str(data["message"])
             is_override = bool(data["isOverride"])
             conversation_id = None
             manage_conversation_context = False
@@ -119,6 +74,9 @@ class chat_service:
             elif task == "extraction":
                 prompt = f"Extract Key Metrics from {filename}"
                 title = f"Key Metrics of {filename}."
+            else:
+                prompt = str(data["message"])
+                title = None
 
             if ('conversation_id' in data and data['conversation_id']):
                 conversation_id = data['conversation_id']
@@ -127,7 +85,7 @@ class chat_service:
             stop_conversation, stop_response, updated_prompt, role = chat_service.validate_prompt(
                 prompt, is_override, pii_scan, nsfw_scan, current_user_email, conversation_id)
             chat_service.update_conversation(
-                conversation_id, updated_prompt, 'user', current_user_email, task, None)
+                conversation_id, updated_prompt, 'user', current_user_email, task, title)
 
             current_completion = ''
             user_action_required = False
@@ -165,18 +123,19 @@ class chat_service:
                     try:
                         logging.info("calling summarize brief executor")
                         executor = SummarizeBriefChain()
-                        res = executor.execute(filepath=filepath)
-                        res['answer'] = res
+                        result = executor.execute(filepath=filepath)
+                        res = {"answer": result}
 
                     except Exception as e:
                         yield ("Sorry. Some error occured. Please try again.")
                         logging.error("error: "+str(e))
+
                 elif (task == "extraction"):
                     try:
                         logging.info("calling summarize brief executor")
                         executor = ExtractionChain()
-                        res = executor.execute(filepath=filepath)
-                        res['answer'] = res
+                        result = executor.execute(filepath=filepath)
+                        res = {"answer": result}
 
                     except Exception as e:
                         yield ("Sorry. Some error occured. Please try again.")
