@@ -28,9 +28,9 @@ class SummarizeBriefChain:
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
         docs = text_splitter.split_documents(pages)
 
-        MAP_PROMPT = PromptTemplate(template=SummarizeBriefChain.map_prompt_template, input_variables=["text"])
-        REDUCE_PROMPT = PromptTemplate(template=SummarizeBriefChain.reduce_prompt_template, input_variables=["text"])
-        chain = load_summarize_chain(llm, chain_type=SummarizeBriefChain.chain_type,  map_prompt=MAP_PROMPT, combine_prompt=REDUCE_PROMPT,verbose=True)
+        MAP_PROMPT = PromptTemplate(template=map_prompt_template, input_variables=["text"])
+        REDUCE_PROMPT = PromptTemplate(template=reduce_prompt_template, input_variables=["text"])
+        chain = load_summarize_chain(llm, chain_type=chain_type,  map_prompt=MAP_PROMPT, combine_prompt=REDUCE_PROMPT,verbose=True)
         result = chain({"input_documents": docs}, return_only_outputs=True)
         return result["output_text"]
 
