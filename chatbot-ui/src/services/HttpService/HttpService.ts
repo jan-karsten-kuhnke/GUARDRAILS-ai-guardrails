@@ -19,7 +19,7 @@ _axios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   // eslint-disable-next-line no-param-reassign
   config.headers.Authorization = `Bearer ${AuthService.getToken()}`;
   config.headers["Content-Type"] = "application/json";
-  if (config.url == '/chat/summarizebrief' && config.method == 'post') {
+  if (config.url == '/chat/executeondoc' && config.method == 'post') {
     config.headers["Content-Type"] = "multipart/form-data";
   }
   config.headers["Access-Control-Allow-Origin"] = "*";
@@ -71,7 +71,7 @@ export const archiveUnarchiveConversation = (
 export const summarizeBrief = (
   formData: FormData
 ) =>
-  fetch(`${import.meta.env.VITE_CHAT_SERVICE_URL}/chat/summarizebrief`, {
+  fetch(`${import.meta.env.VITE_CHAT_SERVICE_URL}/chat/executeondoc`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${AuthService.getToken()}`,
