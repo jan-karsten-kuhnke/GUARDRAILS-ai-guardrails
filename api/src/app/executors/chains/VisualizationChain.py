@@ -55,7 +55,7 @@ class VisualizationChain:
         
         chain = SQLDatabaseSequentialChain.from_llm(
             llm, db, verbose=True, return_intermediate_steps=True,
-            query_prompt=self.PROMPT,**{'top_k':10000000000},decider_prompt=self.DECIDER_PROMPT
+            query_prompt=PROMPT,**{'top_k':10000000000},decider_prompt=DECIDER_PROMPT
         )
     
 

@@ -50,8 +50,8 @@ class SqlChain:
         llm=LlmProvider.get_llm(is_private=is_private, use_chat_model=False, max_output_token=1000, increase_model_token_limit=True)
         
         chain = SQLDatabaseSequentialChain.from_llm(
-            llm, db, verbose=True, return_intermediate_steps=True,decider_prompt=SqlChain.DECIDER_PROMPT,
-            query_prompt=SqlChain.PROMPT ,**{'top_k':10}
+            llm, db, verbose=True, return_intermediate_steps=True,decider_prompt=DECIDER_PROMPT,
+            query_prompt=PROMPT ,**{'top_k':10}
         )
         
 
