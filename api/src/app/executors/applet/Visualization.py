@@ -55,7 +55,7 @@ class Visualization:
             schemas=[Globals.METRIC_SCHEMA],
         )
         
-        llm=LlmProvider.get_llm(is_private=is_private,use_chat_model=False,max_output_token=1000,increase_model_token_limit=True)
+        llm=LlmProvider.get_llm(is_private=is_private,use_chat_model=True,max_output_token=1000,increase_model_token_limit=True)
         
         chain = SQLDatabaseSequentialChain.from_llm(
             llm, db, verbose=True, return_intermediate_steps=True,
@@ -84,7 +84,7 @@ class Visualization:
                 template=VEGA_LITE_PROMPT,
             )
                         
-            vega_chain = LLMChain(llm=self.public_llm, prompt=vega_prompt)
+            vega_chain = LLMChain(llm=llm, prompt=vega_prompt)
             config = vega_chain.run({'sql_data':sql_data, 'sql_query':sql_query, 'question':query})
 
             modified_sql_query = sql_query.replace("\n", " ")

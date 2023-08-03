@@ -51,7 +51,7 @@ class Sql:
             schemas=[Globals.METRIC_SCHEMA],
         )
         
-        llm=LlmProvider.get_llm(is_private=is_private, use_chat_model=False, max_output_token=1000, increase_model_token_limit=True)
+        llm=LlmProvider.get_llm(is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
         
         chain = SQLDatabaseSequentialChain.from_llm(
             llm, db, verbose=True, return_intermediate_steps=True,decider_prompt=DECIDER_PROMPT,
