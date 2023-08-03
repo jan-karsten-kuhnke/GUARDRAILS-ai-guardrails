@@ -7,16 +7,18 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains.summarize import load_summarize_chain
 from executors.utils.LlmProvider import LlmProvider
-
+from database.repository import Persistence
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import create_extraction_chain
 import json
 
 
-class ExtractionChain:
+class Extraction:
     def execute(self, filepath):
         loader = PyPDFLoader(filepath)
         pages = loader.load()
+        chain = Persistence.get_chain_by_code('extraction')
+        params = chain['params']
 
         input_text = ''
         for page in pages:
@@ -30,12 +32,12 @@ class ExtractionChain:
                 "flat_data_type": {"type": "string"},
                 "flat_data_flat_type": {"type": "string"},
                 "flat_data_ifa": {"type": "string"},
-                "flat_data_flat_percentage": {"type": "string"},
+                "flat_data_flat_percentage": {"type": "string"}
             },
-            "required": [],
+            "required": []
         }
 
-        llm=LlmProvider.get_llm(is_private=False, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
+        llm = LlmProvider.get_llm(is_private=False, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
 
         chain = create_extraction_chain(schema=schema, llm=llm)
 

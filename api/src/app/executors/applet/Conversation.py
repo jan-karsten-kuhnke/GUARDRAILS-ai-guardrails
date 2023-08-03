@@ -12,7 +12,7 @@ from typing import Any
 import logging
 
 
-class ConversationalChain:
+class Conversation:
     
     def execute(self, query, is_private, chat_history):
         memory = ConversationBufferMemory(return_messages=True)

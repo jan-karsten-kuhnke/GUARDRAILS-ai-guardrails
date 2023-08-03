@@ -12,17 +12,19 @@ import json
 
 endpoints = SmorestBlueprint('chat', __name__)
 
+
 @endpoints.route('/completions', methods=['POST'])
 @oidc.accept_token(require_token=True)
 def chat_completion():
     data = request.get_json(silent=True)
     user_email = get_current_user_email()
     token = request.headers['authorization'].split(' ')[1]
-    def chat_completion_stream(data,user_email):
-        response = chat_service.chat_completion(data,user_email,token)
+
+    def chat_completion_stream(data, user_email):
+        response = chat_service.chat_completion(data, user_email, token)
         for chunk in response:
             yield chunk
-    return Response(chat_completion_stream(data,user_email), mimetype='text/event-stream')
+    return Response(chat_completion_stream(data, user_email), mimetype='text/event-stream')
 
 
 @endpoints.route('/conversations', methods=['GET'])
@@ -31,7 +33,7 @@ def get_conversations():
     archived_param = request.args.get('archived')
     flag = archived_param.lower() == 'true'
     user_email = get_current_user_email()
-    conversations = chat_service.get_conversations(user_email,flag)
+    conversations = chat_service.get_conversations(user_email, flag)
     return utils.rename_id(conversations)
 
 
@@ -39,7 +41,7 @@ def get_conversations():
 @oidc.accept_token(require_token=True)
 def get_conversation_by_id(conversation_id):
     user_email = get_current_user_email()
-    return chat_service.get_conversation_by_id(conversation_id,user_email)
+    return chat_service.get_conversation_by_id(conversation_id, user_email)
 
 
 @endpoints.route('/conversations/archive', methods=['DELETE'])
@@ -47,7 +49,7 @@ def get_conversation_by_id(conversation_id):
 def archive_all_conversations():
     user_email = get_current_user_email()
     chat_service.archive_all_conversations(user_email)
-    return {"result":"success"}
+    return {"result": "success"}
 
 
 @endpoints.route('/conversations/archive/<conversation_id>', methods=['DELETE'])
@@ -56,8 +58,8 @@ def archive_conversation(conversation_id):
     archived_param = request.args.get('flag')
     flag = archived_param.lower() == 'true'
     user_email = get_current_user_email()
-    chat_service.archive_conversation(user_email, conversation_id,flag=flag)
-    return {"result":"success"}
+    chat_service.archive_conversation(user_email, conversation_id, flag=flag)
+    return {"result": "success"}
 
 
 @endpoints.route('/conversations/<conversation_id>/properties', methods=['PUT'])
@@ -65,8 +67,9 @@ def archive_conversation(conversation_id):
 def update_conversation_properties(conversation_id):
     data = request.get_json(silent=True)
     user_email = get_current_user_email()
-    chat_service.update_conversation_properties(conversation_id,data,user_email)
-    return {"result":"success"}
+    chat_service.update_conversation_properties(
+        conversation_id, data, user_email)
+    return {"result": "success"}
 
 
 @endpoints.route('/requestapproval/<conversation_id>', methods=['GET'])
@@ -74,13 +77,15 @@ def update_conversation_properties(conversation_id):
 def request_approval(conversation_id):
     user_email = get_current_user_email()
     user_groups = get_current_user_groups()
-    message=chat_service.request_approval(conversation_id,user_email,user_groups)
-    return {"message":message}
+    message = chat_service.request_approval(
+        conversation_id, user_email, user_groups)
+    return {"message": message}
 
-@endpoints.route('/summarizebrief', methods=['POST'])
+
+@endpoints.route('/executeondoc', methods=['POST'])
 @oidc.accept_token(require_token=True)
-def create_document():
-    data = json.loads( request.form['data'])
+def execute_on_document():
+    data = json.loads(request.form['data'])
     user_email = get_current_user_email()
     token = request.headers['authorization'].split(' ')[1]
     files = request.files.getlist('files')
@@ -90,8 +95,10 @@ def create_document():
     filepath = os.path.join(os.getcwd(), filename)
     file.save(filepath)
     file.close()
-    def summarize_brief_stream(data,user_email,filename,filepath,token):
-        response=chat_service.summarize_brief(data,user_email,filename,filepath,token)
+
+    def summarize_brief_stream(data, user_email, token, filename, filepath):
+        response = chat_service.chat_completion(
+            data, user_email, token, filename, filepath)
         for chunk in response:
             yield chunk
-    return Response(summarize_brief_stream(data,user_email,filename,filepath,token), mimetype='text/event-stream')
+    return Response(summarize_brief_stream(data, user_email, token, filename, filepath), mimetype='text/event-stream')

@@ -14,7 +14,7 @@ from typing import Any
 import logging
 
 
-class QaRetrievalChain:
+class QaRetrieval:
     
     def execute(self, query, is_private, chat_history):
         embeddings = HuggingFaceEmbeddings()
