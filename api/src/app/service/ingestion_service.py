@@ -24,6 +24,7 @@ from globals import Globals
 from database.models import DocumentEntity
 from database.postgres import session
 from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.vectorstores.pgvector import PGVector
 
 chunk_size = Globals.chunk_size
 chunk_overlap = Globals.chunk_overlap
@@ -50,18 +51,17 @@ class  IngestionService :
         embeddings = HuggingFaceEmbeddings()
         texts = IngestionService.process_documents(directory_path)
         
-        if(IngestionService.does_vectorstore_exist(persist_directory=Globals.persist_directory)):
-            logging.info(f"Appending to existing vectorstore at {Globals.persist_directory}")
-            db = Chroma(persist_directory=Globals.persist_directory, embedding_function=embeddings)
-            logging.info(f"Creating embeddings. May take some minutes...")
-            db.add_documents(texts)
-        else:
-            logging.info("Creating new vectorstore")
-            logging.info(f"Creating embeddings. May take some minutes...")
-            db = Chroma.from_documents(texts, embeddings, persist_directory=Globals.persist_directory)
-        db.persist()
-        db = None
-        logging.info(f"Ingestion complete.")
+        CONNECTION_STRING =Globals.VECTOR_STORE_DB_URI
+        COLLECTION_NAME = Globals.VECTOR_STORE_COLLECTION_NAME
+        
+        store = PGVector(
+            collection_name=COLLECTION_NAME,
+            connection_string=CONNECTION_STRING,
+            embedding_function=embeddings,
+        )
+
+        store.add_documents(texts)
+
     
     def load_document(file_path: str) -> List[Document]:
         ext = os.path.splitext(file_path)[1]
