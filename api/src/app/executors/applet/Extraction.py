@@ -24,18 +24,8 @@ class Extraction:
         for page in pages:
             input_text += page.page_content
 
-        schema =  {
-            "properties": {
-                "project_site_area": {"type": "string"},
-                "project_maximum_building_height": {"type": "string"},
-                "project_gross_plot_ratio": {"type": "string"},
-                "flat_data_type": {"type": "string"},
-                "flat_data_flat_type": {"type": "string"},
-                "flat_data_ifa": {"type": "string"},
-                "flat_data_flat_percentage": {"type": "string"},
-            },
-            "required": [],
-        }
+        schema =  params['schema']
+        print(schema)
 
         llm = LlmProvider.get_llm(is_private=False, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
 
