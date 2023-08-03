@@ -17,6 +17,9 @@ class Globals:
     METRIC_DB_URL =os.environ.get("METRIC_DB_URI")
     METRIC_SCHEMA = os.environ.get("METRIC_SCHEMA")
 
+    VECTOR_STORE_DB_URI=os.environ.get("VECTOR_STORE_DB_URI")
+    VECTOR_STORE_COLLECTION_NAME ="documents"
+    
     #Flowable
     FLOWABLE_BASE_URL = os.environ.get("FLOWABLE_BASE_URL")
     FLOWABLE_KEY = os.environ.get("FLOWABLE_KEY")

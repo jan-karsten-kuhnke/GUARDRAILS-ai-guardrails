@@ -9,6 +9,7 @@ from langchain.llms import VertexAI
 from langchain.embeddings import HuggingFaceEmbeddings
 from globals import Globals
 from executors.utils.LlmProvider import LlmProvider
+from langchain.vectorstores.pgvector import PGVector
 
 from typing import Any
 import logging
@@ -18,12 +19,17 @@ class QaRetrieval:
     
     def execute(self, query, is_private, chat_history):
         embeddings = HuggingFaceEmbeddings()
-        db = Chroma(
-            persist_directory=Globals.persist_directory, embedding_function=embeddings
+        
+        CONNECTION_STRING =Globals.VECTOR_STORE_DB_URI
+        COLLECTION_NAME = Globals.VECTOR_STORE_COLLECTION_NAME
+        
+        store = PGVector(
+            collection_name=COLLECTION_NAME,
+            connection_string=CONNECTION_STRING,
+            embedding_function=embeddings,
         )
-        # https://python.langchain.com/docs/modules/data_connection/retrievers/how_to/vectorstore
-        # retriever = db.as_retriever()
-        retriever = db.as_retriever()
+        
+        retriever = store.as_retriever()
 
         llm=LlmProvider.get_llm(is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=False)
  
