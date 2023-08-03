@@ -59,11 +59,8 @@ class  IngestionService :
             connection_string=CONNECTION_STRING,
             embedding_function=embeddings,
         )
-        print(f"Creating embeddings. May take some minutes...")
-        
+
         store.add_documents(texts)
-        
-        print(f"Ingestion complete.")
 
     
     def load_document(file_path: str) -> List[Document]:
