@@ -123,8 +123,7 @@ class chat_service:
                     try:
                         logging.info("calling summarize brief executor")
                         executor = Summarize()
-                        result = executor.execute(filepath=filepath)
-                        res = {"answer": result}
+                        res = executor.execute(filepath=filepath)
 
                     except Exception as e:
                         yield ("Sorry. Some error occured. Please try again.")
@@ -134,8 +133,7 @@ class chat_service:
                     try:
                         logging.info("calling summarize brief executor")
                         executor = Extraction()
-                        result = executor.execute(filepath=filepath)
-                        res = {"answer": result}
+                        res= executor.execute(filepath=filepath)
 
                     except Exception as e:
                         yield ("Sorry. Some error occured. Please try again.")

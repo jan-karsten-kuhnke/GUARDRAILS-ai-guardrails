@@ -13,68 +13,34 @@ from executors.wrappers.SqlWrapper import SqlWrapper
 from executors.utils.LlmProvider import LlmProvider
 from langchain.chains import LLMChain
 import sqlalchemy
-import json
 from sqlalchemy import create_engine,text
 from sqlalchemy.orm import sessionmaker
 from langchain.output_parsers.list import CommaSeparatedListOutputParser
 from database.repository import Persistence
+from executors.applet.Sql import Sql
+from executors.utils.AppletResponse import AppletResponse
 
 class Visualization:
 
     def execute(self, query, is_private, chat_history):
         chain = Persistence.get_chain_by_code('qa-viz')
         params = chain['params']
-        
-        PROMPT_SUFFIX = params['promptSuffix']
-
-        _DEFAULT_TEMPLATE = params['defaultTemplate']
-        
-        _DECIDER_TEMPLATE = params['deciderTemplate']
-
-        DECIDER_PROMPT_INPUT_VARIABLES = params['deciderPromptInputVariables']
-
-        PROMPT_INPUT_VARIABLES = params['promptInputVariables']
-        
-        DECIDER_PROMPT = PromptTemplate(
-            input_variables=DECIDER_PROMPT_INPUT_VARIABLES,
-            template=_DECIDER_TEMPLATE,
-            output_parser=CommaSeparatedListOutputParser(),
-        )
-
-        PROMPT = PromptTemplate(
-            input_variables=PROMPT_INPUT_VARIABLES,
-            template=_DEFAULT_TEMPLATE + PROMPT_SUFFIX,
-        )
-        
-        # conn_str = f"postgresql+psycopg2://postgres:1234@localhost:5432/AdventureWorks"
         conn_str = Globals.METRIC_DB_URL
-
-        db = SqlWrapper.from_uri(
-            database_uri=conn_str,
-            # schemas=['humanresources','person','production','purchasing','sales'],
-            schemas=[Globals.METRIC_SCHEMA],
-        )
         
         llm=LlmProvider.get_llm(is_private=is_private,use_chat_model=True,max_output_token=1000,increase_model_token_limit=True)
-        
-        chain = SQLDatabaseSequentialChain.from_llm(
-            llm, db, verbose=True, return_intermediate_steps=True,
-            query_prompt=PROMPT,**{'top_k':10000000000},decider_prompt=DECIDER_PROMPT
-        )
-    
 
         sources = []
-        # Prepare the chain
         try:
-            result = chain(query)
-            answer = result["result"]
-            sql_results = (
-                result["intermediate_steps"][0]["input"]
-                .split("\nSQLQuery:")[1]
-                .split("\nSQLResult:")
-            )
-            sql_query = sql_results[0]
-            sql_data = sql_results[1].split("\nAnswer:")[0]
+            executor = Sql()
+            sql_result=executor.execute(query, is_private, chat_history)
+            sql_query_source = json.loads(sql_result['sources'][0])
+            sql_data_source = json.loads(sql_result['sources'][1])
+            
+            sql_query=sql_query_source['doc']
+            sql_query = sql_query[3:-3]
+            sql_data=sql_data_source['doc']
+  
+            
             VEGA_LITE_PROMPT = params['vegaLitePrompt']
 
             VEGA_PROMPT_INPUT_VARIABLES = params['vegaPromptInputVariables']
@@ -123,4 +89,6 @@ class Visualization:
         sources.append(json.dumps(sql_query_source))
         sources.append(json.dumps(sql_result_source))
 
-        return {"answer": answer, "sources": sources}
+        response=AppletResponse(answer, sources)
+
+        return response.obj()

@@ -10,7 +10,7 @@ from typing import Any
 import logging
 from executors.utils.LlmProvider import LlmProvider
 from database.repository import Persistence
-
+from executors.utils.AppletResponse import AppletResponse
 from langchain.chains import SQLDatabaseSequentialChain
 from executors.wrappers.SqlWrapper import SqlWrapper
 from langchain.output_parsers.list import CommaSeparatedListOutputParser
@@ -102,4 +102,6 @@ class Sql:
         sources.append(json.dumps(sql_query_source))
         sources.append(json.dumps(sql_result_source))
 
-        return {"answer": answer, "sources": sources}
+        response=AppletResponse(answer, sources)
+
+        return response.obj()

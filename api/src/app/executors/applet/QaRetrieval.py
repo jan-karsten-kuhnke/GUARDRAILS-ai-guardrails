@@ -10,7 +10,7 @@ from langchain.embeddings import HuggingFaceEmbeddings
 from globals import Globals
 from executors.utils.LlmProvider import LlmProvider
 from langchain.vectorstores.pgvector import PGVector
-
+from executors.utils.AppletResponse import AppletResponse
 from typing import Any
 import logging
 
@@ -50,4 +50,7 @@ class QaRetrieval:
             for doc in docs
         ]
         db = None
-        return {"answer":answer,"sources": sources}
+        
+        response=AppletResponse(answer, sources)
+
+        return response.obj()
