@@ -19,18 +19,30 @@ from langchain.output_parsers.list import CommaSeparatedListOutputParser
 from database.repository import Persistence
 from executors.applet.Sql import Sql
 from executors.utils.AppletResponse import AppletResponse
+from cryptography.fernet import Fernet
+
 
 class Visualization:
 
     def execute(self, query, is_private, chat_history):
-        chain = Persistence.get_chain_by_code('qa-viz')
-        params = chain['params']
-        conn_str = Globals.METRIC_DB_URL
-        
-        llm=LlmProvider.get_llm(is_private=is_private,use_chat_model=True,max_output_token=1000,increase_model_token_limit=True)
-
-        sources = []
         try:
+            chain = Persistence.get_chain_by_code('qa-viz')
+            params = chain['params']
+        
+            sources = []
+            
+            key_str =Globals.ENCRYPTION_KEY
+            key = key_str.encode('utf-8')
+
+            fernet = Fernet(key)
+            
+            encMessage = params['encodedDbUrl']
+            enc = encMessage.encode('utf-8')
+
+            conn_str = fernet.decrypt(enc).decode()
+            
+            llm=LlmProvider.get_llm(is_private=is_private,use_chat_model=True,max_output_token=1000,increase_model_token_limit=True)
+            
             executor = Sql()
             sql_result=executor.execute(query, is_private, chat_history)
             sql_query_source = json.loads(sql_result['sources'][0])

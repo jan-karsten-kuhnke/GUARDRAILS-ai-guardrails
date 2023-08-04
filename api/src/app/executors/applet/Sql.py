@@ -14,6 +14,7 @@ from executors.utils.AppletResponse import AppletResponse
 from langchain.chains import SQLDatabaseSequentialChain
 from executors.wrappers.SqlWrapper import SqlWrapper
 from langchain.output_parsers.list import CommaSeparatedListOutputParser
+from cryptography.fernet import Fernet
 
 
 class Sql:
@@ -42,12 +43,19 @@ class Sql:
             input_variables=PROMPT_INPUT_VARIABLES,
             template=_DEFAULT_TEMPLATE + PROMPT_SUFFIX,
         )
-        # conn_str = f"postgresql+psycopg2://postgres:1234@localhost:5432/AdventureWorks"
-        conn_str = Globals.METRIC_DB_URL
+        
+        key_str =Globals.ENCRYPTION_KEY
+        key = key_str.encode('utf-8')
+
+        fernet = Fernet(key)
+        
+        encMessage = params['encodedDbUrl']
+        enc = encMessage.encode('utf-8')
+
+        conn_str = fernet.decrypt(enc).decode()
 
         db = SqlWrapper.from_uri(
             database_uri=conn_str,
-            # schemas=['humanresources','person','production','purchasing','sales'],
             schemas=[Globals.METRIC_SCHEMA],
         )
         
