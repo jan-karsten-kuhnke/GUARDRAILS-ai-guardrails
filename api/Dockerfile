@@ -14,6 +14,7 @@ RUN pipenv install
 RUN pipenv run python3 -m spacy download en_core_web_lg
 RUN pipenv run pip3 install itsdangerous==2.0.1
 RUN pipenv run pip3 install sqlalchemy==2.0.16
+RUN pipenv run pip3 uninstall -y httpx
 COPY . .
 
 CMD ["pipenv", "run", "start"]
