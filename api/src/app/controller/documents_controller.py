@@ -39,8 +39,10 @@ def create_document():
     os.mkdir(temp_dir_name)
     for file in files:
         file.save(os.path.join(temp_dir_name, file.filename))
-    return DocumentService.create_documents(files=files, location=temp_dir_name)
     
+    return DocumentService.create_documents(location=temp_dir_name)
+    
+
 
 
 # UPDATE an existing document

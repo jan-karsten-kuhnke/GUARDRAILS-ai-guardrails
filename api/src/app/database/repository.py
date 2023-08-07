@@ -1,7 +1,7 @@
 import json
 from sqlalchemy import create_engine, text, func ,or_,and_
 from sqlalchemy.orm import sessionmaker
-from database.models import Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity,DocumentEntity, OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity,ChainEntity
+from database.models import Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, DocumentEntity, OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity,ChainEntity
 from globals import Globals
 from utils.apiResponse import ApiResponse
 from flask import jsonify
@@ -9,7 +9,7 @@ from service.ingestion_service import IngestionService
 import logging
 
 
-from database.postgres import session , engine
+from database.postgres import session , engine, vector_store_engine
 
 class Persistence:
     
@@ -46,13 +46,13 @@ class Persistence:
         finally:
             session.close()
             
-    def insert_document(title, description, location, folder_id):
+    def insert_document(title, description, location, custom_ids):
         try:
             document = DocumentEntity(
                     title=title,
                     description=description,
                     location=location,
-                    folder_id=folder_id
+                    custom_ids=custom_ids
                 )
             session.add(document)
             session.commit()
@@ -71,7 +71,7 @@ class Persistence:
                     title=file.filename,
                     description="",
                     location= location + "/" + file.filename,
-                    folder_id=1)
+                    )
                 session.add(doc)
                 session.commit()
             return jsonify({"message": "success"}), 200
@@ -264,13 +264,26 @@ class Persistence:
     def delete_document(document_id):
         try:
             document = session.query(DocumentEntity).filter(DocumentEntity.id == document_id).first()
+            row = document.to_dict()
+
+            #deleting vector store embeddings for  document
+            custom_ids = row['custom_ids']
+            comma_separated_custom_ids = ', '.join([f"'{id}'" for id in custom_ids])
+            connection = vector_store_engine.connect()
+            sql_query = f"DELETE FROM langchain_pg_embedding WHERE custom_id IN ({comma_separated_custom_ids})"
+            result = connection.execute(text(sql_query))
+            connection.commit()
+
+            
             session.delete(document)
             session.commit()
             return jsonify({"message": "success"}), 200
-        except Exception as e:
+        except Exception as ex:
+            logging.error(f"Exception while deleting document: {ex}")
             session.rollback()
             return jsonify({"message": "error"}), 500
         finally:
+            connection.close()
             session.close()
     
     def get_chain_by_code(chain_code):

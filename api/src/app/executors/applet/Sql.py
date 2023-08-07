@@ -18,7 +18,7 @@ from cryptography.fernet import Fernet
 
 
 class Sql:
-   
+
     def execute(self, query, is_private, chat_history):
         chain=Persistence.get_chain_by_code('qa-sql')
         params=chain['params']
@@ -44,19 +44,21 @@ class Sql:
             template=_DEFAULT_TEMPLATE + PROMPT_SUFFIX,
         )
         
-        key_str =Globals.ENCRYPTION_KEY
+        key_str = Globals.ENCRYPTION_KEY
         key = key_str.encode('utf-8')
 
         fernet = Fernet(key)
         
-        encMessage = params['encodedDbUrl']
-        enc = encMessage.encode('utf-8')
+        enc_metric_db_url = params['encodedMetricDbUrl']
+        enc = enc_metric_db_url.encode('utf-8')
 
         conn_str = fernet.decrypt(enc).decode()
 
+        metric_db_schemas = params['metricDbSchemas']
+
         db = SqlWrapper.from_uri(
-            database_uri=conn_str,
-            schemas=[Globals.METRIC_SCHEMA],
+            database_uri = conn_str,
+            schemas = metric_db_schemas,
         )
         
         llm=LlmProvider.get_llm(is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)

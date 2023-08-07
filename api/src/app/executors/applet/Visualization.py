@@ -44,7 +44,7 @@ class Visualization:
             llm=LlmProvider.get_llm(is_private=is_private,use_chat_model=True,max_output_token=1000,increase_model_token_limit=True)
             
             executor = Sql()
-            sql_result=executor.execute(query, is_private, chat_history)
+            sql_result = executor.execute(query=query, is_private=is_private, chat_history=chat_history)
             sql_query_source = json.loads(sql_result['sources'][0])
             sql_data_source = json.loads(sql_result['sources'][1])
             
@@ -81,7 +81,8 @@ class Visualization:
             session.close()
             engine.dispose()
 
-            return {"answer": "", "sources": sources, "visualization": config, "dataset": json_data}
+            response=AppletResponse("", sources, config, json_data)
+            return response.obj()
 
 
         except Exception as e:

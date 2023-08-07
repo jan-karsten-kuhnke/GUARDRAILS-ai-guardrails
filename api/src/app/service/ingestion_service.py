@@ -47,20 +47,24 @@ FILE_MAPPING = {
 }
 
 class  IngestionService :
-    def ingest_files(self,directory_path: str):
+    def ingest_files(self,file_path: str):
         embeddings = HuggingFaceEmbeddings()
-        texts = IngestionService.process_documents(directory_path)
-        
-        CONNECTION_STRING =Globals.VECTOR_STORE_DB_URI
+
+        CONNECTION_STRING = Globals.VECTOR_STORE_DB_URI
         COLLECTION_NAME = Globals.VECTOR_STORE_COLLECTION_NAME
-        
+
+        document = IngestionService.load_document(file_path)
+        texts = IngestionService.process_documents(document)
+    
         store = PGVector(
             collection_name=COLLECTION_NAME,
             connection_string=CONNECTION_STRING,
             embedding_function=embeddings,
         )
 
-        store.add_documents(texts)
+        custom_ids = store.add_documents(texts)
+
+        return custom_ids
 
     
     def load_document(file_path: str) -> List[Document]:
@@ -72,26 +76,26 @@ class  IngestionService :
 
         raise ValueError(f"Unsupported file type '{ext}'")
 
-    def load_documents(directory: str) -> List[Document]:
+
+    def get_all_documents(directory: str) -> List[Document]:
         documents = []
         for root, _, files in os.walk(directory):
             for file in files:
                 file_path = os.path.join(root, file)
-                documents.extend(IngestionService.load_document(file_path))
+                documents.append({"file_name":file,"file_path":file_path})
         return documents
 
-    def process_documents(source_directory: str) -> List[Document]:
-        logging.info(f"Loading documents from {source_directory}")
-        documents = IngestionService.load_documents(source_directory)
+
+    def process_documents(documents: list) -> List[Document]:
         if not documents:
             logging.info("No documents found")
             exit(0)
             
-        logging.info(f"Loaded {len(documents)} new documents from {source_directory}")
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
         texts = text_splitter.split_documents(documents)
-        for text in texts:
-            text.metadata['source'] = text.metadata['source'].replace(source_directory + '/', '')
+
+        # for text in texts:
+        #     text.metadata['source'] = text.metadata['source'].replace(source_directory + '/', '')
 
         logging.info(f"Split into {len(texts)} chunks of text (max. {chunk_size} tokens each)")
         #Summarize each document
