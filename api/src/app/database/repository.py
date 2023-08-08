@@ -285,6 +285,27 @@ class Persistence:
         finally:
             connection.close()
             session.close()
+            
+    def get_document_by_id(document_id):
+        try:
+            document = session.query(DocumentEntity).filter(DocumentEntity.id == document_id).first()
+            serialized_document = document.to_dict()
+            custom_ids = serialized_document['custom_ids']
+            comma_separated_custom_ids = ', '.join([f"'{id}'" for id in custom_ids])
+            
+            connection = vector_store_engine.connect()
+            sql_query = f"SELECT document FROM langchain_pg_embedding WHERE custom_id IN ({comma_separated_custom_ids})"
+            result = connection.execute(text(sql_query)) 
+            
+            rows = []
+            
+            for r in result:
+                rows.append(r[0])
+            return {"docs":rows,"metadata":serialized_document}
+        except Exception as ex:
+            logging.error(f"Exception while getting document: {ex}")
+        finally:
+            session.close()
     
     def get_chain_by_code(chain_code):
         try:

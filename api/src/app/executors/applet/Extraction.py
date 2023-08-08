@@ -14,12 +14,17 @@ import json
 from executors.utils.AppletResponse import AppletResponse
 
 class Extraction:
-    def execute(self, filepath):
-        loader = PyPDFLoader(filepath)
-        pages = loader.load()
+    def execute(self,filepath,document_array,already_uploaded_doc):
         chain = Persistence.get_chain_by_code('extraction')
         params = chain['params']
 
+        if already_uploaded_doc:
+            loader = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+            pages = loader.create_documents(document_array)
+        else: 
+            loader = PyPDFLoader(filepath)
+            pages = loader.load()
+            
         input_text = ''
         for page in pages:
             input_text += page.page_content
