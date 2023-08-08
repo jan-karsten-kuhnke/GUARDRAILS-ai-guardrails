@@ -35,7 +35,8 @@ export const fetchPrompt = (
   conversationId: string | null,
   isOverride: boolean,
   task: string | undefined,
-  isPrivate: boolean | undefined
+  isPrivate: boolean | undefined,
+  documentId : string | null = null
 ) =>
   fetch(`${import.meta.env.VITE_CHAT_SERVICE_URL}/chat/completions`, {
     method: "POST",
@@ -50,6 +51,7 @@ export const fetchPrompt = (
           conversation_id: conversationId,
           isOverride: isOverride,
           task: task,
+          ... documentId ? {documentId} : {},
         }
         : { message: message }
     ),
@@ -68,7 +70,7 @@ export const archiveUnarchiveConversation = (
   );
 };
 
-export const summarizeBrief = (
+export const executeOnDoc = (
   formData: FormData
 ) =>
   fetch(`${import.meta.env.VITE_CHAT_SERVICE_URL}/chat/executeondoc`, {

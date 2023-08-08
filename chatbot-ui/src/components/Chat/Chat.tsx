@@ -23,12 +23,14 @@ import {
   anonymizeMessage,
   fetchPrompt,
   requestApproval,
-  summarizeBrief,
+  executeOnDoc,
 } from "@/services";
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
 const applicationName: string = import.meta.env.VITE_APPLICATION_NAME;
+
+export let handleSend: Function;
 
 export const Chat = memo(({ stopConversationRef }: Props) => {
   function containsOnlyWhitespacesOrNewlines(str: string) {
@@ -60,16 +62,20 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleSend = useCallback(
+  handleSend = useCallback(
     async (
       message: Message,
       deleteCount = 0,
       isOverRide: boolean = false,
-      formData: FormData = new FormData()
+      task: string | null = null,
+      formData: FormData = new FormData(),
+      documentId: string | undefined = undefined
     ) => {
       if (containsOnlyWhitespacesOrNewlines(message.content)) return;
       message.content = message.content.trim();
-      if (selectedTile.code === "conversation") {
+      const selectedTask = task ? task : selectedTile.code;
+
+      if (selectedTask === "conversation") {
         await anonymizeMessage(message.content)
           .then((res: any) => {
             message.content = res?.data?.result;
@@ -114,16 +120,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         let response: any;
 
         if (
-          selectedTile.code === "summarize-brief" ||
-          selectedTile.code === "extraction"
+          selectedTask === "summarize-brief" ||
+          selectedTask === "extraction"
         ) {
+          
           try {
-            const payload = {
-              conversation_id: selectedConversation.id,
-              isOverride: isOverRide,
-              task: selectedTile.code,
-            };
-            formData.append("data", JSON.stringify(payload));
             toast.loading(
               "Summarization might be a time taking process depending on the size of your document",
               {
@@ -131,7 +132,26 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 duration: 5000,
               }
             );
-            response = await summarizeBrief(formData);
+            if(documentId){
+              response = await fetchPrompt(
+                chatBody.message,
+                selectedConversation.id,
+                isOverRide,
+                selectedTask,
+                isPrivate,
+                documentId
+              );
+            }
+            else{
+              const payload = {
+                conversation_id: selectedConversation.id,
+                isOverride: isOverRide,
+                task: selectedTask,
+              };
+              formData.append("data", JSON.stringify(payload));
+              response = await executeOnDoc(formData);
+            }
+
           } catch (err: any) {
             toast.error(err.message, {
               position: "bottom-right",
@@ -148,7 +168,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 ].content,
                 selectedConversation.id,
                 isOverRide,
-                selectedTile.code,
+                selectedTask,
                 isPrivate
               );
             } catch (err: any) {
@@ -163,7 +183,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 chatBody.message,
                 selectedConversation.id,
                 isOverRide,
-                selectedTile.code,
+                selectedTask,
                 isPrivate
               );
             } catch (err: any) {

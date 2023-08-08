@@ -56,7 +56,7 @@ class chat_service:
     def chat_completion(data, current_user_email, token, filename=None, filepath=None):
         try:
             task = str(data["task"]) if "task" in data else None
-            doc_id=str(data["docId"]) if "docId" in data else None
+            document_id = str(data["documentId"]) if "documentId" in data else None
             is_private = bool(
                 data["isPrivate"]) if "isPrivate" in data else False
             pii_scan = True
@@ -66,8 +66,8 @@ class chat_service:
             already_uploaded_doc=False
             document_array=[]
 
-            if doc_id:
-                document_obj=Persistence.get_document_by_id(doc_id)
+            if document_id:
+                document_obj=Persistence.get_document_by_id(document_id)
                 already_uploaded_doc=True
                 filename=document_obj['metadata']['title']
                 document_array=document_obj['docs']
