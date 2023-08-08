@@ -10,14 +10,15 @@ from typing import Any
 import logging
 from executors.utils.LlmProvider import LlmProvider
 from database.repository import Persistence
-
+from executors.utils.AppletResponse import AppletResponse
 from langchain.chains import SQLDatabaseSequentialChain
 from executors.wrappers.SqlWrapper import SqlWrapper
 from langchain.output_parsers.list import CommaSeparatedListOutputParser
+from cryptography.fernet import Fernet
 
 
 class Sql:
-   
+
     def execute(self, query, is_private, chat_history):
         chain=Persistence.get_chain_by_code('qa-sql')
         params=chain['params']
@@ -42,13 +43,22 @@ class Sql:
             input_variables=PROMPT_INPUT_VARIABLES,
             template=_DEFAULT_TEMPLATE + PROMPT_SUFFIX,
         )
-        # conn_str = f"postgresql+psycopg2://postgres:1234@localhost:5432/AdventureWorks"
-        conn_str = Globals.METRIC_DB_URL
+        
+        key_str = Globals.ENCRYPTION_KEY
+        key = key_str.encode('utf-8')
+
+        fernet = Fernet(key)
+        
+        enc_metric_db_url = params['encodedMetricDbUrl']
+        enc = enc_metric_db_url.encode('utf-8')
+
+        conn_str = fernet.decrypt(enc).decode()
+
+        metric_db_schemas = params['metricDbSchemas']
 
         db = SqlWrapper.from_uri(
-            database_uri=conn_str,
-            # schemas=['humanresources','person','production','purchasing','sales'],
-            schemas=[Globals.METRIC_SCHEMA],
+            database_uri = conn_str,
+            schemas = metric_db_schemas,
         )
         
         llm=LlmProvider.get_llm(is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
@@ -102,4 +112,6 @@ class Sql:
         sources.append(json.dumps(sql_query_source))
         sources.append(json.dumps(sql_result_source))
 
-        return {"answer": answer, "sources": sources}
+        response=AppletResponse(answer, sources)
+
+        return response.obj()

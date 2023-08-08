@@ -8,6 +8,7 @@ from langchain import PromptTemplate
 from langchain.chains.summarize import load_summarize_chain
 from executors.utils.LlmProvider import LlmProvider
 from database.repository import Persistence
+from executors.utils.AppletResponse import AppletResponse
 
 class Summarize:
 
@@ -32,5 +33,9 @@ class Summarize:
         REDUCE_PROMPT = PromptTemplate(template=reduce_prompt_template, input_variables=["text"])
         chain = load_summarize_chain(llm, chain_type=chain_type,  map_prompt=MAP_PROMPT, combine_prompt=REDUCE_PROMPT,verbose=True)
         result = chain({"input_documents": docs}, return_only_outputs=True)
-        return result["output_text"]
+        
+        response=AppletResponse(result["output_text"], [])
+
+        return response.obj()
+
 

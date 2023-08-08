@@ -40,6 +40,7 @@ llama-cpp-python = "0.1.65"
 waitress = "2.1.2"
 pdfminer = {six = "20221105"}
 pgvector = "0.2.1"
+cryptography = "41.0.3"
 
 [dev-packages]
 black = "*"

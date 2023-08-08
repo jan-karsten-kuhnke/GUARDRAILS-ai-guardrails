@@ -11,7 +11,7 @@ from database.repository import Persistence
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import create_extraction_chain
 import json
-
+from executors.utils.AppletResponse import AppletResponse
 
 class Extraction:
     def execute(self, filepath):
@@ -52,4 +52,6 @@ class Extraction:
 ```
 """
       
-        return answer
+        response=AppletResponse(answer, [])
+
+        return response.obj()
