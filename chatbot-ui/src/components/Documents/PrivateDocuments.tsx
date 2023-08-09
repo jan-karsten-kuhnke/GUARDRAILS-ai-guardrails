@@ -45,7 +45,7 @@ export const PrivateDocuments = () => {
         }
       )
       .then(() => {
-        setRefereshGridData(!refereshGridData);
+        setRefereshGridData(prevRefreshGridState => !prevRefreshGridState);
         event.target.value = "";
       });
   };
@@ -65,7 +65,7 @@ export const PrivateDocuments = () => {
         }
       )
       .then(() => {
-        setRefereshGridData(!refereshGridData);
+        setRefereshGridData(prevRefreshGridState => !prevRefreshGridState);
       });
   };
 
