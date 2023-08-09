@@ -19,6 +19,7 @@ import PublicPrivateSwitch from "../PublicPrivateSwitch";
 import AdditionalInputs from "../AdditionalInputs/AdditionalInputs";
 import Tiles from "../Tiles/Tiles";
 import RequestAccessComponent from "../Tiles/RequestAccess";
+import { EXTRACTION_CODE, SUMMARIZATION_CODE } from "@/utils/constants";
 import {
   anonymizeMessage,
   fetchPrompt,
@@ -30,16 +31,17 @@ interface Props {
 }
 const applicationName: string = import.meta.env.VITE_APPLICATION_NAME;
 
-export let handleSend: Function;
+export let executeOnUploadedDocRef: any;
+
+const containsOnlyWhitespacesOrNewlines = (str: string) => {
+  // Check if the string contains only whitespace characters or only newline characters
+  return (
+    str.trim() === "" ||
+    str.split("").every((char) => char === "\n" || char === "\r")
+  );
+}
 
 export const Chat = memo(({ stopConversationRef }: Props) => {
-  function containsOnlyWhitespacesOrNewlines(str: string) {
-    // Check if the string contains only whitespace characters or only newline characters
-    return (
-      str.trim() === "" ||
-      str.split("").every((char) => char === "\n" || char === "\r")
-    );
-  }
   const {
     state: {
       selectedConversation,
@@ -53,6 +55,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
+  executeOnUploadedDocRef = useRef<Object | null>(null);
+
   const [currentMessage, setCurrentMessage] = useState<Message>();
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showScrollDownButton, setShowScrollDownButton] =
@@ -62,18 +66,17 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  handleSend = useCallback(
+  const handleSend = useCallback(
     async (
       message: Message,
       deleteCount = 0,
       isOverRide: boolean = false,
-      task: string | null = null,
       formData: FormData = new FormData(),
       documentId: string | undefined = undefined
     ) => {
       if (containsOnlyWhitespacesOrNewlines(message.content)) return;
       message.content = message.content.trim();
-      const selectedTask = task ? task : selectedTile.code;
+      const selectedTask = selectedTile?.code;
 
       if (selectedTask === "conversation") {
         await anonymizeMessage(message.content)
@@ -326,6 +329,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       selectedTile,
     ]
   );
+
   const handleRequestApproval = async (conversationId: string) => {
     homeDispatch({ field: "loading", value: true });
     homeDispatch({ field: "messageIsStreaming", value: true });
@@ -389,6 +393,20 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     }
   };
   const throttledScrollDown = throttle(scrollDown, 250);
+
+  useEffect(() => {
+    if(executeOnUploadedDocRef.current){
+      let message: Message = {
+        role: "user",
+        content: `${executeOnUploadedDocRef.current.code === SUMMARIZATION_CODE ? "Summarize" : "Extract key metrics from"} ${executeOnUploadedDocRef.current.title}`,
+        userActionRequired: false,
+        msg_info: null,
+      };
+        handleSend(message, 0, false , undefined , executeOnUploadedDocRef.current.id);
+        executeOnUploadedDocRef.current = null;
+    }
+
+  },[executeOnUploadedDocRef.current])
 
   useEffect(() => {
     throttledScrollDown();

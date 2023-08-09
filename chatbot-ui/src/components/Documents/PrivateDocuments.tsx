@@ -6,13 +6,15 @@ import { IconUpload } from "@tabler/icons-react";
 import { uploadDocuments, deleteDocsGridData } from "@/services/DocsService";
 import toast from "react-hot-toast";
 import HomeContext from "@/pages/home/home.context";
-import { handleSend } from "../Chat/Chat";
+import { executeOnUploadedDocRef } from "../Chat/Chat";
+
+import { EXTRACTION_CODE, SUMMARIZATION_CODE } from "@/utils/constants";
 
 export const PrivateDocuments = () => {
   const {
-    state: { theme, tiles, selectedTile },
+    state: { theme, tiles },
     dispatch: homeDispatch,
-    handleNewConversation
+    handleNewConversation,
   } = useContext(HomeContext);
 
   const [refereshGridData, setRefereshGridData] = useState<boolean>(true);
@@ -67,28 +69,16 @@ export const PrivateDocuments = () => {
       });
   };
 
-  const handleDocumentSummarize = (id: any, title:string) => {
-    let message: Message = {
-      role: "user",
-      content: `Summarize ${title}`,
-      userActionRequired: false,
-      msg_info: null,
-    };
-    homeDispatch({ field: "isDocumentDialogOpen", value: false })
-    homeDispatch({ field: "selectedTile", value: tiles.find((tile) => tile.code === "summarize-brief")})
-    handleSend(message, 0, false, "summarize-brief", null, id);
-  };
+  const handleExecuteOnUploadedDoc = (id: any, title: string, code: string) => {
+    executeOnUploadedDocRef.current = { id: id, title: title, code: code };
+    homeDispatch({ field: "isDocumentDialogOpen", value: false });
+    homeDispatch({
+      field: "selectedTile",
+      value: tiles.find((tile) => tile.code === code),
+    });
+    handleNewConversation();
 
-  const handleDocumentExtract = (id: any, title:string) => {
-    let message: Message = {
-      role: "user",
-      content: `Extract key metrics from ${title}`,
-      userActionRequired: false,
-      msg_info: null,
-    };
-    homeDispatch({ field: "isDocumentDialogOpen", value: false })
-    homeDispatch({ field: "selectedTile", value: tiles.find((tile) => tile.code === "extraction")})
-    handleSend(message, 0, false, "extraction", null, id);
+    //In the next step useRef in chat component will call the handleSend function
   };
 
   const columns = [
@@ -109,7 +99,13 @@ export const PrivateDocuments = () => {
               margin: "0px 5px",
               textTransform: "Capitalize",
             }}
-            onClick={() => handleDocumentSummarize(params.row.id,params.row.title)}
+            onClick={() =>
+              handleExecuteOnUploadedDoc(
+                params.row.id,
+                params.row.title,
+                SUMMARIZATION_CODE
+              )
+            }
           >
             Summarize
           </Button>
@@ -123,7 +119,13 @@ export const PrivateDocuments = () => {
               textTransform: "Capitalize",
               margin: "0px 5px",
             }}
-            onClick={() => handleDocumentExtract(params.row.id,params.row.title)}
+            onClick={() =>
+              handleExecuteOnUploadedDoc(
+                params.row.id,
+                params.row.title,
+                EXTRACTION_CODE
+              )
+            }
           >
             Extract
           </Button>
