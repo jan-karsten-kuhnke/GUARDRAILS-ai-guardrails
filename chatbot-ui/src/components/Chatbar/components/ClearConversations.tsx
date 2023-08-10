@@ -23,12 +23,12 @@ export const ClearConversations: FC<Props> = ({ onClearConversations }) => {
       <IconTrash size={18} />
 
       <div className={`ml-3 flex-1 text-left text-[12.5px] leading-3 ${theme.textColor}`}>
-        Are you sure?
+        {('Are you sure?')}
       </div>
 
       <div className="flex w-[40px]">
         <IconCheck
-          className="ml-auto mr-1 min-w-[20px] text-neutral-400 hover:text-neutral-100"
+          className={`ml-auto mr-1 min-w-[20px] ${theme.sidebarActionButtonTheme}`}
           size={18}
           onClick={(e) => {
             e.stopPropagation();
@@ -37,7 +37,7 @@ export const ClearConversations: FC<Props> = ({ onClearConversations }) => {
         />
 
         <IconX
-          className="ml-auto min-w-[20px] text-neutral-400 hover:text-neutral-100"
+          className={`ml-auto min-w-[20px] ${theme.sidebarActionButtonTheme}`}
           size={18}
           onClick={(e) => {
             e.stopPropagation();
