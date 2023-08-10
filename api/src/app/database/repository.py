@@ -49,7 +49,7 @@ class Persistence:
         finally:
             session.close()
             
-    def insert_document(title, description, location, custom_ids):
+    def insert_document(title, location, custom_ids, description=""):
         try:
             session=Session()
             document = DocumentEntity(
@@ -60,11 +60,9 @@ class Persistence:
                 )
             session.add(document)
             session.commit()
-            return jsonify({"message": "success", "document": document.to_dict()}), 200
-        except Exception as e:
+        except Exception as ex:
             logging.error(f"Exception while inserting document: {ex}")
             session.rollback()
-            return jsonify({"message": "error"}), 500
         finally:
             session.close()
     

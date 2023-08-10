@@ -9,6 +9,7 @@ from presidio_anonymizer.entities import RecognizerResult
 from integration.nsfw_model_wrapper import NSFWModelWrapper
 from integration.keycloak_wrapper import keycloak_wrapper
 from service.pii_service import pii_service
+from service.document_service import DocumentService
 import uuid
 from typing import TypedDict, Optional
 from datetime import datetime
@@ -133,6 +134,8 @@ class chat_service:
                 if (task == "summarize-brief"):
                     try:
                         logging.info("calling summarize brief executor")
+                        if(not is_document_uploaded):
+                            DocumentService.create_document(filename,filepath)
                         executor = Summarize()
                         res = executor.execute(filepath=filepath,document_array=document_array,is_document_uploaded=is_document_uploaded)
 
@@ -142,7 +145,8 @@ class chat_service:
 
                 elif (task == "extraction"):
                     try:
-                        logging.info("calling summarize brief executor")
+                        if(not is_document_uploaded):
+                            DocumentService.create_document(filename,filepath)
                         executor = Extraction()
                         res= executor.execute(filepath=filepath,document_array=document_array,is_document_uploaded=is_document_uploaded)
 
