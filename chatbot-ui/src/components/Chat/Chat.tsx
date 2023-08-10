@@ -423,7 +423,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     <div
                       className={`text-center text-2xl font-bold ${theme.textColorSecondary}`}
                     >
-                      Protect your Confidential Information.
+                      {/* Protect your Confidential Information. */}
                     </div>
                   </div>
                 </div>
