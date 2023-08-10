@@ -123,8 +123,7 @@ class chat_service:
                     try:
                         logging.info("calling summarize brief executor")
                         executor = Summarize()
-                        result = executor.execute(filepath=filepath)
-                        res = {"answer": result}
+                        res = executor.execute(filepath=filepath)
 
                     except Exception as e:
                         yield ("Sorry. Some error occured. Please try again.")
@@ -134,8 +133,7 @@ class chat_service:
                     try:
                         logging.info("calling summarize brief executor")
                         executor = Extraction()
-                        result = executor.execute(filepath=filepath)
-                        res = {"answer": result}
+                        res= executor.execute(filepath=filepath)
 
                     except Exception as e:
                         yield ("Sorry. Some error occured. Please try again.")
@@ -144,7 +142,8 @@ class chat_service:
                     try:
                         logging.info("calling conversation executor")
                         executor = Conversation()
-                        res = executor.execute(prompt, is_private, history)
+                        res = executor.execute(query=prompt, is_private=is_private, chat_history=history)
+                        # res = executor.execute(prompt, is_private, history)
 
                     except Exception as e:
                         yield ("Sorry. Some error occured. Please try again.")
@@ -153,7 +152,7 @@ class chat_service:
                     try:
                         logging.info("calling qa retrieval executor")
                         executor = QaRetrieval()
-                        res = executor.execute(prompt, is_private, history)
+                        res = executor.execute(query=prompt, is_private=is_private, chat_history=history)
 
                     except Exception as e:
                         yield ("Sorry. Some error occured. Please try again.")
@@ -162,7 +161,7 @@ class chat_service:
                     try:
                         logging.info("calling qa sql executor")
                         executor = Sql()
-                        res = executor.execute(prompt, is_private, history)
+                        res = executor.execute(query=prompt, is_private=is_private, chat_history=history)
 
                     except Exception as e:
                         yield ("Sorry. Some error occured. Please try again.")
@@ -171,7 +170,7 @@ class chat_service:
                     try:
                         logging.info("calling qa sql executor")
                         executor = Visualization()
-                        res = executor.execute(prompt, is_private, history)
+                        res = executor.execute(query=prompt, is_private=is_private, chat_history=history)
 
                     except Exception as e:
                         yield ("Sorry. Some error occured. Please try again.")

@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text,MetaData,Boolean, TIMESTAMP
 from sqlalchemy.orm import declarative_base
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
@@ -136,7 +137,7 @@ class DocumentEntity(Base):
     title = Column(String(100), nullable=False)
     description = Column(Text)
     location = Column(String())
-    folder_id = Column(Integer())
+    custom_ids = Column(ARRAY(String))
     
     def to_dict(self):
         return {
@@ -144,7 +145,7 @@ class DocumentEntity(Base):
             'title': self.title,
             'description': self.description,
             'location': self.location,
-            'folder_id': self.folder_id
+            'custom_ids': self.custom_ids
         }
     
 

@@ -13,3 +13,5 @@ Base.metadata.create_all(bind=engine)
 # Create a session
 Session = sessionmaker(bind=engine)
 session = Session()
+
+vector_store_engine = create_engine(Globals.VECTOR_STORE_DB_URI)

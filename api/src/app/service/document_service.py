@@ -9,10 +9,19 @@ class DocumentService:
     def create_document(title, description, location, folder_id):
         return Persistence.insert_document(title, description, location, folder_id)
     
-    def create_documents(files,location):
-        ingestion_service = IngestionService()
-        ingestion_service.ingest_files(location)
-        return Persistence.insert_documents(files,location)
+    def create_documents(location):
+        try:
+            ingestion_service = IngestionService()
+            files = IngestionService.get_all_documents(location)
+
+            for file in files:
+                custom_ids = ingestion_service.ingest_files(file["file_path"])
+                Persistence.insert_document(file['file_name'],"",file["file_path"],custom_ids)
+
+            return jsonify({"success":True,"message":"Successfully Uploaded documents"}),200
+        except Exception as ex:
+            logging.error(f"Exception uploading documents: {ex}")
+            return jsonify({"success":False,"message":"Failed to upload documents"}),500
 
     def get_documents(Entity,sort, range_, filter_):
         return Persistence.get_list_query(Entity, sort, range_, filter_)

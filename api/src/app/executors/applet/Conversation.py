@@ -10,6 +10,7 @@ from globals import Globals
 from executors.utils.LlmProvider import LlmProvider
 from typing import Any
 import logging
+from executors.utils.AppletResponse import AppletResponse
 
 
 class Conversation:
@@ -30,7 +31,6 @@ class Conversation:
         answer = chain.predict(input= query)
         answer = answer.replace("\\n", "\n")
         
-        return {
-            "answer": answer,
-            "sources": []
-            }
+        response=AppletResponse(answer, [])
+
+        return response.obj()
