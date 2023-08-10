@@ -14,11 +14,11 @@ import json
 from executors.utils.AppletResponse import AppletResponse
 
 class Extraction:
-    def execute(self,filepath,document_array,already_uploaded_doc):
+    def execute(self,filepath,document_array,is_document_uploaded):
         chain = Persistence.get_chain_by_code('extraction')
         params = chain['params']
 
-        if already_uploaded_doc:
+        if is_document_uploaded:
             loader = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
             pages = loader.create_documents(document_array)
         else: 

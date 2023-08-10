@@ -12,7 +12,7 @@ from executors.utils.AppletResponse import AppletResponse
 
 class Summarize:
 
-    def execute(self,filepath,document_array,already_uploaded_doc):
+    def execute(self,filepath,document_array,is_document_uploaded):
         chain = Persistence.get_chain_by_code('summarize-brief')
         params = chain['params']
         
@@ -24,7 +24,7 @@ class Summarize:
         
         docs=[]
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
-        if already_uploaded_doc:
+        if is_document_uploaded:
             docs=text_splitter.create_documents(document_array)
         else:
             loader = PyPDFLoader(filepath)
