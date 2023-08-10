@@ -30,7 +30,7 @@ export const PromptbarSettings: FC<Props> = () => {
           </label>
           <select
             id="tilelist"
-            value={selectedTile.code}
+            value={selectedTile?.code}
             className={`${theme.taskSelectTheme} outline-none text-sm rounded-lg block w-full p-2.5`}
             onChange={handleChange}
           >

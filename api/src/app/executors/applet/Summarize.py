@@ -12,8 +12,7 @@ from executors.utils.AppletResponse import AppletResponse
 
 class Summarize:
 
-    def execute(self,filepath):
-        
+    def execute(self,filepath,document_array,is_document_uploaded):
         chain = Persistence.get_chain_by_code('summarize-brief')
         params = chain['params']
         
@@ -23,12 +22,15 @@ class Summarize:
         
         llm=LlmProvider.get_llm(is_private=False, use_chat_model=False, max_output_token=1000, increase_model_token_limit=False)
         
-        loader = PyPDFLoader(filepath)
-        pages = loader.load_and_split()
-
+        docs=[]
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
-        docs = text_splitter.split_documents(pages)
-
+        if is_document_uploaded:
+            docs=text_splitter.create_documents(document_array)
+        else:
+            loader = PyPDFLoader(filepath)
+            pages = loader.load_and_split()
+            docs = text_splitter.split_documents(pages)
+            
         MAP_PROMPT = PromptTemplate(template=map_prompt_template, input_variables=["text"])
         REDUCE_PROMPT = PromptTemplate(template=reduce_prompt_template, input_variables=["text"])
         chain = load_summarize_chain(llm, chain_type=chain_type,  map_prompt=MAP_PROMPT, combine_prompt=REDUCE_PROMPT,verbose=True)

@@ -170,3 +170,30 @@ class ChainEntity(Base):
             'params': self.params,
             'is_active': self.is_active
         }
+        
+class FolderEntity(Base):
+    __tablename__ = 'folders'
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
+    user_email = Column(String(255))
+    folders = Column(ARRAY(JSONB))
+    
+    def to_dict(self):
+        return {
+            'id': str(self.id),
+            'user_email': self.user_email,
+            'folders': self.folders
+        }
+        
+        
+class PromptEntity(Base):
+    __tablename__ = 'prompts'
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
+    user_email = Column(String(255))
+    prompts = Column(ARRAY(JSONB))
+    
+    def to_dict(self):
+        return {
+            'id': str(self.id),
+            'user_email': self.user_email,
+            'prompts': self.prompts
+        }

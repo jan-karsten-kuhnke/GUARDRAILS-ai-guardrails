@@ -1,7 +1,7 @@
 import json
 from sqlalchemy import create_engine, text, func ,or_,and_
 from sqlalchemy.orm import sessionmaker
-from database.models import Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, DocumentEntity, OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity,ChainEntity
+from database.models import Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, DocumentEntity, FolderEntity , PromptEntity , OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity,ChainEntity
 from globals import Globals
 from utils.apiResponse import ApiResponse
 from flask import jsonify
@@ -9,12 +9,13 @@ from service.ingestion_service import IngestionService
 import logging
 
 
-from database.postgres import session , engine, vector_store_engine
+from database.postgres import session , engine, vector_store_engine, Session
 
 class Persistence:
     
     def insert_analysis_audits(text, user_email, flagged_text, analysed_entity, criticality):
         try:
+            session=Session()
             audit = AnalysisAuditEntity(text=text, user_email=user_email, flagged_text=flagged_text, analysed_entity=analysed_entity, criticality=criticality)
             session.add(audit)
             session.commit()
@@ -26,6 +27,7 @@ class Persistence:
 
     def insert_anonymize_audits(original_text, anonymized_text, flagged_text, user_email, analysed_entity, criticality):
         try:
+            session=Session()
             audit = AnonymizeAuditEntity(original_text=original_text, anonymized_text=anonymized_text, flagged_text=flagged_text, user_email=user_email, analysed_entity=analysed_entity, criticality=criticality)
             session.add(audit)
             session.commit()
@@ -37,6 +39,7 @@ class Persistence:
 
     def insert_chat_log(user_email, text):
         try:
+            session=Session()
             log = ChatLogEntity(user_email=user_email, text=text)
             session.add(log)
             session.commit()
@@ -46,8 +49,9 @@ class Persistence:
         finally:
             session.close()
             
-    def insert_document(title, description, location, custom_ids):
+    def insert_document(title, location, custom_ids, description=""):
         try:
+            session=Session()
             document = DocumentEntity(
                     title=title,
                     description=description,
@@ -56,16 +60,15 @@ class Persistence:
                 )
             session.add(document)
             session.commit()
-            return jsonify({"message": "success", "document": document.to_dict()}), 200
-        except Exception as e:
+        except Exception as ex:
             logging.error(f"Exception while inserting document: {ex}")
             session.rollback()
-            return jsonify({"message": "error"}), 500
         finally:
             session.close()
     
     def insert_documents(files,location):
         try:
+            session=Session()
             for file in files:
                 doc = DocumentEntity(
                     title=file.filename,
@@ -228,7 +231,8 @@ class Persistence:
             session.close()
 
     def update_query(Entity, id, data):
-        try:
+        try:            
+            session=Session()
             predefined_rule = session.query(Entity).filter(Entity.id == id).first()
             predefined_rule.is_active = data['is_active']
             session.commit()
@@ -242,6 +246,7 @@ class Persistence:
 
     def update_document(document_id, title, description, location, folder_id):
         try:
+            session=Session()
             document = session.query(DocumentEntity).filter(DocumentEntity.id == document_id).first()
             if not document:
                 return jsonify({"message": "not found"}), 404
@@ -263,6 +268,7 @@ class Persistence:
     
     def delete_document(document_id):
         try:
+            session=Session()
             document = session.query(DocumentEntity).filter(DocumentEntity.id == document_id).first()
             row = document.to_dict()
 
@@ -285,6 +291,27 @@ class Persistence:
         finally:
             connection.close()
             session.close()
+            
+    def get_document_by_id(document_id):
+        try:
+            document = session.query(DocumentEntity).filter(DocumentEntity.id == document_id).first()
+            serialized_document = document.to_dict()
+            custom_ids = serialized_document['custom_ids']
+            comma_separated_custom_ids = ', '.join([f"'{id}'" for id in custom_ids])
+            
+            connection = vector_store_engine.connect()
+            sql_query = f"SELECT document FROM langchain_pg_embedding WHERE custom_id IN ({comma_separated_custom_ids})"
+            result = connection.execute(text(sql_query)) 
+            
+            rows = []
+            
+            for r in result:
+                rows.append(r[0])
+            return {"docs":rows,"metadata":serialized_document}
+        except Exception as ex:
+            logging.error(f"Exception while getting document: {ex}")
+        finally:
+            session.close()
     
     def get_chain_by_code(chain_code):
         try:
@@ -295,3 +322,56 @@ class Persistence:
             logging.error(f"Exception while getting chain params: {ex}")
         finally:
             session.close()
+
+    def get_folder_data(user_email):
+        try:
+            folders = session.query(FolderEntity).filter(FolderEntity.user_email == user_email).first()
+            serialized_folders={}
+            if folders:
+                serialized_folders = folders.to_dict()
+            return serialized_folders
+        except Exception as ex:
+            logging.error(f"Exception while getting folders: {ex}")
+    
+    def upsert_folders_by_user_email(folders,user_email):
+        try:
+            session=Session()
+            folders_data= session.query(FolderEntity).filter(FolderEntity.user_email == user_email).first()
+            if folders_data:
+                folders_data.folders = folders
+            else:
+                folders_data = FolderEntity(user_email=user_email,folders=folders)
+                session.add(folders_data)
+            session.commit()
+        except Exception as ex:
+            session.rollback()
+            logging.error(f"Exception while upserting folders: {ex}")
+        finally:
+            session.close()
+            
+    def get_prompts_data(user_email):
+        try:
+            prompts = session.query(PromptEntity).filter(PromptEntity.user_email == user_email).first()
+            serialized_prompts={}
+            if prompts:
+                serialized_prompts = prompts.to_dict()
+            return serialized_prompts
+        except Exception as ex:
+            logging.error(f"Exception while getting prompts: {ex}")
+
+    def upsert_prompts_by_user_email(prompts,user_email):
+        try:
+            session=Session()
+            prompts_data= session.query(PromptEntity).filter(PromptEntity.user_email == user_email).first()
+            if prompts_data:
+                prompts_data.prompts = prompts
+            else:
+                prompts_data = PromptEntity(user_email=user_email,prompts=prompts)
+                session.add(prompts_data)
+            session.commit()
+        except Exception as ex:
+            session.rollback()
+            logging.error(f"Exception while upserting prompts: {ex}")  
+        finally:
+            session.close()    
+        

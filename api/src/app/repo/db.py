@@ -225,16 +225,3 @@ class anonymize_audit_context:
         result = anonymize_audit_collection.insert_one(analysis_audit) 
         return result.inserted_id
     
-class folders_context:
-    def get_folder_data(user_email):
-        return folders_collection.find_one({"user_email":user_email}, {"_id":0})
-    
-    def upsert_folders_by_user_email(folders,user_email):
-        folders_collection.update_one({"user_email":user_email}, {"$set":folders}, upsert=True)
-
-class prompts_context:
-    def get_prompts_data(user_email):
-        return prompts_collection.find_one({"user_email":user_email}, {"_id":0})
-    
-    def upsert_prompts_by_user_email(prompts,user_email):
-        prompts_collection.update_one({"user_email":user_email}, {"$set":prompts}, upsert=True)

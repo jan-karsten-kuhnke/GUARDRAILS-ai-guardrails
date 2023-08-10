@@ -47,14 +47,14 @@ FILE_MAPPING = {
 }
 
 class  IngestionService :
-    def ingest_files(self,file_path: str):
+    def ingest_file(self,file_path: str):
         embeddings = HuggingFaceEmbeddings()
 
         CONNECTION_STRING = Globals.VECTOR_STORE_DB_URI
         COLLECTION_NAME = Globals.VECTOR_STORE_COLLECTION_NAME
 
         document = IngestionService.load_document(file_path)
-        texts = IngestionService.process_documents(document)
+        texts = IngestionService.process_document(document)
     
         store = PGVector(
             collection_name=COLLECTION_NAME,
@@ -86,13 +86,13 @@ class  IngestionService :
         return documents
 
 
-    def process_documents(documents: list) -> List[Document]:
-        if not documents:
-            logging.info("No documents found")
+    def process_document(document: list) -> List[Document]:
+        if not document:
+            logging.info("No document found")
             exit(0)
             
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-        texts = text_splitter.split_documents(documents)
+        texts = text_splitter.split_documents(document)
 
         # for text in texts:
         #     text.metadata['source'] = text.metadata['source'].replace(source_directory + '/', '')
