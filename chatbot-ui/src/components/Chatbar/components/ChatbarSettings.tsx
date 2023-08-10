@@ -18,9 +18,6 @@ import { ClearConversations } from "./ClearConversations";
 import { AuthContext } from "@/services/AuthService";
 
 export const ChatbarSettings = () => {
-  const [isSettingDialogOpen, setIsSettingDialog] = useState<boolean>(false);
-  const [isDocumentDialogOpen, setIsDocumentDialog] = useState<boolean>(false);
-
   const authContext = useContext(AuthContext);
 
   const {
@@ -28,6 +25,8 @@ export const ChatbarSettings = () => {
       theme,
       conversations,
       isArchiveView,
+      isDocumentDialogOpen,
+      isSettingDialogOpen
     },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
@@ -69,13 +68,13 @@ export const ChatbarSettings = () => {
       <SidebarButton
         text={"Documents"}
         icon={<IconFileDescription size={18} />}
-        onClick={() => setIsDocumentDialog(true)}
+        onClick={() => homeDispatch({ field: "isDocumentDialogOpen", value: true })}
       />
 
       <SidebarButton
         text={"Settings"}
         icon={<IconSettings size={18} />}
-        onClick={() => setIsSettingDialog(true)}
+        onClick={() => homeDispatch({ field: "isSettingDialogOpen", value: true })}
       />
       <SidebarButton
         text={"Log Out"}
@@ -88,13 +87,13 @@ export const ChatbarSettings = () => {
       <DocumentDialog
         open={isDocumentDialogOpen}
         onClose={() => {
-          setIsDocumentDialog(false);
+          homeDispatch({ field: "isDocumentDialogOpen", value: false });
         }}
       />
       <SettingDialog
         open={isSettingDialogOpen}
         onClose={() => {
-          setIsSettingDialog(false);
+          homeDispatch({ field: "isSettingDialogOpen", value: false });
         }}
       />
     </div>

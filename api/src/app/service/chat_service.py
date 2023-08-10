@@ -56,10 +56,21 @@ class chat_service:
     def chat_completion(data, current_user_email, token, filename=None, filepath=None):
         try:
             task = str(data["task"]) if "task" in data else None
+            document_id = str(data["documentId"]) if "documentId" in data else None
             is_private = bool(
                 data["isPrivate"]) if "isPrivate" in data else False
             pii_scan = True
             nsfw_scan = True
+            
+            #Summarize/Extraction on already uploaded document
+            is_document_uploaded=False
+            document_array=[]
+
+            if document_id:
+                document_obj=Persistence.get_document_by_id(document_id)
+                is_document_uploaded=True
+                filename=document_obj['metadata']['title']
+                document_array=document_obj['docs']
 
             is_override = bool(data["isOverride"])
             conversation_id = None
@@ -123,7 +134,7 @@ class chat_service:
                     try:
                         logging.info("calling summarize brief executor")
                         executor = Summarize()
-                        res = executor.execute(filepath=filepath)
+                        res = executor.execute(filepath=filepath,document_array=document_array,is_document_uploaded=is_document_uploaded)
 
                     except Exception as e:
                         yield ("Sorry. Some error occured. Please try again.")
@@ -133,7 +144,7 @@ class chat_service:
                     try:
                         logging.info("calling summarize brief executor")
                         executor = Extraction()
-                        res= executor.execute(filepath=filepath)
+                        res= executor.execute(filepath=filepath,document_array=document_array,is_document_uploaded=is_document_uploaded)
 
                     except Exception as e:
                         yield ("Sorry. Some error occured. Please try again.")

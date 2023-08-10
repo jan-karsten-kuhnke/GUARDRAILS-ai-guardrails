@@ -15,6 +15,8 @@ export interface HomeInitialState {
   prompts: Prompt[];
   showChatbar: boolean;
   showPromptbar: boolean;
+  isDocumentDialogOpen: boolean;
+  isSettingDialogOpen: boolean;
   currentFolder: FolderInterface | undefined;
   messageError: boolean;
   searchTerm: string;
@@ -35,6 +37,8 @@ export const initialState: HomeInitialState = {
   currentMessage: undefined,
   prompts: [],
   showPromptbar: true,
+  isDocumentDialogOpen: false,
+  isSettingDialogOpen: false,
   showChatbar: true,
   currentFolder: undefined,
   messageError: false,

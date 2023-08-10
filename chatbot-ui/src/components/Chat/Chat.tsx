@@ -19,25 +19,29 @@ import PublicPrivateSwitch from "../PublicPrivateSwitch";
 import AdditionalInputs from "../AdditionalInputs/AdditionalInputs";
 import Tiles from "../Tiles/Tiles";
 import RequestAccessComponent from "../Tiles/RequestAccess";
+import { EXTRACTION_CODE, SUMMARIZATION_CODE } from "@/utils/constants";
 import {
   anonymizeMessage,
   fetchPrompt,
   requestApproval,
-  summarizeBrief,
+  executeOnDoc,
 } from "@/services";
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
 const applicationName: string = import.meta.env.VITE_APPLICATION_NAME;
 
+export let executeOnUploadedDocRef: any;
+
+const containsOnlyWhitespacesOrNewlines = (str: string) => {
+  // Check if the string contains only whitespace characters or only newline characters
+  return (
+    str.trim() === "" ||
+    str.split("").every((char) => char === "\n" || char === "\r")
+  );
+}
+
 export const Chat = memo(({ stopConversationRef }: Props) => {
-  function containsOnlyWhitespacesOrNewlines(str: string) {
-    // Check if the string contains only whitespace characters or only newline characters
-    return (
-      str.trim() === "" ||
-      str.split("").every((char) => char === "\n" || char === "\r")
-    );
-  }
   const {
     state: {
       selectedConversation,
@@ -50,6 +54,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
+
+  executeOnUploadedDocRef = useRef<Object | null>(null);
 
   const [currentMessage, setCurrentMessage] = useState<Message>();
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
@@ -65,11 +71,14 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       message: Message,
       deleteCount = 0,
       isOverRide: boolean = false,
-      formData: FormData = new FormData()
+      formData: FormData = new FormData(),
+      documentId: string | undefined = undefined
     ) => {
       if (containsOnlyWhitespacesOrNewlines(message.content)) return;
       message.content = message.content.trim();
-      if (selectedTile.code === "conversation") {
+      const selectedTask = selectedTile?.code;
+
+      if (selectedTask === "conversation") {
         await anonymizeMessage(message.content)
           .then((res: any) => {
             message.content = res?.data?.result;
@@ -114,16 +123,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         let response: any;
 
         if (
-          selectedTile.code === "summarize-brief" ||
-          selectedTile.code === "extraction"
+          selectedTask === "summarize-brief" ||
+          selectedTask === "extraction"
         ) {
+          
           try {
-            const payload = {
-              conversation_id: selectedConversation.id,
-              isOverride: isOverRide,
-              task: selectedTile.code,
-            };
-            formData.append("data", JSON.stringify(payload));
             toast.loading(
               "Summarization might be a time taking process depending on the size of your document",
               {
@@ -131,7 +135,26 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 duration: 5000,
               }
             );
-            response = await summarizeBrief(formData);
+            if(documentId){
+              response = await fetchPrompt(
+                chatBody.message,
+                selectedConversation.id,
+                isOverRide,
+                selectedTask,
+                isPrivate,
+                documentId
+              );
+            }
+            else{
+              const payload = {
+                conversation_id: selectedConversation.id,
+                isOverride: isOverRide,
+                task: selectedTask,
+              };
+              formData.append("data", JSON.stringify(payload));
+              response = await executeOnDoc(formData);
+            }
+
           } catch (err: any) {
             toast.error(err.message, {
               position: "bottom-right",
@@ -148,7 +171,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 ].content,
                 selectedConversation.id,
                 isOverRide,
-                selectedTile.code,
+                selectedTask,
                 isPrivate
               );
             } catch (err: any) {
@@ -163,7 +186,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 chatBody.message,
                 selectedConversation.id,
                 isOverRide,
-                selectedTile.code,
+                selectedTask,
                 isPrivate
               );
             } catch (err: any) {
@@ -306,6 +329,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       selectedTile,
     ]
   );
+
   const handleRequestApproval = async (conversationId: string) => {
     homeDispatch({ field: "loading", value: true });
     homeDispatch({ field: "messageIsStreaming", value: true });
@@ -369,6 +393,20 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     }
   };
   const throttledScrollDown = throttle(scrollDown, 250);
+
+  useEffect(() => {
+    if(executeOnUploadedDocRef.current){
+      let message: Message = {
+        role: "user",
+        content: `${executeOnUploadedDocRef.current.code === SUMMARIZATION_CODE ? "Summarize" : "Extract key metrics from"} ${executeOnUploadedDocRef.current.title}`,
+        userActionRequired: false,
+        msg_info: null,
+      };
+        handleSend(message, 0, false , undefined , executeOnUploadedDocRef.current.id);
+        executeOnUploadedDocRef.current = null;
+    }
+
+  },[executeOnUploadedDocRef.current])
 
   useEffect(() => {
     throttledScrollDown();
