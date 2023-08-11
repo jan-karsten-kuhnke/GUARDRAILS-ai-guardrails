@@ -63,6 +63,14 @@ def delete_document(document_id):
     return DocumentService.delete_document(document_id)
 
 
+@documentsendpoints.route('/documents/add-collection', methods=['POST'])
+@oidc.accept_token(require_token=True)
+def add_collection():
+    collection_name = request.json.get('collection_name')
+    return DocumentService.add_collection_for_doc(collection_name=collection_name)
 
-
-
+# GET collections
+@documentsendpoints.route('/documents/collections', methods=['GET'])
+@oidc.accept_token(require_token=True)
+def get_collections():
+    return DocumentService.get_collections()    

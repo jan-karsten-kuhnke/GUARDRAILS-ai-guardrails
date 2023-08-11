@@ -5,6 +5,7 @@ from service.ingestion_service import IngestionService
 from database.repository import Persistence
 from sqlalchemy import func ,or_,and_
 import logging
+
 class DocumentService:
     def create_document(title, description, location, folder_id):
         return Persistence.insert_document(title, description, location, folder_id)
@@ -34,4 +35,10 @@ class DocumentService:
     
     def delete_document(document_id):
         return Persistence.delete_document(document_id)
-        
+
+    def add_collection_for_doc(collection_name):
+        return Persistence.add_collection(collection_name)    
+    
+    def get_collections():
+        return Persistence.get_collections()  
+    

@@ -26,6 +26,7 @@ import {
   requestApproval,
   executeOnDoc,
 } from "@/services";
+import { getCollections } from "@/services/DocsService";
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -51,6 +52,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       isPrivate,
       selectedTile,
       tiles,
+      collections
     },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
@@ -61,6 +63,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showScrollDownButton, setShowScrollDownButton] =
     useState<boolean>(false);
+  const [selectedCollection, setSelectedCollection] = useState("");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -126,7 +129,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           selectedTask === "summarize-brief" ||
           selectedTask === "extraction"
         ) {
-          
+
           try {
             toast.loading(
               "Summarization might be a time taking process depending on the size of your document",
@@ -135,7 +138,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 duration: 5000,
               }
             );
-            if(documentId){
+            if (documentId) {
               response = await fetchPrompt(
                 chatBody.message,
                 selectedConversation.id,
@@ -145,7 +148,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 documentId
               );
             }
-            else{
+            else {
               const payload = {
                 conversation_id: selectedConversation.id,
                 isOverride: isOverRide,
@@ -395,18 +398,18 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const throttledScrollDown = throttle(scrollDown, 250);
 
   useEffect(() => {
-    if(executeOnUploadedDocRef.current){
+    if (executeOnUploadedDocRef.current) {
       let message: Message = {
         role: "user",
         content: `${executeOnUploadedDocRef.current.code === SUMMARIZATION_CODE ? "Summarize" : "Extract key metrics from"} ${executeOnUploadedDocRef.current.title}`,
         userActionRequired: false,
         msg_info: null,
       };
-        handleSend(message, 0, false , undefined , executeOnUploadedDocRef.current.id);
-        executeOnUploadedDocRef.current = null;
+      handleSend(message, 0, false, undefined, executeOnUploadedDocRef.current.id);
+      executeOnUploadedDocRef.current = null;
     }
 
-  },[executeOnUploadedDocRef.current])
+  }, [executeOnUploadedDocRef.current])
 
   useEffect(() => {
     throttledScrollDown();
@@ -440,6 +443,25 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     };
   }, [messagesEndRef]);
 
+
+  // collection selection 
+  const handleGetCollections = () => {
+    getCollections().then((res) => {
+      if (res.data && res.data.length) {
+        homeDispatch({ field: "collections", value: res.data });
+      }
+    });
+  }
+
+  useEffect(() => {
+    handleGetCollections();
+  }, []);
+
+  const handleSelection = (collection_id: any) => {
+    setSelectedCollection(collection_id)
+  }
+
+
   return (
     <div className={`relative flex-1 overflow-hidden ${theme.chatBackground}`}>
       <>
@@ -470,6 +492,21 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 >
                   <Tiles />
                 </div>
+
+                {/* Collection Dropdown */}
+                {selectedTile?.code === "qa-retreival" ?
+                  <select
+                    id="collectionlist"
+                    value={selectedCollection}
+                    className={`${theme.taskSelectTheme} text-sm rounded-lg block p-3`}
+                    onChange={(ev) => handleSelection(ev.target.value)}
+                  >
+                    {collections?.length ? collections.map((collection: any, index) => (
+                      <option value={collection?.id} key={index} className="py-2">{collection?.name}
+                      </option>
+                    )) : ""}
+                  </select> : ""}
+
                 {Object.keys(selectedTile).length && !selectedTile?.has_access ? (
                   <div
                     className={`flex w-full w-full justify-center rounded-lg py-2 ${theme.chatItemsBorder}`}

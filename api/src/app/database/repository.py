@@ -2,6 +2,7 @@ import json
 from sqlalchemy import create_engine, text, func ,or_,and_
 from sqlalchemy.orm import sessionmaker
 from database.models import Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, DocumentEntity, FolderEntity , PromptEntity , OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity,ChainEntity
+from database.vector_store.vector_store_model import Vector_Base, CollectionEntity
 from globals import Globals
 from utils.apiResponse import ApiResponse
 from flask import jsonify
@@ -9,7 +10,7 @@ from service.ingestion_service import IngestionService
 import logging
 
 
-from database.postgres import session , engine, vector_store_engine, Session
+from database.postgres import session , engine, vector_store_engine, Session , Vector_Session ,vector_session
 
 class Persistence:
     
@@ -377,3 +378,36 @@ class Persistence:
         finally:
             session.close()    
         
+
+    def add_collection(collection_name):
+        try:
+            vector_session=Vector_Session()
+            collection = vector_session.query(CollectionEntity).filter(CollectionEntity.name == collection_name).first()
+            if collection:
+                return jsonify({"message": "collection already exists","success":False}), 500  
+            else:
+                data = CollectionEntity(name=collection_name)
+                vector_session.add(data)
+                vector_session.commit()
+                return jsonify({"message": "collection successfully added","success":True}), 200
+        except Exception as ex:
+            vector_session.rollback()
+            logging.error(f"Exception while upserting prompts: {ex}")
+            return jsonify({"message": "failed","success":False}), 500  
+        finally:
+            vector_session.close()
+
+    def get_collections():
+        try:
+            collections = vector_session.query(CollectionEntity).all()
+            result = []
+            for collection in collections:
+                result.append({
+                    'id': str(collection.uuid),
+                    'name': collection.name
+                })
+            return json.dumps(result)
+        except Exception as ex:
+            logging.error(f"Exception while getting chat logs: {ex}")
+        finally:
+            session.close()        

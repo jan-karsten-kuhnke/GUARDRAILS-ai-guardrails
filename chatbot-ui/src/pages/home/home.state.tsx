@@ -2,7 +2,7 @@ import { Conversation, Message } from '@/types/chat';
 import { FolderInterface } from '@/types/folder';
 import { Prompt } from '@/types/prompt';
 import { Tile } from '@/types/tiles';
-import {theme} from '@/styles';
+import { theme } from '@/styles';
 
 export interface HomeInitialState {
   loading: boolean;
@@ -22,9 +22,10 @@ export interface HomeInitialState {
   searchTerm: string;
   refreshConversations: boolean;
   isArchiveView: boolean;
-  isPrivate:boolean;
+  isPrivate: boolean;
   selectedTile: Tile | any;
-  tiles: Tile[]
+  tiles: Tile[];
+  collections: []
 }
 
 export const initialState: HomeInitialState = {
@@ -45,7 +46,7 @@ export const initialState: HomeInitialState = {
   searchTerm: '',
   refreshConversations: false,
   isArchiveView: false,
-  isPrivate:false,
-  tiles:[],
+  isPrivate: false,
+  tiles: [],
   selectedTile: {},
 };
