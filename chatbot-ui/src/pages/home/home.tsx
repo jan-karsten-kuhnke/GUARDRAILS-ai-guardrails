@@ -5,7 +5,7 @@ import HomeContext from "./home.context";
 import { useCreateReducer } from "@/hooks/useCreateReducer";
 import { Navbar } from "@/components/Mobile/Navbar";
 import { Chat } from "@/components/Chat/Chat";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Conversation } from "@/types/chat";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -16,17 +16,21 @@ import {
   updateConversationProperties,
   updateUserFolders,
   updateUserPrompts,
+  getEulaStatus
 } from "@/services/HttpService";
 import { cleanConversationHistory } from "@/utils/app/clean";
 import { FolderInterface, FolderType } from "@/types/folder";
 import { KeyValuePair } from "@/types/data";
 import { Prompt } from "@/types/prompt";
 import { Tile } from "@/types/tiles";
+import { EulaDialog } from "@/components/EulaDialog/EulaDialog";
 
 export const Home = () => {
   const contextValue = useCreateReducer<HomeInitialState>({
     initialState,
   });
+
+  const [eulaStatus, setEulaStatus] = useState<boolean>(true);
 
   const stopConversationRef = useRef<boolean>(false);
   const {
@@ -70,6 +74,12 @@ export const Home = () => {
     fetchPrompts().then((res) => {
       if(res && res.data && res.data.prompts) dispatch({ field: "prompts", value: res.data.prompts });
     });
+
+    getEulaStatus().then((res) => {
+      if(res && res.data && res.data.success){
+        setEulaStatus(res.data.data.eulaStatus);
+      }
+    })
   
     // fetchPrompts().then((res) => {
     //   dispatch({ field: "prompts", value: res.data });
@@ -104,6 +114,10 @@ export const Home = () => {
       value: [conversation, ...conversations],
     });
     dispatch({ field: "selectedConversation", value: conversation });
+  };
+
+  const handleEulaDialogClose = () => {
+    setEulaStatus(true);
   };
 
   const handleCreateFolder = (name: string, type: FolderType) => {
@@ -239,6 +253,8 @@ export const Home = () => {
             onNewConversation={handleNewConversation}
           /> */}
         </div>
+
+        {!eulaStatus && <EulaDialog onClose={handleEulaDialogClose}/>}
 
         <div className="flex h-full w-full pt-[48px] sm:pt-0">
           <Chatbar />

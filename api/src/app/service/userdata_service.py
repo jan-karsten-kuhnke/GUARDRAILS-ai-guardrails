@@ -55,4 +55,8 @@ class userdata_service:
     def request_tile_by_code(user_email,code,name):
         return flowable_wrapper.submit_request(user_email=user_email, tile_code=code,tile_name=name)
         
+    def get_eula_status(user_email):
+        return Persistence.get_eula_status(user_email)
 
+    def set_eula_status(user_email):
+        return Persistence.set_eula_status(user_email)
