@@ -197,3 +197,17 @@ class PromptEntity(Base):
             'user_email': self.user_email,
             'prompts': self.prompts
         }
+        
+        
+class EulaEntity(Base):
+    __tablename__ = 'eula'
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
+    user_email = Column(String(255))
+    eula= Column(Boolean)
+    
+    def to_dict(self):
+        return {
+            'id': str(self.id),
+            'user_email': self.user_email,
+            'eula': self.eula
+        }
