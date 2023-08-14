@@ -71,6 +71,7 @@ export const EulaDialog: FC<Props> = ({ onClose }) => {
                 size="small"
                 variant="outlined"
                 color="error"
+                disabled={loading}
                 onClick={() => AuthService.doLogout()}
               >
                 Decline

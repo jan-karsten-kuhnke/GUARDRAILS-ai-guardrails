@@ -204,10 +204,12 @@ class EulaEntity(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
     user_email = Column(String(255))
     eula= Column(Boolean)
+    eula_accepted_on = Column(TIMESTAMP, server_default=func.now())
     
     def to_dict(self):
         return {
             'id': str(self.id),
             'user_email': self.user_email,
-            'eula': self.eula
+            'eula': self.eula,
+            'eula_accepted_on': self.eula_accepted_on,
         }
