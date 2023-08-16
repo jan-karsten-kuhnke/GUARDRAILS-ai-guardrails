@@ -2,7 +2,7 @@ import { Conversation, Message } from '@/types/chat';
 import { FolderInterface } from '@/types/folder';
 import { Prompt } from '@/types/prompt';
 import { Tile } from '@/types/tiles';
-import {theme} from '@/styles';
+import {theme} from '../../styles';
 
 export interface HomeInitialState {
   loading: boolean;
