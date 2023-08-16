@@ -1,5 +1,6 @@
 
 export const lightTheme = {
+  primaryColor:"#1c96a3",
   textColor: "text-[#75777A]",
   textColorSecondary: "text-[#75777A]",
   primaryButtonTheme: "bg-[#1c96a3] text-[#ffffff] hover:bg-[#23b4c3]",
