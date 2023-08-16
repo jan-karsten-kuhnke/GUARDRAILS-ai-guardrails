@@ -50,14 +50,15 @@ class Persistence:
         finally:
             session.close()
             
-    def insert_document(title, description, location, custom_ids):
+    def insert_document(title, description, location, custom_ids,collection_name):
         try:
             session=Session()
             document = DocumentEntity(
                     title=title,
                     description=description,
                     location=location,
-                    custom_ids=custom_ids
+                    custom_ids=custom_ids,
+                    collection_name=collection_name
                 )
             session.add(document)
             session.commit()
@@ -96,7 +97,7 @@ class Persistence:
             result = []
             for log in logs:
                 result.append({
-                    'id': str(log.id),
+                    'id': str   (log.id),
                     'created_at': log.created_at.isoformat(),
                     'user_email': log.user_email,
                     'text': log.text
@@ -137,10 +138,11 @@ class Persistence:
         finally:
             session.close()
 
-    def get_list_query(Entity, sort, range_, filter_):
+    def get_list_query(Entity, sort, range_, filter_,collection):
         try:
             query = session.query(Entity)
-            
+            query = query.filter(and_(Entity.collection_name == collection))
+
             # Apply filter conditions
             filter_dict = eval(filter_)
             if len(filter_dict) != 0:
@@ -189,6 +191,7 @@ class Persistence:
 
             # Execute the query and retrieve documents
             documents = query.all()
+            
             serialized_documents = [doc.to_dict() for doc in documents]
           
             data = {
@@ -406,7 +409,7 @@ class Persistence:
                     'id': str(collection.uuid),
                     'name': collection.name
                 })
-            return json.dumps(result)
+            return jsonify({"data":result,"success":True}),200
         except Exception as ex:
             logging.error(f"Exception while getting chat logs: {ex}")
         finally:

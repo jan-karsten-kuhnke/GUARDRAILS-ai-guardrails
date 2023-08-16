@@ -33,7 +33,7 @@ export const PrivateDocuments = () => {
     for (let i = 0; i < files.length; i++) {
       formData.append("files", files[i]);
     }
-
+    formData.append("collectionName", selectedCollection)
     toast
       .promise(
         uploadDocuments(formData), //calling api here
@@ -182,8 +182,8 @@ export const PrivateDocuments = () => {
 
   const handleGetCollections = () => {
     getCollections().then((res) => {
-      if (res.data && res.data.length) {
-        homeDispatch({ field: "collections", value: res.data });
+      if (res?.data?.success && res?.data?.data?.length) {
+        homeDispatch({ field: "collections", value: res?.data?.data });
       }
     });
   }
@@ -192,8 +192,8 @@ export const PrivateDocuments = () => {
     handleGetCollections();
   }, []);
 
-  const handleSelection = (collection_id: any) => {
-    setSelectedCollection(collection_id)
+  const handleSelection = (name: any) => {
+    setSelectedCollection(name)
   }
 
   return (
@@ -206,7 +206,7 @@ export const PrivateDocuments = () => {
           onChange={(ev) => handleSelection(ev.target.value)}
         >
           {collections?.length ? collections.map((collection: any, index) => (
-            <option value={collection?.id} key={index} className="py-2">{collection?.name}
+            <option value={collection?.name} key={index} className="py-2">{collection?.name}
             </option>
           )) : ""}
         </select>

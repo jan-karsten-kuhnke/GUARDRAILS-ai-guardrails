@@ -19,8 +19,8 @@ def get_documents():
     sort = request.args.get('sort', default=None, type=str)
     range_ = request.args.get('range', default=None, type=str)
     filter_ = request.args.get('filter', default=None, type=str)
-    
-    return DocumentService.get_documents(DocumentEntity,sort, range_, filter_)
+    collection = request.args.get('collection', default="documents", type=str)
+    return DocumentService.get_documents(DocumentEntity,sort, range_, filter_,collection)
 
 
 # GET a single document
@@ -35,15 +35,14 @@ def get_document(document_id):
 @oidc.accept_token(require_token=True)
 def create_document():
     files = request.files.getlist('files')
+    collection_name = request.form['collectionName']
     temp_dir_name = "temp-" + str(time())
     os.mkdir(temp_dir_name)
     for file in files:
         file.save(os.path.join(temp_dir_name, file.filename))
     
-    return DocumentService.create_documents(location=temp_dir_name)
+    return DocumentService.create_documents(location=temp_dir_name,collection_name = collection_name)
     
-
-
 
 # UPDATE an existing document
 @documentsendpoints.route('/documents/<int:document_id>', methods=['PUT'])

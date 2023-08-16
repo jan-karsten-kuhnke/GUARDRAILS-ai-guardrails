@@ -26,7 +26,6 @@ import {
   requestApproval,
   executeOnDoc,
 } from "@/services";
-import { getCollections } from "@/services/DocsService";
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -145,6 +144,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 isOverRide,
                 selectedTask,
                 isPrivate,
+                selectedCollection,
                 documentId
               );
             }
@@ -175,7 +175,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 selectedConversation.id,
                 isOverRide,
                 selectedTask,
-                isPrivate
+                isPrivate,
+                selectedCollection,
               );
             } catch (err: any) {
               toast.error(err.message, {
@@ -190,7 +191,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 selectedConversation.id,
                 isOverRide,
                 selectedTask,
-                isPrivate
+                isPrivate,
+                selectedCollection,
               );
             } catch (err: any) {
               toast.error(err.message, {
@@ -330,6 +332,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       stopConversationRef,
       isPrivate,
       selectedTile,
+      selectedCollection
     ]
   );
 
@@ -444,23 +447,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   }, [messagesEndRef]);
 
 
-  // collection selection 
-  const handleGetCollections = () => {
-    getCollections().then((res) => {
-      if (res.data && res.data.length) {
-        homeDispatch({ field: "collections", value: res.data });
-      }
-    });
-  }
-
-  useEffect(() => {
-    handleGetCollections();
-  }, []);
-
-  const handleSelection = (collection_id: any) => {
-    setSelectedCollection(collection_id)
-  }
-
 
   return (
     <div className={`relative flex-1 overflow-hidden ${theme.chatBackground}`}>
@@ -493,20 +479,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   <Tiles />
                 </div>
 
-                {/* Collection Dropdown */}
-                {selectedTile?.code === "qa-retreival" ?
-                  <select
-                    id="collectionlist"
-                    value={selectedCollection}
-                    className={`${theme.taskSelectTheme} text-sm rounded-lg block p-3`}
-                    onChange={(ev) => handleSelection(ev.target.value)}
-                  >
-                    {collections?.length ? collections.map((collection: any, index) => (
-                      <option value={collection?.id} key={index} className="py-2">{collection?.name}
-                      </option>
-                    )) : ""}
-                  </select> : ""}
-
                 {Object.keys(selectedTile).length && !selectedTile?.has_access ? (
                   <div
                     className={`flex w-full w-full justify-center rounded-lg py-2 ${theme.chatItemsBorder}`}
@@ -524,6 +496,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                       <AdditionalInputs
                         inputs={selectedTile?.params?.inputs}
                         handleSend={handleSend}
+                        selectedCollection={selectedCollection}
+                        setSelectedCollection={setSelectedCollection}
                       />
                     </div>
                   )}

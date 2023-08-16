@@ -163,7 +163,7 @@ class chat_service:
                     try:
                         logging.info("calling qa retrieval executor")
                         executor = QaRetrieval()
-                        res = executor.execute(query=prompt, is_private=is_private, chat_history=history)
+                        res = executor.execute(query=prompt, is_private=is_private, chat_history=history,collection_name="documents")
 
                     except Exception as e:
                         yield ("Sorry. Some error occured. Please try again.")

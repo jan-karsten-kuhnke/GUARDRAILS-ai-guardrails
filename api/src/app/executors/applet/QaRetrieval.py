@@ -17,11 +17,11 @@ import logging
 
 class QaRetrieval:
     
-    def execute(self, query, is_private, chat_history):
+    def execute(self, query, is_private, chat_history,collection_name):
         embeddings = HuggingFaceEmbeddings()
         
         CONNECTION_STRING =Globals.VECTOR_STORE_DB_URI
-        COLLECTION_NAME = Globals.VECTOR_STORE_COLLECTION_NAME
+        COLLECTION_NAME = collection_name
         
         store = PGVector(
             collection_name=COLLECTION_NAME,
