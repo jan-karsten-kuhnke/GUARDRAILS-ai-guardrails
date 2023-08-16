@@ -1,7 +1,7 @@
 import json
 from sqlalchemy import create_engine, text, func ,or_,and_
 from sqlalchemy.orm import sessionmaker
-from database.models import Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, DocumentEntity, FolderEntity , PromptEntity , OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity,ChainEntity
+from database.models import Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, EulaEntity, DocumentEntity, FolderEntity , PromptEntity , OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity,ChainEntity
 from globals import Globals
 from utils.apiResponse import ApiResponse
 from flask import jsonify
@@ -375,3 +375,37 @@ class Persistence:
         finally:
             session.close()    
         
+        
+    def get_eula_status(user_email):
+        try:
+            eula = session.query(EulaEntity).filter(EulaEntity.user_email == user_email).first()
+            
+            eula_status=False
+            if eula:
+                serialized_eula=eula.to_dict()
+                eula_status = serialized_eula['eula']
+                
+            return jsonify({"data":{"eula":eula_status},"success":True,"message": "Successfully retrieved eula"}), 200      
+        except Exception as ex:
+            return jsonify({"data":"","success":False,"message": "Error in retrieving eula"}), 500      
+            logging.error(f"Exception while getting eula status: {ex}")
+        finally:
+            session.close()
+            
+    def set_eula_status(user_email):
+        try:
+            eula = session.query(EulaEntity).filter(EulaEntity.user_email == user_email).first()
+            if eula:
+                eula.eula = True
+            else:
+                eula = EulaEntity(user_email=user_email,eula=True)
+                session.add(eula)
+            session.commit()
+            return jsonify({"message": "Successfully updated eula","success":True}), 200
+        except Exception as ex:
+            logging.error(f"Exception while setting eula status: {ex}")
+            session.rollback()
+            return jsonify({"message": "Error in updating eula","success":False}), 500
+        finally:
+            session.close()
+            
