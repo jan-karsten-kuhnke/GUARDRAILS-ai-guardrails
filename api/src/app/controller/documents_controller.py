@@ -8,6 +8,7 @@ from globals import Globals
 import os
 from oidc import oidc
 from time import time
+import shutil
 
 
 documentsendpoints = SmorestBlueprint('documents', __name__)
@@ -41,7 +42,10 @@ def create_document():
     for file in files:
         file.save(os.path.join(temp_dir_name, file.filename))
     
-    return DocumentService.create_documents(location=temp_dir_name,collection_name = collection_name)
+    response = DocumentService.create_documents(location=temp_dir_name,collection_name = collection_name)
+    shutil.rmtree(temp_dir_name)
+    return response
+
     
 
 # UPDATE an existing document

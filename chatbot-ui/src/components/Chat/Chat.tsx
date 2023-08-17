@@ -469,12 +469,13 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     <div
                       className={`text-center text-2xl font-bold ${theme.textColorSecondary}`}
                     >
-                      Protect your Confidential Information.
+                      {/* Protect your Confidential Information. */}
                     </div>
                   </div>
                 </div>
                 <div
                   className={`flex w-full w-full justify-center rounded-lg py-2 ${theme.chatItemsBorder}`}
+                  id="tiles-container"
                 >
                   <Tiles />
                 </div>

@@ -27,6 +27,7 @@ export interface HomeInitialState {
   tiles: Tile[];
   collections: [];
   selectedCollection: string;
+  showOnboardingGuide: boolean;
 }
 
 export const initialState: HomeInitialState = {
@@ -50,4 +51,5 @@ export const initialState: HomeInitialState = {
   isPrivate: false,
   tiles: [],
   selectedTile: {},
+  showOnboardingGuide: false,
 };

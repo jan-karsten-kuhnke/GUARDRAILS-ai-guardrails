@@ -91,8 +91,10 @@ def execute_on_document():
     files = request.files.getlist('files')
     file = files[0]
     # save file to disk
+    temp_dir_name = "temp-" + str(time())
+    os.mkdir(temp_dir_name)
     filename = file.filename
-    filepath = os.path.join(os.getcwd(), filename)
+    filepath = os.path.join(os.path.join(temp_dir_name, file.filename))
     file.save(filepath)
     file.close()
 

@@ -1,4 +1,5 @@
 export const darkTheme = {
+  primaryColor:"#343541",
   textColor: "text-[#ffffff]",
   textColorSecondary: "text-gray-400",
   primaryButtonTheme:

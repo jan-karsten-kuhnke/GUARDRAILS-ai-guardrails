@@ -325,6 +325,7 @@ export const ChatInput = ({
           className={`relative mx-2 flex w-full flex-grow flex-col rounded-md  sm:mx-4`}
         >
           <textarea
+            id="chat-input"
             ref={textareaRef}
             disabled={
               selectedConversation?.archived || !selectedTile?.has_access
@@ -352,6 +353,7 @@ export const ChatInput = ({
           />
 
           <button
+            id="send-button"
             className={`absolute right-2 top-2 rounded-sm p-1 ${theme.chatSendButtonTheme}`}
             onClick={handleSend}
           >

@@ -7,8 +7,15 @@ from sqlalchemy import func ,or_,and_
 import logging
 
 class DocumentService:
-    def create_document(title, description, location, folder_id):
-        return Persistence.insert_document(title, description, location, folder_id)
+    def create_document(filename, filepath, description=""):
+        try:
+            ingestion_service = IngestionService()
+            custom_ids = ingestion_service.ingest_file(filepath)
+            Persistence.insert_document(filename, filepath, custom_ids, description)
+
+        except Exception as ex:
+            logging.error(f"Exception uploading document: {ex}")
+
     
     def create_documents(location,collection_name):
         try:
@@ -16,10 +23,10 @@ class DocumentService:
             files = IngestionService.get_all_documents(location)
 
             for file in files:
-                custom_ids = ingestion_service.ingest_files(file["file_path"],collection_name)
-                Persistence.insert_document(file['file_name'],"",file["file_path"],custom_ids,collection_name)
+                custom_ids = ingestion_service.ingest_file(file["file_path"], collection_name)
+                Persistence.insert_document(file['file_name'], file["file_path"], custom_ids, collection_name)
 
-            return jsonify({"success":True,"message":"Successfully Uploaded documents"}),200
+            return jsonify({"success":True,"message":"Successfully uploaded documents"}),200
         except Exception as ex:
             logging.error(f"Exception uploading documents: {ex}")
             return jsonify({"success":False,"message":"Failed to upload documents"}),500

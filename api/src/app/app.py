@@ -22,7 +22,7 @@ app.config["API_TITLE"] = "AI-Guardrails Swagger"
 app.config["API_VERSION"] = "v1"
 app.config["OPENAPI_VERSION"] = "3.0.3"
 app.config["OPENAPI_URL_PREFIX"] = "/"
-app.config["OPENAPI_SWAGGER_UI_PATH"] = "/api/docs" #url for documentation
+app.config["OPENAPI_SWAGGER_UI_PATH"] = "/api/documentation" #url for documentation
 app.config["OPENAPI_SWAGGER_UI_URL"] = "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
 app.config['API_SPEC_OPTIONS'] = {
         'security':[{"bearerAuth": []}],

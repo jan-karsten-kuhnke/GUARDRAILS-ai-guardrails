@@ -19,7 +19,7 @@ _axios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   // eslint-disable-next-line no-param-reassign
   config.headers.Authorization = `Bearer ${AuthService.getToken()}`;
   config.headers["Content-Type"] = "application/json";
-  if (config.url == '/chat/executeondoc' && config.method == 'post') {
+  if (config.url == "/chat/executeondoc" && config.method == "post") {
     config.headers["Content-Type"] = "multipart/form-data";
   }
   config.headers["Access-Control-Allow-Origin"] = "*";
@@ -37,7 +37,7 @@ export const fetchPrompt = (
   task: string | undefined,
   isPrivate: boolean | undefined,
   collectionName: string,
-  documentId: string | null = null,
+  documentId: string | null = null
 ) =>
   fetch(`${import.meta.env.VITE_CHAT_SERVICE_URL}/chat/completions`, {
     method: "POST",
@@ -72,9 +72,7 @@ export const archiveUnarchiveConversation = (
   );
 };
 
-export const executeOnDoc = (
-  formData: FormData
-) =>
+export const executeOnDoc = (formData: FormData) =>
   fetch(`${import.meta.env.VITE_CHAT_SERVICE_URL}/chat/executeondoc`, {
     method: "POST",
     headers: {
@@ -140,4 +138,12 @@ export const getTiles = () => {
 
 export const RequestAccess = (params: any) => {
   return _axios.post(`/user/access_request`, params);
+};
+
+export const getEulaStatus = () => {
+  return _axios.get(`/user/eula`);
+};
+
+export const setEulaStatus = () => {
+  return _axios.post(`/user/eula`);
 };
