@@ -138,6 +138,7 @@ class DocumentEntity(Base):
     description = Column(Text)
     location = Column(String())
     custom_ids = Column(ARRAY(String))
+    collection_name = Column(String())
     
     def to_dict(self):
         return {
@@ -145,7 +146,8 @@ class DocumentEntity(Base):
             'title': self.title,
             'description': self.description,
             'location': self.location,
-            'custom_ids': self.custom_ids
+            'custom_ids': self.custom_ids,
+            'collection_name':self.collection_name
         }
     
 

@@ -36,7 +36,7 @@ export interface Message {
 
 export const CustomDataGrid = (props: CustomDataGridProps) => {
   const {
-    state: { theme },
+    state: { theme, selectedCollection },
   } = useContext(HomeContext);
 
   const [rows, setRows] = useState([]);
@@ -54,7 +54,7 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
 
   useEffect(() => {
     fetchData();
-  }, [sortConfig, range, filter, props?.refereshGridData]);
+  }, [sortConfig, range, filter, props?.refereshGridData, selectedCollection]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -63,6 +63,7 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
       filter: filter,
       range: range,
       sort: sort,
+      collection_name: selectedCollection || ""
     };
 
     try {
@@ -197,7 +198,7 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
           sortModel={sortConfig}
           rowCount={totalRows}
           loading={loading}
-          slots={{ toolbar: GridToolbar,pagination: CustomPagination }}
+          slots={{ toolbar: GridToolbar, pagination: CustomPagination }}
           paginationModel={paginationModel}
           sx={{
             backgroundColor: theme.dataGridTheme.bGcolor,
@@ -207,9 +208,9 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
             marginBottom: "20px",
             color: theme.dataGridTheme.color,
             "& .MuiDataGrid-menuIconButton,.MuiDataGrid-sortIcon,.MuiDataGrid-filterIcon":
-              {
-                color: theme.dataGridTheme.color,
-              },
+            {
+              color: theme.dataGridTheme.color,
+            },
             "&.MuiButtonBase-root ,&.MuiButton-root": {
               color: "white !important",
             },

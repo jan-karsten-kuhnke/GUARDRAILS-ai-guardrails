@@ -14,6 +14,7 @@ class Globals:
     mongo_db_name = os.environ.get("MONGO_DB_NAME")
     pg_schema = os.environ.get("PG_SCHEMA")
     DB_URL =os.environ.get("DB_URI")
+    vector_store_pg_schema = "public"
 
     VECTOR_STORE_DB_URI=os.environ.get("VECTOR_STORE_DB_URI")
     VECTOR_STORE_COLLECTION_NAME ="documents"

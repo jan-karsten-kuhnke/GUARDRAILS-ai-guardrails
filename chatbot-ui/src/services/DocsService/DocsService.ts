@@ -20,7 +20,7 @@ _axios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   config.headers.Authorization = `Bearer ${AuthService.getToken()}`;
   config.headers["Access-Control-Allow-Origin"] = "*";
   config.headers["Content-Type"] = "application/json";
-  if(config.url=='/documents' && config.method=='post'){
+  if (config.url == '/documents' && config.method == 'post') {
     config.headers["Content-Type"] = "multipart/form-data";
   }
   return config;
@@ -29,11 +29,11 @@ _axios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 _axios.interceptors.response.use(handleSuccess, handleError);
 
 
-export const uploadDocuments = ( formData:FormData ) => {
+export const uploadDocuments = (formData: FormData) => {
   return _axios.post('/documents', formData);
 }
 
-export const getDocsGridData = (entity: string,params: any) => {
+export const getDocsGridData = (entity: string, params: any) => {
   const stringParams = Object.keys(params)
     .map((key, index) => `${key}=${JSON.stringify(params[key])}`)
     .join("&");
@@ -42,4 +42,12 @@ export const getDocsGridData = (entity: string,params: any) => {
 
 export const deleteDocsGridData = (id: number) => {
   return _axios.delete(`/documents/${id}`);
+}
+
+export const addCollection = (name: string) => {
+  return _axios.post(`/documents/add-collection`, { collection_name: name });
+}
+
+export const getCollections = () => {
+  return _axios.get(`/documents/collections`);
 }

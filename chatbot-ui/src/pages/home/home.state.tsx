@@ -2,7 +2,8 @@ import { Conversation, Message } from '@/types/chat';
 import { FolderInterface } from '@/types/folder';
 import { Prompt } from '@/types/prompt';
 import { Tile } from '@/types/tiles';
-import {theme} from '@/styles';
+import { theme } from '@/styles';
+import { collection } from '@/types/collection';
 
 export interface HomeInitialState {
   loading: boolean;
@@ -22,9 +23,11 @@ export interface HomeInitialState {
   searchTerm: string;
   refreshConversations: boolean;
   isArchiveView: boolean;
-  isPrivate:boolean;
+  isPrivate: boolean;
   selectedTile: Tile | any;
   tiles: Tile[];
+  collections: collection[];
+  selectedCollection: string;
   showOnboardingGuide: boolean;
 }
 
@@ -46,8 +49,10 @@ export const initialState: HomeInitialState = {
   searchTerm: '',
   refreshConversations: false,
   isArchiveView: false,
-  isPrivate:false,
-  tiles:[],
+  isPrivate: false,
+  tiles: [],
+  collections: [],
+  selectedCollection: "",
   selectedTile: {},
   showOnboardingGuide: false,
 };
