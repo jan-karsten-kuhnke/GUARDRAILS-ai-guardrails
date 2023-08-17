@@ -1,13 +1,12 @@
-import { FC, useContext, useEffect, useReducer, useRef } from 'react';
+import { FC, useContext, useEffect, useReducer, useRef } from "react";
 
+import { useCreateReducer } from "@/hooks/useCreateReducer";
 
-import { useCreateReducer } from '@/hooks/useCreateReducer';
+import { getSettings, saveSettings } from "@/utils/app/settings";
 
-import { getSettings, saveSettings } from '@/utils/app/settings';
+import { Settings } from "@/types/settings";
 
-import { Settings } from '@/types/settings';
-
-import HomeContext from '@/pages/home/home.context';
+import HomeContext from "@/pages/home/home.context";
 
 interface Props {
   open: boolean;
@@ -19,32 +18,40 @@ export const SettingDialog: FC<Props> = ({ open, onClose }) => {
   const { state, dispatch } = useCreateReducer<Settings>({
     initialState: settings,
   });
-  const { state : { theme } } = useContext(HomeContext);
+  const {
+    state: { showOnboardingGuide, theme },
+    dispatch: homeDispatch,
+  } = useContext(HomeContext);
 
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleMouseDown = (e: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-        window.addEventListener('mouseup', handleMouseUp);
+        window.addEventListener("mouseup", handleMouseUp);
       }
     };
 
     const handleMouseUp = (e: MouseEvent) => {
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener("mouseup", handleMouseUp);
       onClose();
     };
 
-    window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener("mousedown", handleMouseDown);
 
     return () => {
-      window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener("mousedown", handleMouseDown);
     };
   }, [onClose]);
 
   const handleSave = () => {
     // homeDispatch({ field: 'lightMode', value: state.theme });
     saveSettings(state);
+  };
+
+  const hanldeShowOnboardingGuide = () => {
+    onClose();
+    homeDispatch({ field: "showOnboardingGuide", value: true });
   };
 
   // Render nothing if the dialog is not open.
@@ -68,8 +75,14 @@ export const SettingDialog: FC<Props> = ({ open, onClose }) => {
             role="dialog"
           >
             <div className={`text-lg pb-4 font-bold ${theme.textColor}`}>
-              {('Settings')}
+              {"Settings"}
             </div>
+            <button
+              className={`${theme.primaryButtonTheme} p-2 rounded-md text-sm transition-colors duration-200`}
+              onClick={hanldeShowOnboardingGuide}
+            >
+              Show App Guide
+            </button>
           </div>
         </div>
       </div>

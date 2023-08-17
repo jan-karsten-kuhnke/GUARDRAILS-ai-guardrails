@@ -46,7 +46,9 @@ const Sidebar = <T,>({
   handleCreateFolder,
   handleDrop,
 }: Props<T>) => {
-  const {state: {theme}} = useContext(HomeContext);
+  const {
+    state: { theme },
+  } = useContext(HomeContext);
 
   const allowDrop = (e: any) => {
     e.preventDefault();
@@ -69,6 +71,7 @@ const Sidebar = <T,>({
           {!isArhiveView && itemDisplayName !== "Archive" ? (
             <>
               <button
+                id={side === "left" ? "new-chat" : "new-prompt"}
                 className={`${theme.primaryButtonTheme} text-sidebar flex w-[190px] flex-shrink-0 cursor-pointer select-none items-center gap-3 rounded-md p-3 transition-colors duration-200`}
                 onClick={() => {
                   handleCreateItem();
@@ -80,7 +83,8 @@ const Sidebar = <T,>({
               </button>
 
               <button
-                className={`${ theme.secondaryButtonTheme} ml-2 flex flex-shrink-0 cursor-pointer items-center gap-3 rounded-md p-3 text-sm transition-colors duration-200`}
+                id={side === "left" ? "new-chat-folder" : "new-prompt-folder"}
+                className={`${theme.secondaryButtonTheme} ml-2 flex flex-shrink-0 cursor-pointer items-center gap-3 rounded-md p-3 text-sm transition-colors duration-200`}
                 onClick={handleCreateFolder}
               >
                 <IconFolderPlus size={16} />
@@ -97,7 +101,10 @@ const Sidebar = <T,>({
           onSearch={handleSearchTerm}
         />
 
-        <div className="flex-grow overflow-auto">
+        <div
+          id={side === "left" ? "conversation-container" : "prompt-container"}
+          className="flex-grow overflow-auto"
+        >
           <div className="flex items-center">{folderDisplayName}</div>
           <div className={`flex ${theme.dividerBottomTheme} pb-2`}>
             {folderComponent}

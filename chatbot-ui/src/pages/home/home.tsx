@@ -16,8 +16,9 @@ import {
   updateConversationProperties,
   updateUserFolders,
   updateUserPrompts,
-  getEulaStatus
+  getEulaStatus,
 } from "@/services/HttpService";
+import OnboardingGuide from "@/components/OnboardingGuide/OnboardingGuide";
 import { cleanConversationHistory } from "@/utils/app/clean";
 import { FolderInterface, FolderType } from "@/types/folder";
 import { KeyValuePair } from "@/types/data";
@@ -42,6 +43,7 @@ export const Home = () => {
       prompts,
       refreshConversations,
       isArchiveView,
+      showOnboardingGuide,
     },
     dispatch,
   } = contextValue;
@@ -68,19 +70,21 @@ export const Home = () => {
     });
 
     fetchFolders().then((res) => {
-      if(res && res.data && res.data.folders) dispatch({ field: "folders", value: res.data.folders });
+      if (res && res.data && res.data.folders)
+        dispatch({ field: "folders", value: res.data.folders });
     });
 
     fetchPrompts().then((res) => {
-      if(res && res.data && res.data.prompts) dispatch({ field: "prompts", value: res.data.prompts });
+      if (res && res.data && res.data.prompts)
+        dispatch({ field: "prompts", value: res.data.prompts });
     });
 
     getEulaStatus().then((res) => {
-      if(res && res.data && res.data.success){
-        setEulaStatus(res.data.data.eulaStatus);
+      if (res && res.data && res.data.success) {
+        setEulaStatus(res.data.data.eula);
       }
-    })
-  
+    });
+
     // fetchPrompts().then((res) => {
     //   dispatch({ field: "prompts", value: res.data });
     // });
@@ -118,6 +122,7 @@ export const Home = () => {
 
   const handleEulaDialogClose = () => {
     setEulaStatus(true);
+    dispatch({ field: "showOnboardingGuide", value: true });
   };
 
   const handleCreateFolder = (name: string, type: FolderType) => {
@@ -129,14 +134,11 @@ export const Home = () => {
 
     const updatedFolders = [...folders, newFolder];
 
-    dispatch({ field: 'folders', value: updatedFolders });
+    dispatch({ field: "folders", value: updatedFolders });
 
     updateUserFolders(updatedFolders);
-
   };
 
- 
-  
   const handleUpdateFolder = (folderId: string, name: string) => {
     const updatedFolders = folders.map((f) => {
       if (f.id === folderId) {
@@ -149,16 +151,14 @@ export const Home = () => {
       return f;
     });
 
-    dispatch({ field: 'folders', value: updatedFolders });
+    dispatch({ field: "folders", value: updatedFolders });
 
     updateUserFolders(updatedFolders);
   };
-  
-
 
   const handleDeleteFolder = (folderId: string) => {
     const updatedFolders = folders.filter((f) => f.id !== folderId);
-    dispatch({ field: 'folders', value: updatedFolders });
+    dispatch({ field: "folders", value: updatedFolders });
     updateUserFolders(updatedFolders);
 
     const updatedConversations: Conversation[] = conversations.map((c) => {
@@ -173,7 +173,7 @@ export const Home = () => {
       return c;
     });
 
-    dispatch({ field: 'conversations', value: updatedConversations });
+    dispatch({ field: "conversations", value: updatedConversations });
 
     const updatedPrompts: Prompt[] = prompts.map((p) => {
       if (p.folderId === folderId) {
@@ -186,18 +186,25 @@ export const Home = () => {
       return p;
     });
 
-    dispatch({ field: 'prompts', value: updatedPrompts });
+    dispatch({ field: "prompts", value: updatedPrompts });
     updateUserPrompts(updatedPrompts);
   };
-  
+
   const handleSelectConversation = (conversation: Conversation) => {
     fetchConversationById(conversation.id).then((res) => {
-      conversation.messages = res.data.messages.map((message: { role: any; content: any; user_action_required: any; msg_info:any }) => ({
-        role: message.role,
-        content: message.content,
-        userActionRequired: message.user_action_required,
-        msg_info: message.msg_info
-      }));;
+      conversation.messages = res.data.messages.map(
+        (message: {
+          role: any;
+          content: any;
+          user_action_required: any;
+          msg_info: any;
+        }) => ({
+          role: message.role,
+          content: message.content,
+          userActionRequired: message.user_action_required,
+          msg_info: message.msg_info,
+        })
+      );
       dispatch({
         field: "selectedConversation",
         value: conversation,
@@ -206,29 +213,38 @@ export const Home = () => {
 
     // saveConversation(conversation);
   };
-  
+
   const handleUpdateConversation = (
-      conversation: Conversation,
-      data: KeyValuePair,
-    ) => {
-      const updatedConversation = {
-        ...conversation,
-        [data.key]: data.value,
-      };
-      dispatch({ field: 'selectedConversation', value: updatedConversation });
-      dispatch({ field: 'conversations', value: conversations.map((c) => (c.id === updatedConversation.id ? updatedConversation : c)) });
-      updateConversationProperties(updatedConversation.id, updatedConversation.title, updatedConversation.folderId).then((res) => {
-        dispatch({field : 'refreshConversations', value: true});
-      });
+    conversation: Conversation,
+    data: KeyValuePair
+  ) => {
+    const updatedConversation = {
+      ...conversation,
+      [data.key]: data.value,
     };
+    dispatch({ field: "selectedConversation", value: updatedConversation });
+    dispatch({
+      field: "conversations",
+      value: conversations.map((c) =>
+        c.id === updatedConversation.id ? updatedConversation : c
+      ),
+    });
+    updateConversationProperties(
+      updatedConversation.id,
+      updatedConversation.title,
+      updatedConversation.folderId
+    ).then((res) => {
+      dispatch({ field: "refreshConversations", value: true });
+    });
+  };
 
-    const handleIsPrivate=(isPrivate:boolean)=>{
-      dispatch({field:'isPrivate',value:isPrivate});
-    }
+  const handleIsPrivate = (isPrivate: boolean) => {
+    dispatch({ field: "isPrivate", value: isPrivate });
+  };
 
-    const handleSelectedTile=(tile:Tile)=>{
-      dispatch({field:'selectedTile',value:tile});
-    }
+  const handleSelectedTile = (tile: Tile) => {
+    dispatch({ field: "selectedTile", value: tile });
+  };
 
   return (
     <HomeContext.Provider
@@ -241,20 +257,18 @@ export const Home = () => {
         handleSelectConversation,
         handleUpdateConversation,
         handleIsPrivate,
-        handleSelectedTile
+        handleSelectedTile,
       }}
     >
-      <main
-        className={`flex h-screen w-screen flex-col text-sm text-white`}
-      >
+      <main className={`flex h-screen w-screen flex-col text-sm text-white`}>
+        {showOnboardingGuide && <OnboardingGuide />}
         <div className="fixed top-0 w-full sm:hidden">
           {/* <Navbar
             selectedConversation={selectedConversation}
             onNewConversation={handleNewConversation}
           /> */}
         </div>
-
-        {!eulaStatus && <EulaDialog onClose={handleEulaDialogClose}/>}
+        {!eulaStatus && <EulaDialog onClose={handleEulaDialogClose} />}
 
         <div className="flex h-full w-full pt-[48px] sm:pt-0">
           <Chatbar />
