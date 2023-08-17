@@ -47,7 +47,7 @@ FILE_MAPPING = {
 }
 
 class  IngestionService :
-    def ingest_files(self,file_path: str,collection_name):
+    def ingest_file(self,file_path: str,collection_name):
         embeddings = HuggingFaceEmbeddings()
 
         CONNECTION_STRING = Globals.VECTOR_STORE_DB_URI

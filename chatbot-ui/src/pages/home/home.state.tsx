@@ -3,6 +3,7 @@ import { FolderInterface } from '@/types/folder';
 import { Prompt } from '@/types/prompt';
 import { Tile } from '@/types/tiles';
 import { theme } from '@/styles';
+import { collection } from '@/types/collection';
 
 export interface HomeInitialState {
   loading: boolean;
@@ -25,7 +26,7 @@ export interface HomeInitialState {
   isPrivate: boolean;
   selectedTile: Tile | any;
   tiles: Tile[];
-  collections: [];
+  collections: collection[];
   selectedCollection: string;
   showOnboardingGuide: boolean;
 }
@@ -50,6 +51,8 @@ export const initialState: HomeInitialState = {
   isArchiveView: false,
   isPrivate: false,
   tiles: [],
+  collections: [],
+  selectedCollection: "",
   selectedTile: {},
   showOnboardingGuide: false,
 };

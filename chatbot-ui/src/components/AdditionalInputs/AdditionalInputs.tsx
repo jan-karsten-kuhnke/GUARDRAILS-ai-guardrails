@@ -13,13 +13,11 @@ interface Props {
     }
   ];
   handleSend: Function;
-  selectedCollection: string,
-  setSelectedCollection: Function
 }
 
-const AdditionalInputs: FC<Props> = ({ inputs, handleSend, selectedCollection, setSelectedCollection }) => {
+const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
   const {
-    state: { theme, selectedTile, collections },
+    state: { theme, selectedTile, collections, selectedCollection },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -56,7 +54,7 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend, selectedCollection, s
   }, []);
 
   const handleSelection = (name: any) => {
-    setSelectedCollection(name)
+    homeDispatch({ field: "selectedCollection", value: name });
   }
 
   return (
@@ -92,6 +90,7 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend, selectedCollection, s
           {/* Collection Dropdown */ }
           return (
             <>
+              <div className={`${theme.textColor} pb-2`}>Choose Collection</div>
               <select
                 id="collectionlist"
                 value={selectedCollection}

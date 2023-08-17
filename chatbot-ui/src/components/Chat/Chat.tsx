@@ -51,7 +51,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       isPrivate,
       selectedTile,
       tiles,
-      collections
+      selectedCollection
     },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
@@ -62,7 +62,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showScrollDownButton, setShowScrollDownButton] =
     useState<boolean>(false);
-  const [selectedCollection, setSelectedCollection] = useState("");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -489,7 +488,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 ) : (
                   ""
                 )}
-                {selectedTile?.code == "qa-retreival" ? <div>Choose Collection</div> : ""}
                 {selectedTile?.params &&
                   selectedTile?.params?.inputs?.length > 0 ? (
                   <div
@@ -498,8 +496,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     <AdditionalInputs
                       inputs={selectedTile?.params?.inputs}
                       handleSend={handleSend}
-                      selectedCollection={selectedCollection}
-                      setSelectedCollection={setSelectedCollection}
                     />
                   </div>
                 ) : ""}

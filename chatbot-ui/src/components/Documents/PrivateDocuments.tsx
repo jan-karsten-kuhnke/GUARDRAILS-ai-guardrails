@@ -12,18 +12,24 @@ import { EXTRACTION_CODE, SUMMARIZATION_CODE } from "@/utils/constants";
 
 export const PrivateDocuments = () => {
   const {
-    state: { theme, tiles, collections },
+    state: { theme, tiles, collections, selectedCollection },
     dispatch: homeDispatch,
     handleNewConversation,
   } = useContext(HomeContext);
 
   const [refereshGridData, setRefereshGridData] = useState<boolean>(true);
   const [collectionName, setCollectionName] = useState("");
-  const [selectedCollection, setSelectedCollection] = useState("");
+
 
   const handleDocumentsUpload = async (
     event: ChangeEvent<HTMLInputElement>
   ) => {
+    if(!selectedCollection){ 
+      toast.error("Please select a collection first",{
+        position: "bottom-center",
+      })
+      return;
+    }
     const files = event.target.files;
     if (!files || files.length === 0) {
       return;
@@ -184,10 +190,12 @@ export const PrivateDocuments = () => {
     getCollections().then((res) => {
       if (res?.data?.success && res?.data?.data?.length) {
         homeDispatch({ field: "collections", value: res?.data?.data });
-        homeDispatch({
-          field: "selectedCollection",
-          value: res?.data?.data[0]?.name,
-        });
+        if (!selectedCollection){
+          homeDispatch({
+            field: "selectedCollection",
+            value: res?.data?.data[0]?.name,
+          });
+        }
       }
     });
   }
@@ -197,7 +205,6 @@ export const PrivateDocuments = () => {
   }, []);
 
   const handleSelection = (name: any) => {
-    setSelectedCollection(name)
     homeDispatch({
       field: "selectedCollection",
       value: name,
@@ -206,12 +213,11 @@ export const PrivateDocuments = () => {
 
   return (
     <>
-      <div className="flex items-end justify-between">
+      <div className="flex items-center justify-around">
         <div
           style={{
             display: "flex",
             justifyContent: "flex-end",
-            margin: "25px 10px",
             whiteSpace: "nowrap",
             marginBottom: "0px",
           }}
@@ -246,8 +252,6 @@ export const PrivateDocuments = () => {
           style={{
             display: "flex",
             justifyContent: "flex-end",
-            margin: "25px 10px",
-            marginBottom: "0px",
           }}
         >
           <label
