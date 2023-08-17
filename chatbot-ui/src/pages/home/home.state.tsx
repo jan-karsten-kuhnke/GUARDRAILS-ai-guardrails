@@ -25,7 +25,8 @@ export interface HomeInitialState {
   isPrivate: boolean;
   selectedTile: Tile | any;
   tiles: Tile[];
-  collections: []
+  collections: [];
+  selectedCollection: string;
 }
 
 export const initialState: HomeInitialState = {

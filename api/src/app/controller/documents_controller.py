@@ -19,7 +19,7 @@ def get_documents():
     sort = request.args.get('sort', default=None, type=str)
     range_ = request.args.get('range', default=None, type=str)
     filter_ = request.args.get('filter', default=None, type=str)
-    collection = request.args.get('collection', default="documents", type=str)
+    collection = request.args.get('collection_name', default=None, type=str)
     return DocumentService.get_documents(DocumentEntity,sort, range_, filter_,collection)
 
 

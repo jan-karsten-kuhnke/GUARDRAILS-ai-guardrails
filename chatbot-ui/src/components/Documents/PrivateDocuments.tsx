@@ -194,11 +194,39 @@ export const PrivateDocuments = () => {
 
   const handleSelection = (name: any) => {
     setSelectedCollection(name)
+    homeDispatch({
+      field: "selectedCollection",
+      value: name,
+    });
   }
 
   return (
     <>
-      <div className="flex items-end justify-end">
+      <div className="flex items-end justify-between">
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            margin: "25px 10px",
+            whiteSpace: "nowrap",
+            marginBottom: "0px",
+          }}
+        >
+          <label
+            className={`flex gap-1 items-center w-55 p-2 rounded-md ${theme.primaryButtonTheme} cursor-pointer`}
+          >
+            <input
+              type="text"
+              placeholder="Enter Collection Name"
+              onChange={(e) => setCollectionName(e.target.value)}
+              value={collectionName}
+              className={`m-0 w-full resize-none p-0 mr-2 py-2 pr-8 pl-5 md:py-3 ${theme.chatTextAreaTheme}`}
+
+            />
+            {/* <IconPlus /> */}
+            <span onClick={AddCollection}>Add Collection</span>
+          </label>
+        </div>
         <select
           id="collectionlist"
           value={selectedCollection}
@@ -240,30 +268,7 @@ export const PrivateDocuments = () => {
         refereshGridData={refereshGridData}
       />
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          margin: "25px 10px",
-          whiteSpace: "nowrap",
-          marginBottom: "0px",
-        }}
-      >
-        <label
-          className={`flex gap-1 items-center w-55 p-2 rounded-md ${theme.primaryButtonTheme} cursor-pointer`}
-        >
-          <input
-            type="text"
-            placeholder="Enter Collection Name"
-            onChange={(e) => setCollectionName(e.target.value)}
-            value={collectionName}
-            className={`m-0 w-full resize-none p-0 mr-2 py-2 pr-8 pl-5 md:py-3 ${theme.chatTextAreaTheme}`}
 
-          />
-          {/* <IconPlus /> */}
-          <span onClick={AddCollection}>Add Collection</span>
-        </label>
-      </div>
     </>
   );
 };

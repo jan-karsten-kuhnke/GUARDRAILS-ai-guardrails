@@ -141,7 +141,8 @@ class Persistence:
     def get_list_query(Entity, sort, range_, filter_,collection):
         try:
             query = session.query(Entity)
-            query = query.filter(and_(Entity.collection_name == collection))
+            print("collection" , collection)
+            query = query.filter(Entity.collection_name == collection)
 
             # Apply filter conditions
             filter_dict = eval(filter_)
