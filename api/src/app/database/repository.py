@@ -142,7 +142,7 @@ class Persistence:
         try:
             query = session.query(Entity)
             print("collection" , collection)
-            query = query.filter(Entity.collection_name == collection)
+            query = query.filter(Entity.collection_name == eval(collection))
 
             # Apply filter conditions
             filter_dict = eval(filter_)

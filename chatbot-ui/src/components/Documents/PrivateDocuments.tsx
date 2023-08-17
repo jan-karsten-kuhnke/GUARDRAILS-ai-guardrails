@@ -184,6 +184,10 @@ export const PrivateDocuments = () => {
     getCollections().then((res) => {
       if (res?.data?.success && res?.data?.data?.length) {
         homeDispatch({ field: "collections", value: res?.data?.data });
+        homeDispatch({
+          field: "selectedCollection",
+          value: res?.data?.data[0]?.name,
+        });
       }
     });
   }

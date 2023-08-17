@@ -488,19 +488,20 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 ) : (
                   ""
                 )}
+                {selectedTile?.code == "qa-retreival" ? <div>Choose Collection</div> : ""}
                 {selectedTile?.params &&
-                  selectedTile?.params?.inputs?.length > 0 && (
-                    <div
-                      className={`w-full justify-center rounded-lg p-4 ${theme.chatItemsBorder}`}
-                    >
-                      <AdditionalInputs
-                        inputs={selectedTile?.params?.inputs}
-                        handleSend={handleSend}
-                        selectedCollection={selectedCollection}
-                        setSelectedCollection={setSelectedCollection}
-                      />
-                    </div>
-                  )}
+                  selectedTile?.params?.inputs?.length > 0 ? (
+                  <div
+                    className={`w-full justify-center rounded-lg p-4 ${theme.chatItemsBorder}`}
+                  >
+                    <AdditionalInputs
+                      inputs={selectedTile?.params?.inputs}
+                      handleSend={handleSend}
+                      selectedCollection={selectedCollection}
+                      setSelectedCollection={setSelectedCollection}
+                    />
+                  </div>
+                ) : ""}
                 {selectedTile?.has_access ? (
                   <div
                     className={`w-full justify-center rounded-lg p-4 ${theme.chatItemsBorder}`}
