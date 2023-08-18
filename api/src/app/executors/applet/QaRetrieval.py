@@ -31,7 +31,7 @@ class QaRetrieval:
         
         retriever = store.as_retriever()
 
-        llm=LlmProvider.get_llm(is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=False)
+        llm=LlmProvider.get_llm(is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
  
         chain = ConversationalRetrievalChain.from_llm(
             llm=llm,
