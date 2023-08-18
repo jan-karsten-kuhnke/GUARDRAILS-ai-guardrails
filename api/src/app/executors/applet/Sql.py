@@ -22,6 +22,8 @@ class Sql:
     def execute(self, query, is_private, chat_history):
         chain=Persistence.get_chain_by_code('qa-sql')
         params=chain['params']
+
+        model_type = params['modelType']
         
         PROMPT_SUFFIX =params['promptSuffix']
 
@@ -61,7 +63,7 @@ class Sql:
             schemas = metric_db_schemas,
         )
         
-        llm=LlmProvider.get_llm(is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
+        llm=LlmProvider.get_llm(model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
         
         chain = SQLDatabaseSequentialChain.from_llm(
             llm, db, verbose=True, return_intermediate_steps=True,decider_prompt=DECIDER_PROMPT,

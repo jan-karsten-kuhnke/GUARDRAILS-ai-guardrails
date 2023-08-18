@@ -9,6 +9,7 @@ from langchain.llms import VertexAI
 from langchain.embeddings import HuggingFaceEmbeddings
 from globals import Globals
 from executors.utils.LlmProvider import LlmProvider
+from database.repository import Persistence
 from langchain.vectorstores.pgvector import PGVector
 from executors.utils.AppletResponse import AppletResponse
 from typing import Any
@@ -18,6 +19,11 @@ import logging
 class QaRetrieval:
     
     def execute(self, query, is_private, chat_history,collection_name):
+        chain = Persistence.get_chain_by_code('qa-retreival')
+        params = chain['params']
+        model_type = params['modelType']
+
+
         embeddings = HuggingFaceEmbeddings()
         
         CONNECTION_STRING =Globals.VECTOR_STORE_DB_URI
@@ -31,7 +37,7 @@ class QaRetrieval:
         
         retriever = store.as_retriever()
 
-        llm=LlmProvider.get_llm(is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=False)
+        llm=LlmProvider.get_llm(model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=False)
  
         chain = ConversationalRetrievalChain.from_llm(
             llm=llm,

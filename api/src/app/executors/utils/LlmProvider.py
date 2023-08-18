@@ -6,7 +6,7 @@ from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
 
 class LlmProvider:
-    def get_llm(is_private=False, use_chat_model= False, max_output_token = 1000 , increase_model_token_limit=False):
+    def get_llm(model_type="OpenAI", is_private=False, use_chat_model= False, max_output_token = 1000 , increase_model_token_limit=False):
         private_llm: Any = None
         public_llm: Any = None
 
@@ -14,7 +14,7 @@ class LlmProvider:
         temp = Globals.model_temp
         
             
-        if Globals.public_model_type == "OpenAI":
+        if model_type == "OpenAI":
             if use_chat_model:
                 if increase_model_token_limit:
                     public_llm = ChatOpenAI(callbacks=callbacks, verbose=False, temperature=temp,max_tokens=max_output_token, model= "gpt-3.5-turbo-16k")
@@ -25,7 +25,7 @@ class LlmProvider:
                     public_llm = OpenAI(callbacks=callbacks, verbose=False, temperature=temp,model= "gpt-3.5-turbo-16k")
                 else:
                     public_llm = OpenAI(callbacks=callbacks, verbose=False, temperature=temp,max_tokens=max_output_token)
-        elif Globals.public_model_type == "VertexAI":
+        elif model_type == "VertexAI":
             if use_chat_model:
                 public_llm=ChatVertexAI(max_output_tokens=max_output_token, verbose=False)
             else:    
