@@ -18,7 +18,7 @@ export const lightTheme = {
   itemMoveRenameTheme: "bg-[#d8f5ff] text-neutral-500",
   sidebarActionButtonTheme: "text-neutral-400 hover:text-neutral-500",
   itemDropColor: "#d8f5ff",
-  taskSelectTheme: "bg-[#23b4c3] text-white",
+  taskSelectTheme: "bg-[#1c96a3] text-white",
   chatBackground: "bg-white",
   chatItemsBorder: "border border-neutral-200",
   chatTitleTheme:
@@ -44,6 +44,10 @@ export const lightTheme = {
     scrollBarThumb: "#7e7e7e",
     scrollBarTrack: "white",
     scrollBarThumbHover: "#343541",
+  },
+  documentTabTheme: {
+    color: "#75777A",
+    selectedTabColor: "#1c96a3"
   },
   modalDialogTheme:
     "bg-[#ffffff] text-[#75777A] border-l-2 border-r-2 border-gray-300",

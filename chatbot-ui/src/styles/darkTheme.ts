@@ -44,6 +44,10 @@ export const darkTheme = {
     scrollBarTrack: "white",
     scrollBarThumbHover: "#7e7e7e",
   },
+  documentTabTheme: {
+    color: "#A0A0A0",
+    selectedTabColor: "#fff"
+  },
   modalDialogTheme: "bg-[#202123] text-[#ffffff]",
   dataGridTheme: {
     primaryColor: "#fff",
