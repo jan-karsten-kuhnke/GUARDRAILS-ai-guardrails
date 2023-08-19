@@ -13,6 +13,7 @@ from langchain.vectorstores.pgvector import PGVector
 from executors.utils.AppletResponse import AppletResponse
 from typing import Any
 import logging
+from langchain.retrievers.multi_query import MultiQueryRetriever
 
 
 class QaRetrieval:
@@ -30,8 +31,10 @@ class QaRetrieval:
         )
         
         retriever = store.as_retriever()
+        
 
         llm=LlmProvider.get_llm(is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
+        retriever_from_llm = MultiQueryRetriever.from_llm(retriever=retriever, llm=llm)
  
         chain = ConversationalRetrievalChain.from_llm(
             llm=llm,
