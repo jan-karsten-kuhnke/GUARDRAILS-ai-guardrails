@@ -16,7 +16,7 @@ export const darkTheme = {
   itemMoveRenameTheme: "bg-[#343541] text-white",
   sidebarActionButtonTheme: "text-neutral-400 hover:text-neutral-100",
   itemDropColor: "#343541",
-  taskSelectTheme: "bg-[#343541] text-white",
+  taskSelectTheme: "bg-[#70738d] text-[#fff]",
   chatBackground: "bg-[#343541]",
   chatItemsBorder: "border border-neutral-600",
   chatTitleTheme: "bg-[#444654] text-neutral-200",
@@ -41,11 +41,15 @@ export const darkTheme = {
   tabTheme: {
     color: "white",
   },
+  documentTabTheme: {
+    color: "#A0A0A0",
+    selectedTabColor: "#fff"
+  },
   modalDialogTheme: "bg-[#202123] text-[#ffffff]",
   dataGridTheme: {
-    primaryColor: "#fff",
+    primaryColor: "#ccccff",
     bgColor: "#202123",
-    color: "white",
+    color: "#fff",
     disabledIconColor: "#5A5A5A",
   }
 };
