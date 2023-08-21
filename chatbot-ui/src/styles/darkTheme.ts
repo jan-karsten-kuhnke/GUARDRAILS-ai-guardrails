@@ -40,9 +40,6 @@ export const darkTheme = {
   chatMessageThemeUser: "border-gray-900/50 bg-[#343541] text-gray-100",
   tabTheme: {
     color: "white",
-    scrollBarThumb: "#343541 ",
-    scrollBarTrack: "white",
-    scrollBarThumbHover: "#7e7e7e",
   },
   modalDialogTheme: "bg-[#202123] text-[#ffffff]",
   dataGridTheme: {

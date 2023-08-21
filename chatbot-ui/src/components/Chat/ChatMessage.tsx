@@ -294,7 +294,7 @@ export const ChatMessage: FC<Props> = memo(
             ) : (
               <div className="flex flex-row">
                 {sources && sources.length > 0 ? (
-                  <Box sx={{ width: "100%", typography: "body1" }}>
+                  <Box sx={{ width: "100%", overflow: "auto", typography: "body1" }}>
                     <TabContext value={value}>
                       <Box
                         sx={{
