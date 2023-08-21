@@ -26,7 +26,7 @@ export const SourceTabBar: FC<TabsProps> = ({ sources }) => {
     fontWeight: 500,
   };
   return (
-    <Box sx={{ width: "100%", typography: "body1" }}>
+    <Box sx={{ width: "100%", overflow: "auto", typography: "body1" }}>
       <TabContext value={value}>
         <Box
           sx={{
@@ -38,36 +38,19 @@ export const SourceTabBar: FC<TabsProps> = ({ sources }) => {
           <TabList
             onChange={handleChange}
             aria-label="lab API tabs example"
+            variant="scrollable"
+            scrollButtons="auto"
             sx={{
               "& .MuiTab-root": {
                 fontFamily: "'Inter', sans-serif", // Set the font-family
-                fontWeight: 600,
                 color: theme.tabTheme.color,
-                textTransform: "Capitalize",
-                paddingTop: "0px",
+                paddingBottom: "12px",
               },
               "& .MuiButtonBase-root.Mui-selected": {
                 color: theme.tabTheme.color,
               },
               "& .MuiTabs-indicator": {
                 backgroundColor: theme.tabTheme.color,
-                marginBottom: "8px",
-              },
-              "& .MuiTabs-scroller": {
-                overflowX: "scroll !important",
-                "&::-webkit-scrollbar": {
-                  height: "0.4em",
-                },
-                "&::-webkit-scrollbar-thumb": {
-                  backgroundColor: theme.tabTheme.scrollBarThumb, // Change this to your desired color
-                },
-                "&::-webkit-scrollbar-thumb:hover": {
-                  backgroundColor: theme.tabTheme.scrollBarThumbHover, // Change this to your desired color
-                },
-                "&::-webkit-scrollbar-track": {
-                  borderRadius: "20px",
-                  backgroundColor: theme.tabTheme.scrollBarTrack, // Change this to your desired color
-                },
               },
             }}
           >

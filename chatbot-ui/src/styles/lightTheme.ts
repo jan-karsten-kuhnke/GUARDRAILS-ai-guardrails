@@ -41,9 +41,6 @@ export const lightTheme = {
   chatMessageThemeUser: " bg-white text-gray-800 ",
   tabTheme: {
     color: "black",
-    scrollBarThumb: "#7e7e7e",
-    scrollBarTrack: "white",
-    scrollBarThumbHover: "#343541",
   },
   modalDialogTheme:
     "bg-[#ffffff] text-[#75777A] border-l-2 border-r-2 border-gray-300",
