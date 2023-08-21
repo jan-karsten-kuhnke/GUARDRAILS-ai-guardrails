@@ -1,5 +1,5 @@
 export const darkTheme = {
-  primaryColor:"#343541",
+  primaryColor: "#343541",
   textColor: "text-[#ffffff]",
   textColorSecondary: "text-gray-400",
   primaryButtonTheme:
@@ -51,5 +51,6 @@ export const darkTheme = {
     bgColor: "#202123",
     color: "#fff",
     disabledIconColor: "#5A5A5A",
-  }
+  },
+  bgLoader: "bg-[#ffffff]"
 };
