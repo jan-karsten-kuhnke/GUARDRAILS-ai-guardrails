@@ -28,6 +28,7 @@ class Visualization:
         try:
             chain = Persistence.get_chain_by_code('qa-viz')
             params = chain['params']
+            model_type = params['modelType']
         
             sources = []
             
@@ -41,7 +42,7 @@ class Visualization:
 
             conn_str = fernet.decrypt(enc).decode()
             
-            llm=LlmProvider.get_llm(is_private=is_private,use_chat_model=True,max_output_token=1000,increase_model_token_limit=True)
+            llm=LlmProvider.get_llm(model_type=model_type, is_private=is_private,use_chat_model=True,max_output_token=1000,increase_model_token_limit=True)
             
             executor = Sql()
             sql_result = executor.execute(query=query, is_private=is_private, chat_history=chat_history)

@@ -15,12 +15,13 @@ class Summarize:
     def execute(self,filepath,document_array,is_document_uploaded):
         chain = Persistence.get_chain_by_code('summarize-brief')
         params = chain['params']
-        
+
+        model_type = params['modelType']
         map_prompt_template = params['mapPromptTemplate']
         reduce_prompt_template = params['reducePromptTemplate']
         chain_type = params['chainType']
         
-        llm=LlmProvider.get_llm(is_private=False, use_chat_model=False, max_output_token=1000, increase_model_token_limit=False)
+        llm=LlmProvider.get_llm(model_type=model_type, is_private=False, use_chat_model=False, max_output_token=1000, increase_model_token_limit=False)
         
         docs=[]
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
