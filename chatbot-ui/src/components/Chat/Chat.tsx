@@ -473,7 +473,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   </div>
                 </div>
                 <div
-                  className={`flex w-full w-full justify-center rounded-lg py-2 ${theme.chatItemsBorder}`}
+                  className={`w-full rounded-lg ${theme.chatItemsBorder}`}
                   id="tiles-container"
                 >
                   <Tiles />

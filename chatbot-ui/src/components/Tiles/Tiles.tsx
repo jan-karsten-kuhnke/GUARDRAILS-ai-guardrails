@@ -79,16 +79,28 @@ const Tiles: FC = () => {
   }, []);
 
   return (
-    <>
-      <div className="flex align-center">
-        {scrollX !== 0 && (
+    <div className="flex flex-col">
+      <div className={`flex justify-between items-center p-3  rounded-lg`}>
+        <h1>Tiles</h1>
+        <div>
+        {/* {scrollX !== 0 && ( */}
+        {/* )} */}
           <button
-            className={`m-1 hover:scale-125 transition-transform duration-300 ease-in-out ${theme.textColorSecondary}`}
+            className={`m-1 hover:scale-105 transition-transform duration-300 ease-in-out ${theme.textColorSecondary} p-0.5 border rounded-full`}
             onClick={() => slide(-300)}
           >
-            <IconChevronLeft size={30} />
+            <IconChevronLeft size={25} />
           </button>
-        )}
+
+        {/* {!scrolEnd && ( */}
+        {/* )} */}
+          <button
+            className={`m-1 hover:scale-105 transition-transform duration-300 ease-in-out ${theme.textColorSecondary} p-0.5 border rounded-full`}
+            onClick={() => slide(+300)}
+          >
+            <IconChevronRight size={25} />
+          </button>
+          </div>
       </div>
       <div
         ref={scrl}
@@ -118,17 +130,7 @@ const Tiles: FC = () => {
             </div>
           ))}
       </div>
-      <div className="flex align-center">
-        {!scrolEnd && (
-          <button
-            className={`m-1 hover:scale-125 transition-transform duration-300 ease-in-out ${theme.textColorSecondary}`}
-            onClick={() => slide(+300)}
-          >
-            <IconChevronRight size={30} />
-          </button>
-        )}
-      </div>
-    </>
+    </div>
   );
 };
 
