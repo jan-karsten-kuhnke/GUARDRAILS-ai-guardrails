@@ -1,8 +1,7 @@
-
 export const lightTheme = {
   primaryColor: "#1c96a3",
-  textColor: "text-[#75777A]",
-  textColorSecondary: "text-[#75777A]",
+  textColor: "#75777A",
+  textColorSecondary: "#75777A",
   primaryButtonTheme: "bg-[#1c96a3] text-[#ffffff] hover:bg-[#23b4c3]",
   secondaryButtonTheme:
     "bg-[#ffffff] text-[#1c96a3] hover:bg-[#d8f5ff] border border-2 border-[#1c96a3]/80",
@@ -23,8 +22,11 @@ export const lightTheme = {
   chatItemsBorder: "border border-neutral-200",
   chatTitleTheme:
     "border border-b-neutral-300 bg-neutral-100  text-neutral-500",
-  tilesHoverTheme: "hover:bg-[#d8f5ff]",
-  tileSelectedTheme: "bg-[#1c96a3] text-white",
+  tilesTheme: {
+    hover: "hover:bg-[#d8f5ff]",
+    selected: "bg-[#1c96a3] text-white",
+    header: "bg-[#1c96a3] text-white",
+  },
   publicPrivateSwitchTheme: "text-neutral-500",
   switchTheme: {
     Bg: "#75777A",
@@ -44,7 +46,7 @@ export const lightTheme = {
   },
   documentTabTheme: {
     color: "#75777A",
-    selectedTabColor: "#1c96a3"
+    selectedTabColor: "#1c96a3",
   },
   modalDialogTheme:
     "bg-[#ffffff] text-[#75777A] border-l-2 border-r-2 border-gray-300",
@@ -54,5 +56,5 @@ export const lightTheme = {
     color: "black",
     disabledIconColor: "#BBBBBB",
   },
-  bgLoader: "bg-[#1c96a3]"
+  bgLoader: "bg-[#1c96a3]",
 };

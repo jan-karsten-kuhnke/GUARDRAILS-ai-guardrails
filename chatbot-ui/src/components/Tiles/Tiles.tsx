@@ -3,7 +3,7 @@ import { Tile } from "../../types/tiles";
 import HomeContext from "@/pages/home/home.context";
 import { useContext } from "react";
 import "./styles.scss";
-import { RequestAccess, getTiles } from "@/services";
+import { getTiles } from "@/services";
 import { IconChevronRight, IconChevronLeft } from "@tabler/icons-react";
 import * as Icons from "@tabler/icons-react";
 
@@ -52,8 +52,7 @@ const Tiles: FC = () => {
     handleSelectedTile(tile);
   };
 
-  useEffect(() => {
-    if (tiles.length) return;
+  const handleGetTiles = () => {
     getTiles().then((res) => {
       if (res && res.data) {
         let defaultTile = res.data.find(
@@ -66,7 +65,14 @@ const Tiles: FC = () => {
         dispatch({ field: "selectedTile", value: defaultTile ?? {} });
       }
     });
+  }
+
+  useEffect(() => {
+    if (tiles.length) return;
+    handleGetTiles();
   }, []);
+
+
 
   const getIcon = useMemo(() => {
     type ObjectKey = keyof typeof Icons;
@@ -80,27 +86,25 @@ const Tiles: FC = () => {
 
   return (
     <div className="flex flex-col">
-      <div className={`flex justify-between items-center p-3  rounded-lg`}>
-        <h1>Tiles</h1>
+      <div className={`flex justify-between items-center p-2 px-4 rounded-lg ${theme.tilesTheme.header}`}>
+        <span className={`text-xl ml-3`}>Choose task</span>
         <div>
-        {/* {scrollX !== 0 && ( */}
-        {/* )} */}
           <button
-            className={`m-1 hover:scale-105 transition-transform duration-300 ease-in-out ${theme.textColorSecondary} p-0.5 border rounded-full`}
+            className={`m-1 hover:scale-110 transition-transform duration-300 ease-in-out p-0.5 mr-2 border rounded-full ${scrollX === 0 && "opacity-30 cursor-not-allowed hover:scale-100"}`}
             onClick={() => slide(-300)}
+            disabled={scrollX === 0}
           >
             <IconChevronLeft size={25} />
           </button>
 
-        {/* {!scrolEnd && ( */}
-        {/* )} */}
           <button
-            className={`m-1 hover:scale-105 transition-transform duration-300 ease-in-out ${theme.textColorSecondary} p-0.5 border rounded-full`}
+            className={`m-1 hover:scale-110 transition-transform duration-300 ease-in-out p-0.5 border rounded-full ${scrolEnd && "opacity-30 cursor-not-allowed hover:scale-100"}`}
             onClick={() => slide(+300)}
+            disabled={scrolEnd}
           >
             <IconChevronRight size={25} />
           </button>
-          </div>
+        </div>
       </div>
       <div
         ref={scrl}
@@ -112,10 +116,10 @@ const Tiles: FC = () => {
             <div
               key={index}
               className={`flex flex-col gap-5 rounded-lg p-4 cursor-pointer tile 
-              ${selectedTile.code !== curr_tile.code && theme.tilesHoverTheme}
-              ${theme.textColorSecondary}
+              text-[${theme.textColorSecondary}]
+              ${selectedTile.code !== curr_tile.code && theme.tilesTheme.hover}
               ${theme.chatItemsBorder}
-              ${selectedTile.code === curr_tile.code && theme.tileSelectedTheme}
+              ${selectedTile.code === curr_tile.code && theme.tilesTheme.selected}
               ${!curr_tile.is_active && "opacity-30"}
               ${!curr_tile.has_access && "opacity-50"}`}
               onClick={(e) => {

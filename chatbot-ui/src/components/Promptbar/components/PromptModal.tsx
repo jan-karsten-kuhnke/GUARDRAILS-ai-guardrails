@@ -68,7 +68,7 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
             className={`${theme.modalDialogTheme} inline-block max-h-[400px] transform overflow-y-auto rounded-lg  px-4 pt-5 pb-4 text-left align-bottom shadow-xl transition-all  sm:my-8 sm:max-h-[600px] sm:w-full sm:max-w-lg sm:p-6 sm:align-middle`}
             role="dialog"
           >
-            <div className={` ${theme.textColor} text-sm font-bold`}>
+            <div className={`text-[${theme.textColor}] text-sm font-bold`}>
               {('Name')}
             </div>
             <input
@@ -79,7 +79,7 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
               onChange={(e) => setName(e.target.value)}
             />
 
-            <div className={` ${theme.textColor} mt-6 text-sm font-bold`}>
+            <div className={`text-[${theme.textColor}] mt-6 text-sm font-bold`}>
               {('Description')}
             </div>
             <textarea
@@ -91,7 +91,7 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
               rows={3}
             /> 
 
-            <div className={` ${theme.textColor} mt-6 text-sm font-bold `}>
+            <div className={`text-[${theme.textColor}] mt-6 text-sm font-bold `}>
               {('Prompt')}
             </div>
             <textarea

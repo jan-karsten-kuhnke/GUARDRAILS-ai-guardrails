@@ -57,7 +57,7 @@ export const EulaDialog: FC<Props> = ({ onClose }) => {
             role="dialog"
           >
             <div
-              className={`text-lg pb-4 font-bold h-[10%] ${theme.textColor}`}
+              className={`text-lg pb-4 font-bold h-[10%] text-[${theme.textColor}]`}
             >
               {"End user license agreement"}
             </div>
