@@ -16,9 +16,7 @@ from executors.utils.AppletResponse import AppletResponse
 
 class Conversation:
     
-    def execute(self, query, is_private, chat_history):
-        chain = Persistence.get_chain_by_code('conversation')
-        params = chain['params']
+    def execute(self, query, is_private, chat_history, params):
         model_type = params['modelType']
 
         memory = ConversationBufferMemory(return_messages=True)
