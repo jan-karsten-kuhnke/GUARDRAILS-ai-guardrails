@@ -35,7 +35,10 @@ export const lightTheme = {
   chatInputTheme: "bg-gradient-to-b from-transparent via-white to-white  ",
   chatTextAreaTheme:
     "text-neutral-500 outline-none rounded shadow-[0_3px_8px_rgba(0,0,0,0.24)]  focus:shadow-[0_0_2px_1px_rgba(28,150,163)]",
-  chatSendButtonTheme: "text-[#18B4EA] rounded opacity-60 hover:bg-[#d8f5ff] ",
+  chatSendButtonTheme: {
+    active: "bg-[#1c96a3] text-white",
+    disabled: "text-[#BBBBBB] opacity-50",
+  },
   chatScrollDownButtonTheme:
     "shadow-md hover:shadow-lg  focus:outline-none ring-2 ring-[#18B4EA]  text-[#18B4EA] ",
   chatLoadingTheme: "border-neutral-800",

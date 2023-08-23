@@ -34,8 +34,10 @@ export const darkTheme = {
     "bg-gradient-to-b from-transparent via-[#343541] to-[#343541] ",
   chatTextAreaTheme:
     "bg-[#40414f] text-neutral-100 rounded shadow-[0_0_15px_rgba(0,0,0,0.10)] ",
-  chatSendButtonTheme:
-    "bg-opacity-50 rounded text-neutral-100 hover:bg-[#202123]",
+  chatSendButtonTheme: {
+    active: "bg-[#202123] text-white",
+    disabled: "text-white opacity-50",
+  },
   chatScrollDownButtonTheme:
     "shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-500 bg-gray-700 text-neutral-200",
   chatLoadingTheme: "border-neutral-100",
