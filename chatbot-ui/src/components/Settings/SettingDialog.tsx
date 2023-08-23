@@ -22,6 +22,7 @@ export const SettingDialog: FC<Props> = ({ open, onClose }) => {
   });
   const {
     state: { showOnboardingGuide, theme },
+    handleNewConversation,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -34,6 +35,7 @@ export const SettingDialog: FC<Props> = ({ open, onClose }) => {
 
   const hanldeShowOnboardingGuide = () => {
     onClose();
+    handleNewConversation();
     homeDispatch({ field: "showOnboardingGuide", value: true });
   };
 
