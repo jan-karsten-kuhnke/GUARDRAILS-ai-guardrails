@@ -23,24 +23,23 @@ class userdata_service:
 
     def get_tiles(user_email):
         user_groups = get_current_user_groups()
-        # previous_requests = flowable_wrapper.get_submitted_requests_code(user_email)
+        previous_requests = flowable_wrapper.get_submitted_requests_code(user_email)
 
         all_chains  = session.query(ChainEntity).all()
         res = []
 
         for chain in all_chains:
             chain_dict = chain.to_dict()
-            # group_code = chain_dict['group_code']
+            group_code = chain_dict['group_code']
             chain_dict['dispalyOrder'] = int(chain.params['displayOrder'])
-            # if group_code is None or group_code == "":
-            #     chain_dict['has_access'] = True
-            # elif group_code in user_groups:
-            #     chain_dict['has_access'] = True
-            # else:
-            #     chain_dict['has_access'] = False
+            if group_code is None or group_code == "":
+                chain_dict['has_access'] = True
+            elif group_code in user_groups:
+                chain_dict['has_access'] = True
+            else:
+                chain_dict['has_access'] = False
             
-            # chain_dict['request_submitted'] = True if group_code in previous_requests else False
-            chain_dict['has_access'] = True
+            chain_dict['request_submitted'] = True if group_code in previous_requests else False
             chain_dict['request_submitted'] = False
             res.append(chain_dict)
         res.sort(key=lambda x: x['dispalyOrder'])
