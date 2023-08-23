@@ -68,7 +68,7 @@ export const DocumentDialog: FC<Props> = ({ open, onClose }) => {
             role="dialog"
           >
             <div
-              className={`text-lg pb-4 font-bold ${theme.textColor} flex justify-between`}
+              className={`text-lg pb-4 font-bold text-[${theme.textColor}] flex justify-between`}
             >
               <span>{"Manage documents"}</span>
               <Tooltip title="Close" placement="top">

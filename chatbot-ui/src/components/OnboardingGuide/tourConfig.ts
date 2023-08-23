@@ -3,11 +3,13 @@ interface TourStep {
   content: string;
 }
 
+const applicationName: string = import.meta.env.VITE_APPLICATION_NAME;;
+
 export const tourConfig: TourStep[] = [
   {
     selector: "",
     content:
-      "Welcome to Ai-Gaurdrails, Here is the basic tour to start your journey with Ai-Gaurdrails",
+      `Welcome to ${applicationName}, Here is the basic tour to start your journey`,
   },
   {
     selector: "#new-chat",

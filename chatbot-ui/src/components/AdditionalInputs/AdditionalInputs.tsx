@@ -89,8 +89,8 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
         else if (input.key === "collection" && input.type === "collectionPicker") {
           {/* Collection Dropdown */ }
           return (
-            <>
-              <div className={`${theme.textColor} pb-2`}>Choose Collection</div>
+            <div key={index}>
+              <div className={`text-[${theme.textColor}] pb-2`}>Choose Collection</div>
               <select
                 id="collectionlist"
                 value={selectedCollection}
@@ -103,7 +103,7 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
                   </option>
                 )) : ""}
               </select>
-            </>
+            </div>
           )
         }
       })}

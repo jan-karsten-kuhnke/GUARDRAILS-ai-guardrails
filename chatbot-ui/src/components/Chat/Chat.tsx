@@ -461,19 +461,19 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 <div className="text-center text-3xl font-semibold">
                   <div className="mx-auto flex h-full w-[300px] flex-col justify-center space-y-6 sm:w-[600px]">
                     <div
-                      className={`text-center text-4xl font-bold ${theme.textColor}`}
+                      className={`text-center text-4xl font-bold text-[${theme.textColor}]`}
                     >
                       Welcome to {applicationName}
                     </div>
                     <div
-                      className={`text-center text-2xl font-bold ${theme.textColorSecondary}`}
+                      className={`text-center text-2xl font-bold text-[${theme.textColorSecondary}]`}
                     >
                       {/* Protect your Confidential Information. */}
                     </div>
                   </div>
                 </div>
                 <div
-                  className={`flex w-full w-full justify-center rounded-lg py-2 ${theme.chatItemsBorder}`}
+                  className={`w-full rounded-lg ${theme.chatItemsBorder}`}
                   id="tiles-container"
                 >
                   <Tiles />
