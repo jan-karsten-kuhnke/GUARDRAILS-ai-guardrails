@@ -12,9 +12,7 @@ from executors.utils.AppletResponse import AppletResponse
 
 class Summarize:
 
-    def execute(self,filepath,document_array,is_document_uploaded):
-        chain = Persistence.get_chain_by_code('summarize-brief')
-        params = chain['params']
+    def execute(self,filepath,document_array,is_document_uploaded, params):
 
         model_type = params['modelType']
         map_prompt_template = params['mapPromptTemplate']

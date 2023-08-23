@@ -63,6 +63,15 @@ class chat_service:
             pii_scan = True
             nsfw_scan = True
             
+            if task is None:
+                yield (json.dumps({"error": "Invalid task"}))
+                return
+                
+            #getting chain from db
+            chain = Persistence.get_chain_by_code(task)
+            params = chain['params']
+        
+           
             #Summarize/Extraction on already uploaded document
             is_document_uploaded=False
             document_array=[]
@@ -131,68 +140,69 @@ class chat_service:
                                 (messages[i]['content'], messages[i+1]['content']))
 
                 res = None
-                if (task == "summarize-brief"):
+                executor = params['executor']
+                
+                if (executor == "summarize"):
                     try:
                         logging.info("calling summarize brief executor")
                         if(not is_document_uploaded):
                             DocumentService.create_document(filename,filepath)
-                        executor = Summarize()
-                        res = executor.execute(filepath=filepath,document_array=document_array,is_document_uploaded=is_document_uploaded)
+                        executor_instance = Summarize()
+                        res = executor_instance.execute(filepath=filepath,document_array=document_array,is_document_uploaded=is_document_uploaded, params=params)
 
                     except Exception as e:
                         yield ("Sorry. Some error occured. Please try again.")
                         logging.error("error: "+str(e))
 
-                elif (task == "extraction"):
+                elif (executor == "extraction"):
                     try:
                         if(not is_document_uploaded):
                             DocumentService.create_document(filename,filepath)
-                        executor = Extraction()
-                        res= executor.execute(filepath=filepath,document_array=document_array,is_document_uploaded=is_document_uploaded)
+                        executor_instance = Extraction()
+                        res= executor_instance.execute(filepath=filepath,document_array=document_array,is_document_uploaded=is_document_uploaded, params=params)
 
                     except Exception as e:
                         yield ("Sorry. Some error occured. Please try again.")
                         logging.error("error: "+str(e))
-                elif (task == "conversation"):
+                elif (executor == "conversation"):
                     try:
                         logging.info("calling conversation executor")
-                        executor = Conversation()
-                        res = executor.execute(query=prompt, is_private=is_private, chat_history=history)
-                        # res = executor.execute(prompt, is_private, history)
+                        executor_instance = Conversation()
+                        res = executor_instance.execute(query=prompt, is_private=is_private, chat_history=history, params=params)
 
                     except Exception as e:
                         yield ("Sorry. Some error occured. Please try again.")
                         logging.error("error: "+str(e))
-                elif (task == "qa-retreival"):
+                elif (executor == "qaRetrieval"):
                     try:
                         logging.info("calling qa retrieval executor")
-                        executor = QaRetrieval()
-                        res = executor.execute(query=prompt, is_private=is_private, chat_history=history,collection_name=data['collection_name'])
+                        executor_instance = QaRetrieval()
+                        res = executor_instance.execute(query=prompt, is_private=is_private, chat_history=history,collection_name=data['collection_name'], params=params)
 
                     except Exception as e:
                         yield ("Sorry. Some error occured. Please try again.")
                         logging.error("error: "+str(e))
-                elif (task == "qa-sql"):
+                elif (executor == "sql"):
                     try:
                         logging.info("calling qa sql executor")
-                        executor = Sql()
-                        res = executor.execute(query=prompt, is_private=is_private, chat_history=history)
+                        executor_instance = Sql()
+                        res = executor_instance.execute(query=prompt, is_private=is_private, chat_history=history, params=params)
 
                     except Exception as e:
                         yield ("Sorry. Some error occured. Please try again.")
                         logging.error("error: "+str(e))
-                elif (task == "qa-viz"):
+                elif (executor == "visualization"):
                     try:
                         logging.info("calling qa sql executor")
-                        executor = Visualization()
-                        res = executor.execute(query=prompt, is_private=is_private, chat_history=history)
+                        executor_instance = Visualization()
+                        res = executor_instance.execute(query=prompt, is_private=is_private, chat_history=history, params=params)
 
                     except Exception as e:
                         yield ("Sorry. Some error occured. Please try again.")
                         logging.error("error: "+str(e))
 
                 else:
-                    yield (json.dumps({"error": "Invalid model type"}))
+                    yield (json.dumps({"error": "Invalid executor"}))
 
                 answer = res['answer']
 

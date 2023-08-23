@@ -14,9 +14,7 @@ import json
 from executors.utils.AppletResponse import AppletResponse
 
 class Extraction:
-    def execute(self,filepath,document_array,is_document_uploaded):
-        chain = Persistence.get_chain_by_code('extraction')
-        params = chain['params']
+    def execute(self,filepath,document_array,is_document_uploaded, params):
         model_type = params['modelType']
 
         if is_document_uploaded:

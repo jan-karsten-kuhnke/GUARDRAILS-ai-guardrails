@@ -18,9 +18,8 @@ import logging
 
 class QaRetrieval:
     
-    def execute(self, query, is_private, chat_history,collection_name):
-        chain = Persistence.get_chain_by_code('qa-retreival')
-        params = chain['params']
+    def execute(self, query, is_private, chat_history,collection_name, params):
+    
         model_type = params['modelType']
 
 
