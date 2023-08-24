@@ -34,10 +34,12 @@ class Visualization:
             key_str =Globals.ENCRYPTION_KEY
             key = key_str.encode('utf-8')
 
-            fernet = Fernet(key)
-            
-            encoded_db_url = params['encodedDbUrl'].encode('utf-8')
+            data_source_id = params['dataSourceId']
+            data_source = Persistence.get_data_source_by_id(data_source_id)
 
+            fernet = Fernet(key)
+        
+            encoded_db_url = data_source['connection_string'].encode('utf-8')
             db_url = fernet.decrypt(encoded_db_url).decode()
             
             llm=LlmProvider.get_llm(model_type=model_type, is_private=is_private,use_chat_model=True,max_output_token=1000,increase_model_token_limit=True)
