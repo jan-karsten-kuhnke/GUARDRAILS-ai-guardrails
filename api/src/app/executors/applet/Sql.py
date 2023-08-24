@@ -54,11 +54,15 @@ class Sql:
         encoded_db_url = data_source['connection_string'].encode('utf-8')
         db_url = fernet.decrypt(encoded_db_url).decode()
 
-        db_schemas = data_source['schemas']
+        db_schemas = data_source['schemas'] if data_source['schemas'] else []
+        tables = data_source['tables_to_include'] if data_source['tables_to_include'] else []
+
+
 
         db = SqlWrapper.from_uri(
             database_uri = db_url,
             schemas = db_schemas,
+            include_tables = tables
         )
         
         llm=LlmProvider.get_llm(model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)

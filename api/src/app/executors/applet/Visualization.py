@@ -70,6 +70,8 @@ class Visualization:
             vega_chain = LLMChain(llm=llm, prompt=vega_prompt)
             config = vega_chain.run({'sql_data':sql_data, 'sql_query':sql_query, 'question':query})
 
+            config = config.replace("```JSON\n", "").replace("```", "")
+
             modified_sql_query = sql_query.replace("\n", " ")
 
             engine = create_engine (db_url)

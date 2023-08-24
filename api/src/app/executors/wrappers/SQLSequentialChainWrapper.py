@@ -15,6 +15,7 @@ from langchain.schema import BasePromptTemplate
 from langchain.schema.language_model import BaseLanguageModel
 from langchain.sql_database import SQLDatabase
 from langchain.tools.sql_database.prompt import QUERY_CHECKER
+import datetime
 
 INTERMEDIATE_STEPS_KEY = "intermediate_steps"
 
