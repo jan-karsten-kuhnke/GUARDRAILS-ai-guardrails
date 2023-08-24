@@ -96,7 +96,7 @@ class chat_service:
                 prompt = f"Extract Key Metrics from {filename}"
                 title = f"Key Metrics of {filename}."
             else:
-                prompt = str(data["message"])
+                prompt = str(data["message"]) if "message" in data else "Task."
                 title = None
 
             if ('conversation_id' in data and data['conversation_id']):

@@ -124,8 +124,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         let response: any;
 
         if (
-          selectedTask === "summarize-brief" ||
-          selectedTask === "extraction"
+          selectedTile.params?.useExecuteOnDoc
         ) {
 
           try {

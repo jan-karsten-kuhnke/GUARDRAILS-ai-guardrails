@@ -5,13 +5,15 @@ from service.ingestion_service import IngestionService
 from database.repository import Persistence
 from sqlalchemy import func ,or_,and_
 import logging
+from oidc import get_current_user_email
 
 class DocumentService:
     def create_document(filename, filepath, description=""):
         try:
             ingestion_service = IngestionService()
-            custom_ids = ingestion_service.ingest_file(filepath)
-            Persistence.insert_document(filename, filepath, custom_ids, description)
+            collection_name = get_current_user_email().split('@')[0]
+            custom_ids = ingestion_service.ingest_file(filepath,collection_name=collection_name)
+            Persistence.insert_document(filename, filepath, custom_ids,collection_name=collection_name)
 
         except Exception as ex:
             logging.error(f"Exception uploading document: {ex}")

@@ -11,7 +11,7 @@ import logging
 from executors.utils.LlmProvider import LlmProvider
 from database.repository import Persistence
 from executors.utils.AppletResponse import AppletResponse
-from langchain.chains import SQLDatabaseSequentialChain
+from executors.wrappers.SQLSequentialChainWrapper import SQLDatabaseSequentialChain
 from executors.wrappers.SqlWrapper import SqlWrapper
 from langchain.output_parsers.list import CommaSeparatedListOutputParser
 from cryptography.fernet import Fernet
