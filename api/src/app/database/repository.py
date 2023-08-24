@@ -2,7 +2,7 @@ import json
 from sqlalchemy import create_engine, text, func ,or_,and_
 from sqlalchemy.orm import sessionmaker
 
-from database.models import Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, DocumentEntity, FolderEntity , PromptEntity , OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity, ChainEntity,  EulaEntity
+from database.models import Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, DocumentEntity, FolderEntity , PromptEntity , OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity, ChainEntity,  EulaEntity, DataSourcesEntity
 from database.vector_store.vector_store_model import Vector_Base, CollectionEntity
 
 from globals import Globals
@@ -327,6 +327,16 @@ class Persistence:
             return serialized_chain
         except Exception as ex:
             logging.error(f"Exception while getting chain params: {ex}")
+        finally:
+            session.close()
+
+    def get_data_source_by_id(id):
+        try:
+            data_source = session.query(DataSourcesEntity).filter(DataSourcesEntity.id == id).first()
+            serialized_data_source = data_source.to_dict()
+            return serialized_data_source
+        except Exception as ex:
+            logging.error(f"Exception while getting data source: {ex}")
         finally:
             session.close()
 
