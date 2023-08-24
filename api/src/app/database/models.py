@@ -215,3 +215,22 @@ class EulaEntity(Base):
             'eula': self.eula,
             'eula_accepted_on': self.eula_accepted_on,
         }
+
+
+class DataSourcesEntity(Base):
+    __tablename__ = 'data_sources'
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
+    connection_string = Column(Text)
+    schemas = Column(ARRAY(String))
+    tables_to_include = Column(ARRAY(String))
+    custom_schema_description = Column(Text)
+    
+    def to_dict(self):
+        return {
+            'id': str(self.id),
+            'connection_string': self.connection_string,
+            'schemas': self.schemas,
+            'tables_to_include': self.tables_to_include,
+            'custom_schema_description': self.custom_schema_description,
+        }
