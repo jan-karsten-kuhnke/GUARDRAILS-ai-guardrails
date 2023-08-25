@@ -57,7 +57,11 @@ class chat_service:
     def chat_completion(data, current_user_email, token, filename=None, filepath=None):
         try:
             task = str(data["task"]) if "task" in data else None
-            document_id = str(data["documentId"]) if "documentId" in data else None
+            task_params=data["params"] if "params" in data else None
+            document_id =task_params["documentId"] if "documentId" in task_params else None
+            collection_name = task_params["collectionName"] if "collectionName" in task_params else None
+            qa_document_id=task_params["qaDocumentId"] if "qaDocumentId" in task_params else None
+            
             is_private = bool(
                 data["isPrivate"]) if "isPrivate" in data else False
             pii_scan = True
@@ -77,7 +81,7 @@ class chat_service:
             document_array=[]
 
             if document_id:
-                document_obj=Persistence.get_document_by_id(document_id)
+                document_obj=Persistence.get_pgvector_document_by_id(document_id)
                 is_document_uploaded=True
                 filename=document_obj['metadata']['title']
                 document_array=document_obj['docs']
@@ -175,9 +179,16 @@ class chat_service:
                         logging.error("error: "+str(e))
                 elif (executor == "qaRetrieval"):
                     try:
+                        custom_ids=[]
+                        is_document_selected=False
+                        if qa_document_id:
+                            document_obj=Persistence.get_document_by_id(qa_document_id)
+                            title=document_obj['title']
+                            is_document_selected=True
+                            
                         logging.info("calling qa retrieval executor")
                         executor_instance = QaRetrieval()
-                        res = executor_instance.execute(query=prompt, is_private=is_private, chat_history=history,collection_name=data['collection_name'], params=params)
+                        res = executor_instance.execute(query=prompt, is_private=is_private, chat_history=history,collection_name=collection_name, params=params,is_document_selected=is_document_selected,title=title)
 
                     except Exception as e:
                         yield ("Sorry. Some error occured. Please try again.")

@@ -2,7 +2,7 @@ import { ChangeEvent, useState, useContext } from "react";
 import { Button, Tooltip } from "@mui/material";
 import { CustomDataGrid } from "./CustomDataGrid";
 import { IconUpload } from "@tabler/icons-react";
-import { uploadDocuments, deleteDocsGridData } from "@/services/DocsService";
+import { uploadDocuments, deleteDocsGridData , getDocumentsByCollectionName} from "@/services/DocsService";
 import toast from "react-hot-toast";
 import HomeContext from "@/pages/home/home.context";
 import { executeOnUploadedDocRef } from "../Chat/Chat";
@@ -51,6 +51,15 @@ export const PrivateDocuments = () => {
       )
       .then(() => {
         setRefereshGridData((prevRefreshGridState) => !prevRefreshGridState);
+        getDocumentsByCollectionName(selectedCollection).then((res) => {
+          if (res?.data?.success && res?.data?.data?.length) {
+            homeDispatch({ field: "documents", value: res?.data?.data });
+          }
+          else
+          {
+            homeDispatch({ field: "documents", value: [] });
+          }
+        });
         event.target.value = "";
       });
   };
@@ -70,6 +79,15 @@ export const PrivateDocuments = () => {
         }
       )
       .then(() => {
+        getDocumentsByCollectionName(selectedCollection).then((res) => {
+          if (res?.data?.success && res?.data?.data?.length) {
+            homeDispatch({ field: "documents", value: res?.data?.data });
+          }
+          else
+          {
+            homeDispatch({ field: "documents", value: [] });
+          }
+        });
         setRefereshGridData((prevRefreshGridState) => !prevRefreshGridState);
       });
   };
@@ -167,6 +185,14 @@ export const PrivateDocuments = () => {
     homeDispatch({
       field: "selectedCollection",
       value: name,
+    });
+    getDocumentsByCollectionName(name).then((res) => {
+      if (res?.data?.success && res?.data?.data?.length) {
+        homeDispatch({ field: "documents", value: res?.data?.data });
+      }
+      else{
+        homeDispatch({ field: "documents", value: [] });
+      }
     });
   };
 

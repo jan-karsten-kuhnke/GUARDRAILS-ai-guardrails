@@ -18,7 +18,7 @@ import logging
 
 class QaRetrieval:
     
-    def execute(self, query, is_private, chat_history,collection_name, params):
+    def execute(self, query, is_private, chat_history,collection_name, params, is_document_selected,title):
     
         model_type = params['modelType']
 
@@ -34,7 +34,15 @@ class QaRetrieval:
             embedding_function=embeddings,
         )
         
-        retriever = store.as_retriever()
+        print("is_document_selected",is_document_selected)
+        print("title",title)
+        if is_document_selected:
+            retriever=store.as_retriever(
+               search_kwargs={'filter': {'source':title}}
+            )  
+        else:
+            retriever = store.as_retriever(
+            )
         
         llm=LlmProvider.get_llm(model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
 

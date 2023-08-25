@@ -51,3 +51,7 @@ export const addCollection = (name: string) => {
 export const getCollections = () => {
   return _axios.get(`/documents/collections`);
 }
+
+export const getDocumentsByCollectionName = (collectionName:string) => {
+  return _axios.get(`/documents/getcollectiondocuments`, {params:{collection_name:collectionName}});
+}

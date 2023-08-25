@@ -4,6 +4,7 @@ import { Prompt } from '@/types/prompt';
 import { Tile } from '@/types/tiles';
 import { theme } from '@/styles';
 import { collection } from '@/types/collection';
+import { document } from '@/types/document';
 
 export interface HomeInitialState {
   loading: boolean;
@@ -29,6 +30,8 @@ export interface HomeInitialState {
   collections: collection[];
   selectedCollection: string;
   showOnboardingGuide: boolean;
+  documents:document[];
+  selectedDocument:number | undefined;
 }
 
 export const initialState: HomeInitialState = {
@@ -55,4 +58,6 @@ export const initialState: HomeInitialState = {
   selectedCollection: "",
   selectedTile: {},
   showOnboardingGuide: false,
+  documents:[],
+  selectedDocument:undefined
 };
