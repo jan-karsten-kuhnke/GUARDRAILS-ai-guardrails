@@ -14,7 +14,7 @@ from executors.utils.AppletResponse import AppletResponse
 from executors.wrappers.SQLSequentialChainWrapper import SQLDatabaseSequentialChain
 from executors.wrappers.SqlWrapper import SqlWrapper
 from langchain.output_parsers.list import CommaSeparatedListOutputParser
-from cryptography.fernet import Fernet
+from utils.encryption import Encryption
 
 
 class Sql:
@@ -44,15 +44,10 @@ class Sql:
             template=_DEFAULT_TEMPLATE + PROMPT_SUFFIX,
         )
         
-        key_str = Globals.ENCRYPTION_KEY
-        key = key_str.encode('utf-8')
-        
         data_source_id = params['dataSourceId']
         data_source = Persistence.get_data_source_by_id(data_source_id)
 
-        fernet = Fernet(key)
-        encoded_db_url = data_source['connection_string'].encode('utf-8')
-        db_url = fernet.decrypt(encoded_db_url).decode()
+        db_url = Encryption.decrypt(data_source['connection_string'])
 
         db_schemas = data_source['schemas'] if data_source['schemas'] else []
         tables = data_source['tables_to_include'] if data_source['tables_to_include'] else []
