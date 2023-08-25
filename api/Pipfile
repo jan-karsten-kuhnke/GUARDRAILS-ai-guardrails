@@ -42,6 +42,7 @@ waitress = "2.1.2"
 pdfminer = {six = "20221105"}
 pgvector = "0.2.1"
 cryptography = "41.0.3"
+pymssql = "2.2.8"
 
 [dev-packages]
 black = "*"
