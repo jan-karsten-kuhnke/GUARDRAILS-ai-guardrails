@@ -169,7 +169,7 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
         onPageChange={handleChangePage}
         rowsPerPage={paginationModel.pageSize}
         onRowsPerPageChange={handleChangeRowsPerPage}
-        rowsPerPageOptions={[10, 20, 50, 100]}
+        rowsPerPageOptions={[5, 10, 20, 50]}
         sx={{
           color: theme.dataGridTheme.color,
           "& .Mui-disabled": {

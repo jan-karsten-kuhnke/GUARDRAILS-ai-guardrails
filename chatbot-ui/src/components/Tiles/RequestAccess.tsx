@@ -33,8 +33,8 @@ const RequestAccessComponent: FC = () => {
 
     return (
         <>
-            <div className={`flex flex-col justify-center rounded-lg py-2 ${theme.textColorSecondary}`}>
-                You are not authorized to the use the above functionality
+            <div className={`flex flex-col justify-center rounded-lg py-2 text-[${theme.textColorSecondary}]`}>
+                You do not have access to this resource, please request access.
                 {!selectedTile.has_access && !selectedTile.request_submitted ?
                     <button className={`mt-5 request_btn ${theme.chatItemsBorder}`}
                         onClick={() => AccessRequest(selectedTile)}>

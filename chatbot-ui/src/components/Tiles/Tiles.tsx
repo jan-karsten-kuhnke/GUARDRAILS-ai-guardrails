@@ -3,9 +3,14 @@ import { Tile } from "../../types/tiles";
 import HomeContext from "@/pages/home/home.context";
 import { useContext } from "react";
 import "./styles.scss";
-import { RequestAccess, getTiles } from "@/services";
-import { IconChevronRight, IconChevronLeft } from "@tabler/icons-react";
+import { getTiles } from "@/services";
+import {
+  IconChevronRight,
+  IconChevronLeft,
+  IconRefreshDot,
+} from "@tabler/icons-react";
 import * as Icons from "@tabler/icons-react";
+import { Divider, Tooltip } from "@mui/material";
 
 const Tiles: FC = () => {
   const {
@@ -14,6 +19,7 @@ const Tiles: FC = () => {
     dispatch,
   } = useContext(HomeContext);
   const scrl = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const [scrollX, setscrollX] = useState(0);
   const [scrolEnd, setscrolEnd] = useState(false);
 
@@ -52,20 +58,28 @@ const Tiles: FC = () => {
     handleSelectedTile(tile);
   };
 
+  const handleGetTiles = () => {
+    if (loading) return;
+    setLoading(true);
+    getTiles()
+      .then((res) => {
+        if (res && res.data) {
+          let defaultTile = res.data.find(
+            (item: Tile) => item.code === "conversation"
+          );
+          let sortedData = res.data.sort(
+            (a: any, b: any) => Number(b.has_access) - Number(a.has_access)
+          );
+          dispatch({ field: "tiles", value: sortedData });
+          dispatch({ field: "selectedTile", value: defaultTile ?? {} });
+        }
+      })
+      .finally(() => setLoading(false));
+  };
+
   useEffect(() => {
     if (tiles.length) return;
-    getTiles().then((res) => {
-      if (res && res.data) {
-        let defaultTile = res.data.find(
-          (item: Tile) => item.code === "conversation"
-        );
-        let sortedData = res.data.sort(
-          (a: any, b: any) => Number(b.has_access) - Number(a.has_access)
-        );
-        dispatch({ field: "tiles", value: sortedData });
-        dispatch({ field: "selectedTile", value: defaultTile ?? {} });
-      }
-    });
+    handleGetTiles();
   }, []);
 
   const getIcon = useMemo(() => {
@@ -79,16 +93,45 @@ const Tiles: FC = () => {
   }, []);
 
   return (
-    <>
-      <div className="flex align-center">
-        {scrollX !== 0 && (
-          <button
-            className={`m-1 hover:scale-125 transition-transform duration-300 ease-in-out ${theme.textColorSecondary}`}
-            onClick={() => slide(-300)}
-          >
-            <IconChevronLeft size={30} />
-          </button>
-        )}
+    <div className="flex flex-col">
+      <div
+        className={`flex justify-between items-center p-2 px-4 rounded-lg ${theme.tilesTheme.header}`}
+      >
+        <span className={`text-xl ml-3`}>Select task</span>
+        <div className="flex">
+          <Tooltip title="Refresh tasks" placement="top">
+            <button
+              className={`${
+                loading && "animate-spin opacity-50 cursor-not-allowed"
+              } m-1 hover:scale-110 transition-transform duration-300 ease-in-out p-0.5 mr-2 border rounded-full`}
+              onClick={handleGetTiles}
+            >
+              <IconRefreshDot />
+            </button>
+          </Tooltip>
+          <Divider orientation="vertical" flexItem sx={{ margin: "0 20px",backgroundColor: "white", opacity: 0.3 }} />
+          <span>
+            <button
+              className={`m-1 hover:scale-110 transition-transform duration-300 ease-in-out p-0.5 mr-2 border rounded-full ${
+                scrollX === 0 && "opacity-30 cursor-not-allowed hover:scale-100"
+              }`}
+              onClick={() => slide(-300)}
+              disabled={scrollX === 0}
+            >
+              <IconChevronLeft size={25} />
+            </button>
+
+            <button
+              className={`m-1 hover:scale-110 transition-transform duration-300 ease-in-out p-0.5 border rounded-full ${
+                scrolEnd && "opacity-30 cursor-not-allowed hover:scale-100"
+              }`}
+              onClick={() => slide(+300)}
+              disabled={scrolEnd}
+            >
+              <IconChevronRight size={25} />
+            </button>
+          </span>
+        </div>
       </div>
       <div
         ref={scrl}
@@ -100,10 +143,13 @@ const Tiles: FC = () => {
             <div
               key={index}
               className={`flex flex-col gap-5 rounded-lg p-4 cursor-pointer tile 
-              ${selectedTile.code !== curr_tile.code && theme.tilesHoverTheme}
-              ${theme.textColorSecondary}
+              text-[${theme.textColorSecondary}]
+              ${selectedTile.code !== curr_tile.code && theme.tilesTheme.hover}
               ${theme.chatItemsBorder}
-              ${selectedTile.code === curr_tile.code && theme.tileSelectedTheme}
+              ${
+                selectedTile.code === curr_tile.code &&
+                theme.tilesTheme.selected
+              }
               ${!curr_tile.is_active && "opacity-30"}
               ${!curr_tile.has_access && "opacity-50"}`}
               onClick={(e) => {
@@ -118,17 +164,7 @@ const Tiles: FC = () => {
             </div>
           ))}
       </div>
-      <div className="flex align-center">
-        {!scrolEnd && (
-          <button
-            className={`m-1 hover:scale-125 transition-transform duration-300 ease-in-out ${theme.textColorSecondary}`}
-            onClick={() => slide(+300)}
-          >
-            <IconChevronRight size={30} />
-          </button>
-        )}
-      </div>
-    </>
+    </div>
   );
 };
 

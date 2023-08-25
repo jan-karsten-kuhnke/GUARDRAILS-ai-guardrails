@@ -8,7 +8,7 @@ WORKDIR /python-docker
 
 RUN pip3 install pipenv
 RUN pipenv install sentence-transformers==2.2.2
-RUN apt-get update && apt-get install -y build-essential
+RUN apt-get update && apt-get install -y build-essential unixodbc
 COPY Pipfile .
 RUN pipenv install
 RUN pipenv run python3 -m spacy download en_core_web_lg

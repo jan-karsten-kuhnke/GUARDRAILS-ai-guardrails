@@ -9,6 +9,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
 from globals import Globals
 from executors.utils.LlmProvider import LlmProvider
+from database.repository import Persistence
 from typing import Any
 import logging
 from executors.utils.AppletResponse import AppletResponse
@@ -16,12 +17,14 @@ from executors.utils.AppletResponse import AppletResponse
 
 class Conversation:
     
-    def execute(self, query, is_private, chat_history):
+    def execute(self, query, is_private, chat_history, params):
+        model_type = params['modelType']
+
         memory = ConversationBufferMemory(memory_key="chat_history",return_messages=True)
         for history in chat_history:
             memory.save_context({"input": history[0]}, {"output": history[1]})
         
-        llm=LlmProvider.get_llm(is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
+        llm=LlmProvider.get_llm(model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
         
         _DEFAULT_TEMPLATE = """You are ChatGPT, a large language model trained by OpenAI, based on the GPT-3.5 architecture , and you like explaining in detail , so answer in detail as possible.\nCurrent date: 2023-03-02.
 

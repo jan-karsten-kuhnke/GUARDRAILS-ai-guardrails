@@ -2,7 +2,7 @@ import HomeContext from "@/pages/home/home.context";
 import { IconRobot } from "@tabler/icons-react";
 import { FC, useContext } from "react";
 
-interface Props {}
+interface Props { }
 
 export const ChatLoader: FC<Props> = () => {
   const {
@@ -18,7 +18,11 @@ export const ChatLoader: FC<Props> = () => {
         <div className="min-w-[40px] items-end">
           <IconRobot size={30} />
         </div>
-        <span className="animate-pulse cursor-default mt-1">▍</span>
+        <span className="animate-bounce cursor-default mt-1 flex items-center ml-2">
+          <div className={`w-3 h-3 ${theme.bgLoader} mr-1 rounded-full`}></div>
+          <div className={`w-3 h-3 ${theme.bgLoader} mr-1 rounded-full`}></div>
+          <div className={`w-3 h-3 ${theme.bgLoader} mr-1 rounded-full`}></div>
+        </span>
       </div>
     </div>
   );
