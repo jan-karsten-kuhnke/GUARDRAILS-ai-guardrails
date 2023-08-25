@@ -221,6 +221,7 @@ class DataSourcesEntity(Base):
     __tablename__ = 'data_sources'
     
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
+    name = Column(String(255))
     connection_string = Column(Text)
     schemas = Column(ARRAY(String))
     tables_to_include = Column(ARRAY(String))
@@ -229,6 +230,7 @@ class DataSourcesEntity(Base):
     def to_dict(self):
         return {
             'id': str(self.id),
+            'name': self.name,
             'connection_string': self.connection_string,
             'schemas': self.schemas,
             'tables_to_include': self.tables_to_include,
