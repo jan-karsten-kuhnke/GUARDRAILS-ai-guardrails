@@ -197,4 +197,21 @@ def complete_request():
     approved = data['approved']
     return admin_service.complete_request(request_id, approved)
 
-    
+@adminendpoints.route('/insert_chain', methods=['POST'])
+@oidc.accept_token(require_token=True)
+def insert_chain():
+    data = request.json
+    title = data['title']
+    icon = data['icon']
+    code = data['code']
+    params=data['params']
+    active=data['is_active']
+    group_code=data['group_code']
+    return admin_service.insert_chain(title, icon, code, params, active, group_code)
+
+
+@adminendpoints.route('/update_chain/<id>',methods=['POST'])
+@oidc.accept_token(require_token=True)
+def update_chain(id):
+    data = request.json
+    return admin_service.update_chain(id, data) 
