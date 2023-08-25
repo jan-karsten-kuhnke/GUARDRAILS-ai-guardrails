@@ -34,8 +34,6 @@ class QaRetrieval:
             embedding_function=embeddings,
         )
         
-        print("is_document_selected",is_document_selected)
-        print("title",title)
         if is_document_selected:
             retriever=store.as_retriever(
                search_kwargs={'filter': {'source':title}}

@@ -17,7 +17,6 @@ const Collections: FC<CollectionsProps> = ({ handleGetCollections }) => {
   const [collectionName, setCollectionName] = useState("");
 
   const AddCollection = () => {
-    console.log("collectionNamein", collectionName)
     if (!collectionName) {
       toast.error("Please enter a collection name", {
         position: "bottom-center",

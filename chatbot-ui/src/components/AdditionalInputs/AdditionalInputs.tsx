@@ -81,7 +81,7 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
   };
 
   const handleDocumentSelect = (id: any) => {
-    if(id == "None"){
+    if(id == "All"){
       homeDispatch({ field: "selectedDocument", value: undefined });
       return;
     }
@@ -169,7 +169,7 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
                         selected  
                         className="py-2"
                       >
-                       None
+                       All
                       </option>
                     {documents?.length
                       ? documents.map((documents: any, index) => (
