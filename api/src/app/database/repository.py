@@ -502,3 +502,56 @@ class Persistence:
             return jsonify({"message": "Error in updating eula","success":False}), 500
         finally:
             session.close()
+
+    
+
+    def insert_chain(title, icon, code, params, active, group_code):
+        try:
+            session=Session()
+            chain = ChainEntity(
+                    title=title,
+                    icon=icon,
+                    code=code,
+                    params=params,
+                    is_active=active,
+                    group_code=group_code
+            )
+            session.add(chain)
+            session.commit()
+            return jsonify({"message": "Successfully inserted chain","success":True}), 200
+        except Exception as e:
+            logging.error(f"Exception while inserting chain: {e}")
+            session.rollback()
+            return jsonify({"message": "Error in inserting chain","success":False}), 500
+        finally:
+            session.close()
+    
+    def update_chain(id, data):
+        try:
+            session=Session()
+            chain=session.query(ChainEntity).filter(ChainEntity.id == id).first()
+            if chain:
+                if 'title' in data:
+                    chain.title = data['title']
+                if 'icon' in data:
+                    chain.icon = data['icon']
+                if 'code' in data:
+                    chain.code = data['code']
+                if 'params' in data:
+                    chain.params = data['params']
+                if 'is_active' in data:
+                    chain.is_active = data['is_active']
+                if 'group_code' in data:
+                    chain.group_code = data['group_code']
+            else:
+                return jsonify({"message": "Cannot find the chain","success":False}), 500
+            session.commit()
+            return jsonify({"message": "Successfully updated chain","success":True}), 200
+        except Exception as e:
+            logging.error(f"Exception while updating chain: {e}")
+            session.rollback()
+            return jsonify({"message": "Error in updating chain","success":False}), 500
+        finally:
+            session.close()
+        
+

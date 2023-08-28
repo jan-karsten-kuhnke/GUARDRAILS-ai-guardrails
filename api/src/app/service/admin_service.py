@@ -104,3 +104,9 @@ class admin_service:
     def complete_request(request_id, approved:bool):
         flowable_wrapper.complete_request(request_id, approved)
         return {"success":True,"message":"Successfully completed the request"}
+    
+    def insert_chain(title, icon, code, params, active, group_code):
+        return Persistence.insert_chain(title, icon, code, params, active, group_code)
+    
+    def update_chain(id,data):
+        return Persistence.update_chain(id,data)
