@@ -77,3 +77,10 @@ def add_collection():
 @oidc.accept_token(require_token=True)
 def get_collections():
     return DocumentService.get_collections()    
+
+@documentsendpoints.route('/documents/getcollectiondocuments', methods=['GET'])
+@oidc.accept_token(require_token=True)
+def get_documents_by_collection_name():
+    collection_name = request.args.get('collection_name', type=str)
+    
+    return DocumentService.get_documents_by_collection_name(collection_name)    

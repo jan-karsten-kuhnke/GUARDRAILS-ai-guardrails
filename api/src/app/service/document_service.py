@@ -51,3 +51,6 @@ class DocumentService:
     def get_collections():
         return Persistence.get_collections()  
     
+    def get_documents_by_collection_name(collection_name):
+        return Persistence.get_documents_by_collection_name(collection_name)  
+    

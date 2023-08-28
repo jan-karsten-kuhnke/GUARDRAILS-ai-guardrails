@@ -319,6 +319,16 @@ class Persistence:
         finally:
             session.close()
     
+    def get_document_by_id(id):
+        try:
+            document = session.query(DocumentEntity).filter(DocumentEntity.id == id).first()
+            res = document.to_dict()
+            return res
+        except Exception as ex:
+            logging.error(f"Exception while getting document: {ex}")
+        finally:
+            session.close()
+    
     def delete_document(document_id):
         try:
             session=Session()
@@ -345,11 +355,11 @@ class Persistence:
             connection.close()
             session.close()
             
-    def get_document_by_id(document_id):
+    def get_pgvector_document_by_id(document_id):
         try:
-            document = session.query(DocumentEntity).filter(DocumentEntity.id == document_id).first()
-            serialized_document = document.to_dict()
-            custom_ids = serialized_document['custom_ids']
+            document = Persistence.get_document_by_id(document_id)
+
+            custom_ids = document['custom_ids']
             comma_separated_custom_ids = ', '.join([f"'{id}'" for id in custom_ids])
             
             connection = vector_store_engine.connect()
@@ -360,7 +370,7 @@ class Persistence:
             
             for r in result:
                 rows.append(r[0])
-            return {"docs":rows,"metadata":serialized_document}
+            return {"docs":rows,"metadata":document}
         except Exception as ex:
             logging.error(f"Exception while getting document: {ex}")
         finally:
@@ -470,7 +480,23 @@ class Persistence:
         except Exception as ex:
             logging.error(f"Exception while getting chat logs: {ex}")
         finally:
-            session.close()        
+            session.close()   
+            
+    def get_documents_by_collection_name(collection_name):
+        try:
+            documents = session.query(DocumentEntity).filter(DocumentEntity.collection_name == collection_name).all()
+            result = []
+            for document in documents:
+                result.append({
+                    'id': str(document.id),
+                    'title': document.title,
+                })
+            return jsonify({"data":result,"success":True}),200
+        except Exception as ex:
+            return jsonify({"data":"","success":False,"message": "Error in retrieving documents from collection"}), 500
+            logging.error(f"Exception while getting documents: {ex}")
+        finally:
+            session.close()         
         
     def get_eula_status(user_email):
         try:

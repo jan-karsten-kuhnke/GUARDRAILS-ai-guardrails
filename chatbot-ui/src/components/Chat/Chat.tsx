@@ -51,7 +51,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       isPrivate,
       selectedTile,
       tiles,
-      selectedCollection
+      selectedCollection,
+      selectedDocument
     },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
@@ -123,6 +124,13 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         const controller = new AbortController();
         let response: any;
 
+        //params for selected tiles
+
+        let params: any = {
+          ...documentId ? { documentId } : {},
+          ...selectedCollection ? { collectionName: selectedCollection } : {},
+          ...selectedDocument ? { qaDocumentId: selectedDocument } : {},
+        };
         if (
           selectedTile.params?.useExecuteOnDoc
         ) {
@@ -142,8 +150,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 isOverRide,
                 selectedTask,
                 isPrivate,
-                selectedCollection,
-                documentId
+                params
               );
             }
             else {
@@ -174,7 +181,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 isOverRide,
                 selectedTask,
                 isPrivate,
-                selectedCollection,
+                params,
               );
             } catch (err: any) {
               toast.error(err.message, {
@@ -190,7 +197,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 isOverRide,
                 selectedTask,
                 isPrivate,
-                selectedCollection,
+                params,
               );
             } catch (err: any) {
               toast.error(err.message, {
@@ -330,7 +337,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       stopConversationRef,
       isPrivate,
       selectedTile,
-      selectedCollection
+      selectedCollection,
+      selectedDocument
     ]
   );
 
