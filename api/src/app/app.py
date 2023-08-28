@@ -16,7 +16,7 @@ from globals import *
 
 Globals.prepare_client_secrets()
 app = Flask(__name__)
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=Globals.logging_level)
 app.config["PROPAGATE_EXCEPTIONS"] = True
 app.config["API_TITLE"] = "AI-Guardrails Swagger"
 app.config["API_VERSION"] = "v1"

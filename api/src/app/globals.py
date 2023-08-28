@@ -71,6 +71,8 @@ class Globals:
     
     open_ai_api_key=os.environ.get("OPENAI_API_KEY")
     
+    logging_level = os.environ.get("LOGGING_LEVEL")
+
     def prepare_client_secrets():
         if os.path.isfile("client_secrets.json"):
             logging.info("removing existing client_secrets.json")
