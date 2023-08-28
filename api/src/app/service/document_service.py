@@ -8,24 +8,24 @@ import logging
 from oidc import get_current_user_email
 
 class DocumentService:
-    def create_document(filename, filepath, description=""):
+    def create_document(filename, filepath,uploaded_by,uploaded_at,description=""):
         try:
             ingestion_service = IngestionService()
             collection_name = get_current_user_email().split('@')[0]
-            custom_ids = ingestion_service.ingest_file(filepath,collection_name=collection_name)
+            custom_ids = ingestion_service.ingest_file(filepath,collection_name,uploaded_by,uploaded_at)
             Persistence.insert_document(filename, filepath, custom_ids,collection_name=collection_name)
 
         except Exception as ex:
             logging.error(f"Exception uploading document: {ex}")
 
     
-    def create_documents(location,collection_name):
+    def create_documents(location,collection_name,uploaded_by,uploaded_at,metadata):
         try:
             ingestion_service = IngestionService()
             files = IngestionService.get_all_documents(location)
 
             for file in files:
-                custom_ids = ingestion_service.ingest_file(file["file_path"], collection_name)
+                custom_ids = ingestion_service.ingest_file(file["file_path"], collection_name,uploaded_by,uploaded_at,metadata)
                 Persistence.insert_document(file['file_name'], file["file_path"], custom_ids, collection_name)
 
             return jsonify({"success":True,"message":"Successfully uploaded documents"}),200

@@ -7,6 +7,8 @@ from database.models import DocumentEntity
 from globals import Globals
 import os
 from oidc import oidc
+from oidc import get_current_user_email
+from datetime import datetime
 from time import time
 import shutil
 
@@ -37,12 +39,15 @@ def get_document(document_id):
 def create_document():
     files = request.files.getlist('files')
     collection_name = request.form['collectionName']
+    uploaded_by = get_current_user_email()
+    uploaded_at = str(datetime.now())
+    metadata = request.form['apiMetadata'] if 'apiMetadata' in request.form else {}
     temp_dir_name = "temp-" + str(time())
     os.mkdir(temp_dir_name)
     for file in files:
         file.save(os.path.join(temp_dir_name, file.filename))
     
-    response = DocumentService.create_documents(location=temp_dir_name,collection_name = collection_name)
+    response = DocumentService.create_documents(location=temp_dir_name,collection_name = collection_name,uploaded_by=uploaded_by,uploaded_at=uploaded_at,metadata=metadata)
     shutil.rmtree(temp_dir_name)
     return response
 
