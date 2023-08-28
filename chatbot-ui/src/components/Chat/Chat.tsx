@@ -51,6 +51,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       isPrivate,
       selectedTile,
       tiles,
+      selectedCollection
     },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
@@ -123,10 +124,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         let response: any;
 
         if (
-          selectedTask === "summarize-brief" ||
-          selectedTask === "extraction"
+          selectedTile.params?.useExecuteOnDoc
         ) {
-          
+
           try {
             toast.loading(
               "Summarization might be a time taking process depending on the size of your document",
@@ -135,17 +135,18 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 duration: 5000,
               }
             );
-            if(documentId){
+            if (documentId) {
               response = await fetchPrompt(
                 chatBody.message,
                 selectedConversation.id,
                 isOverRide,
                 selectedTask,
                 isPrivate,
+                selectedCollection,
                 documentId
               );
             }
-            else{
+            else {
               const payload = {
                 conversation_id: selectedConversation.id,
                 isOverride: isOverRide,
@@ -172,7 +173,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 selectedConversation.id,
                 isOverRide,
                 selectedTask,
-                isPrivate
+                isPrivate,
+                selectedCollection,
               );
             } catch (err: any) {
               toast.error(err.message, {
@@ -187,7 +189,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 selectedConversation.id,
                 isOverRide,
                 selectedTask,
-                isPrivate
+                isPrivate,
+                selectedCollection,
               );
             } catch (err: any) {
               toast.error(err.message, {
@@ -327,6 +330,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       stopConversationRef,
       isPrivate,
       selectedTile,
+      selectedCollection
     ]
   );
 
@@ -395,18 +399,18 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const throttledScrollDown = throttle(scrollDown, 250);
 
   useEffect(() => {
-    if(executeOnUploadedDocRef.current){
+    if (executeOnUploadedDocRef.current) {
       let message: Message = {
         role: "user",
         content: `${executeOnUploadedDocRef.current.code === SUMMARIZATION_CODE ? "Summarize" : "Extract key metrics from"} ${executeOnUploadedDocRef.current.title}`,
         userActionRequired: false,
         msg_info: null,
       };
-        handleSend(message, 0, false , undefined , executeOnUploadedDocRef.current.id);
-        executeOnUploadedDocRef.current = null;
+      handleSend(message, 0, false, undefined, executeOnUploadedDocRef.current.id);
+      executeOnUploadedDocRef.current = null;
     }
 
-  },[executeOnUploadedDocRef.current])
+  }, [executeOnUploadedDocRef.current])
 
   useEffect(() => {
     throttledScrollDown();
@@ -440,6 +444,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     };
   }, [messagesEndRef]);
 
+
+
   return (
     <div className={`relative flex-1 overflow-hidden ${theme.chatBackground}`}>
       <>
@@ -454,22 +460,24 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 <div className="text-center text-3xl font-semibold">
                   <div className="mx-auto flex h-full w-[300px] flex-col justify-center space-y-6 sm:w-[600px]">
                     <div
-                      className={`text-center text-4xl font-bold ${theme.textColor}`}
+                      className={`text-center text-4xl font-bold text-[${theme.textColor}]`}
                     >
                       Welcome to {applicationName}
                     </div>
                     <div
-                      className={`text-center text-2xl font-bold ${theme.textColorSecondary}`}
+                      className={`text-center text-2xl font-bold text-[${theme.textColorSecondary}]`}
                     >
                       {/* Protect your Confidential Information. */}
                     </div>
                   </div>
                 </div>
                 <div
-                  className={`flex w-full w-full justify-center rounded-lg py-2 ${theme.chatItemsBorder}`}
+                  className={`w-full rounded-lg ${theme.chatItemsBorder}`}
+                  id="tiles-container"
                 >
                   <Tiles />
                 </div>
+
                 {Object.keys(selectedTile).length && !selectedTile?.has_access ? (
                   <div
                     className={`flex w-full w-full justify-center rounded-lg py-2 ${theme.chatItemsBorder}`}
@@ -480,16 +488,16 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   ""
                 )}
                 {selectedTile?.params &&
-                  selectedTile?.params?.inputs?.length > 0 && (
-                    <div
-                      className={`w-full justify-center rounded-lg p-4 ${theme.chatItemsBorder}`}
-                    >
-                      <AdditionalInputs
-                        inputs={selectedTile?.params?.inputs}
-                        handleSend={handleSend}
-                      />
-                    </div>
-                  )}
+                  selectedTile?.params?.inputs?.length > 0 ? (
+                  <div
+                    className={`w-full justify-center rounded-lg p-4 ${theme.chatItemsBorder}`}
+                  >
+                    <AdditionalInputs
+                      inputs={selectedTile?.params?.inputs}
+                      handleSend={handleSend}
+                    />
+                  </div>
+                ) : ""}
                 {selectedTile?.has_access ? (
                   <div
                     className={`w-full justify-center rounded-lg p-4 ${theme.chatItemsBorder}`}

@@ -14,9 +14,8 @@ import json
 from executors.utils.AppletResponse import AppletResponse
 
 class Extraction:
-    def execute(self,filepath,document_array,is_document_uploaded):
-        chain = Persistence.get_chain_by_code('extraction')
-        params = chain['params']
+    def execute(self,filepath,document_array,is_document_uploaded, params):
+        model_type = params['modelType']
 
         if is_document_uploaded:
             loader = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
@@ -42,7 +41,7 @@ class Extraction:
             "required": []
         }
 
-        llm = LlmProvider.get_llm(is_private=False, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
+        llm = LlmProvider.get_llm(model_type=model_type, is_private=False, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
 
         chain = create_extraction_chain(schema=schema, llm=llm)
 

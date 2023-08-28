@@ -23,6 +23,7 @@ import { debounce } from "lodash";
 import { AnalysisObject, AnalysisResponseType } from "@/types/AnalysisObject";
 import { analyzeMessage } from "@/services";
 import { AxiosResponse } from "axios";
+import { Tooltip } from "@mui/material";
 
 interface Props {
   onSend: (message: Message) => void;
@@ -124,12 +125,7 @@ export const ChatInput = ({
       .finally(() => {});
   }, 1000);
   const handleSend = () => {
-    if (messageIsStreaming) {
-      return;
-    }
-
-    if (!content) {
-      alert("Please enter a message");
+    if (!content || messageIsStreaming) {
       return;
     }
 
@@ -325,6 +321,7 @@ export const ChatInput = ({
           className={`relative mx-2 flex w-full flex-grow flex-col rounded-md  sm:mx-4`}
         >
           <textarea
+            id="chat-input"
             ref={textareaRef}
             disabled={
               selectedConversation?.archived || !selectedTile?.has_access
@@ -350,19 +347,21 @@ export const ChatInput = ({
             onChange={handleChange}
             onKeyDown={handleKeyDown}
           />
-
-          <button
-            className={`absolute right-2 top-2 rounded-sm p-1 ${theme.chatSendButtonTheme}`}
-            onClick={handleSend}
-          >
-            {messageIsStreaming ? (
-              <div
-                className={`h-4 w-4 animate-spin rounded-full border-t-2 ${theme.chatLoadingTheme}`}
-              ></div>
-            ) : (
-              <IconSend size={18} />
-            )}
-          </button>
+          <Tooltip title="Send message" placement="bottom">
+            <button
+              id="send-button"
+              className={`absolute right-2 top-2 rounded-lg p-1 ${content.length && !messageIsStreaming ? theme.chatSendButtonTheme.active : `${theme.chatSendButtonTheme.disabled} cursor-default`}`}
+              onClick={handleSend}
+            >
+              {messageIsStreaming ? (
+                <div
+                  className={`h-4 w-4 animate-spin rounded-full border-t-2 ${theme.chatLoadingTheme}`}
+                ></div>
+              ) : (
+                <IconSend size={18} />
+              )}
+            </button>
+          </Tooltip>
 
           {showScrollDownButton && (
             <div className="absolute bottom-12 right-0 lg:bottom-0 lg:-right-10">
@@ -397,7 +396,7 @@ export const ChatInput = ({
           )}
         </div>
       </div>
-      {/* <div className={`px-3 pt-2 pb-3 text-center text-[12px] md:px-4 md:pt-3 md:pb-6 ${theme.textColorSecondary}`}>
+      {/* <div className={`px-3 pt-2 pb-3 text-center text-[12px] md:px-4 md:pt-3 md:pb-6 text-[${theme.textColorSecondary}]`}>
         {applicationName}
         <Chip label="Beta" variant="outlined" size="small" style={{ borderColor: '#DA9B14', color: '#DA9B14', width: '39px', height: '15px', fontSize: '10px', margin: '2px' }} />
         lets your organisation use public LLM models in a safe and secure way, ensuring your corporate confidential information remains protected.

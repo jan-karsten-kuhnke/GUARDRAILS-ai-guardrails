@@ -36,6 +36,7 @@ export const fetchPrompt = (
   isOverride: boolean,
   task: string | undefined,
   isPrivate: boolean | undefined,
+  collectionName: string,
   documentId: string | null = null
 ) =>
   fetch(`${import.meta.env.VITE_CHAT_SERVICE_URL}/chat/completions`, {
@@ -47,12 +48,13 @@ export const fetchPrompt = (
     body: JSON.stringify(
       conversationId
         ? {
-            message: message,
-            conversation_id: conversationId,
-            isOverride: isOverride,
-            task: task,
-            ...(documentId ? { documentId } : {}),
-          }
+          message: message,
+          conversation_id: conversationId,
+          isOverride: isOverride,
+          task: task,
+          ...documentId ? { documentId } : {},
+          collection_name: collectionName
+        }
         : { message: message }
     ),
   });

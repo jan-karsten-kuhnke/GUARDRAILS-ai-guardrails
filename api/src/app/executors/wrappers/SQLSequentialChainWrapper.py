@@ -15,10 +15,8 @@ from langchain.schema import BasePromptTemplate
 from langchain.schema.language_model import BaseLanguageModel
 from langchain.sql_database import SQLDatabase
 from langchain.tools.sql_database.prompt import QUERY_CHECKER
-import json
-import ast
 import datetime
-from decimal import Decimal
+
 INTERMEDIATE_STEPS_KEY = "intermediate_steps"
 
 
@@ -119,7 +117,7 @@ class SQLDatabaseChain(Chain):
             sql_cmd = self.llm_chain.predict(
                 callbacks=_run_manager.get_child(),
                 **llm_inputs,
-            ).strip()
+            ).strip().replace("```sql",'').replace("```",'')
             if not self.use_query_checker:
                 _run_manager.on_text(sql_cmd, color="green", verbose=self.verbose)
                 intermediate_steps.append(

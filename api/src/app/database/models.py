@@ -138,6 +138,7 @@ class DocumentEntity(Base):
     description = Column(Text)
     location = Column(String())
     custom_ids = Column(ARRAY(String))
+    collection_name = Column(String())
     
     def to_dict(self):
         return {
@@ -145,7 +146,8 @@ class DocumentEntity(Base):
             'title': self.title,
             'description': self.description,
             'location': self.location,
-            'custom_ids': self.custom_ids
+            'custom_ids': self.custom_ids,
+            'collection_name':self.collection_name
         }
     
 
@@ -212,4 +214,25 @@ class EulaEntity(Base):
             'user_email': self.user_email,
             'eula': self.eula,
             'eula_accepted_on': self.eula_accepted_on,
+        }
+
+
+class DataSourcesEntity(Base):
+    __tablename__ = 'data_sources'
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
+    name = Column(String(255))
+    connection_string = Column(Text)
+    schemas = Column(ARRAY(String))
+    tables_to_include = Column(ARRAY(String))
+    custom_schema_description = Column(Text)
+    
+    def to_dict(self):
+        return {
+            'id': str(self.id),
+            'name': self.name,
+            'connection_string': self.connection_string,
+            'schemas': self.schemas,
+            'tables_to_include': self.tables_to_include,
+            'custom_schema_description': self.custom_schema_description,
         }

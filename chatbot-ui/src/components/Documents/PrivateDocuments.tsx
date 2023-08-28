@@ -1,7 +1,6 @@
 import { ChangeEvent, useState, useContext } from "react";
-import { Button } from "@mui/material";
+import { Button, Tooltip } from "@mui/material";
 import { CustomDataGrid } from "./CustomDataGrid";
-import { Message } from "@/types/chat";
 import { IconUpload } from "@tabler/icons-react";
 import { uploadDocuments, deleteDocsGridData } from "@/services/DocsService";
 import toast from "react-hot-toast";
@@ -12,7 +11,7 @@ import { EXTRACTION_CODE, SUMMARIZATION_CODE } from "@/utils/constants";
 
 export const PrivateDocuments = () => {
   const {
-    state: { theme, tiles },
+    state: { theme, tiles, collections, selectedCollection },
     dispatch: homeDispatch,
     handleNewConversation,
   } = useContext(HomeContext);
@@ -22,6 +21,12 @@ export const PrivateDocuments = () => {
   const handleDocumentsUpload = async (
     event: ChangeEvent<HTMLInputElement>
   ) => {
+    if (!selectedCollection) {
+      toast.error("Please select a collection first", {
+        position: "bottom-center",
+      });
+      return;
+    }
     const files = event.target.files;
     if (!files || files.length === 0) {
       return;
@@ -31,7 +36,7 @@ export const PrivateDocuments = () => {
     for (let i = 0; i < files.length; i++) {
       formData.append("files", files[i]);
     }
-
+    formData.append("collectionName", selectedCollection);
     toast
       .promise(
         uploadDocuments(formData), //calling api here
@@ -45,7 +50,7 @@ export const PrivateDocuments = () => {
         }
       )
       .then(() => {
-        setRefereshGridData(prevRefreshGridState => !prevRefreshGridState);
+        setRefereshGridData((prevRefreshGridState) => !prevRefreshGridState);
         event.target.value = "";
       });
   };
@@ -65,7 +70,7 @@ export const PrivateDocuments = () => {
         }
       )
       .then(() => {
-        setRefereshGridData(prevRefreshGridState => !prevRefreshGridState);
+        setRefereshGridData((prevRefreshGridState) => !prevRefreshGridState);
       });
   };
 
@@ -87,6 +92,8 @@ export const PrivateDocuments = () => {
       field: "actions",
       headerName: "Actions",
       width: 270,
+      sortable: false,
+      filterable: false,
       renderCell: (params: any) => (
         <>
           <Button
@@ -147,6 +154,7 @@ export const PrivateDocuments = () => {
       ),
     },
   ];
+
   const entity = "documents";
   const initialSort = [
     {
@@ -154,29 +162,51 @@ export const PrivateDocuments = () => {
       sort: "asc",
     },
   ];
+
+  const handleSelection = (name: any) => {
+    homeDispatch({
+      field: "selectedCollection",
+      value: name,
+    });
+  };
+
   return (
     <>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          margin: "25px 40px",
-          marginBottom: "0px",
-        }}
-      >
-        <label
-          className={`flex gap-1 items-center w-55 p-2 rounded-md ${theme.primaryButtonTheme} cursor-pointer`}
+      <div className="flex items-center justify-end gap-5 px-4">
+        <span className="font-bold text-base">Select collection:</span>
+        <select
+          id="collectionlist"
+          value={selectedCollection}
+          className={`${theme.taskSelectTheme} outline-none text-sm rounded-lg block p-3 w-48`}
+          onChange={(ev) => handleSelection(ev.target.value)}
         >
-          <IconUpload />
-          Upload Documents
-          <input
-            type="file"
-            multiple
-            accept=".doc, .docx, .pdf , .csv"
-            hidden
-            onChange={handleDocumentsUpload}
-          />
-        </label>
+          {collections?.length
+            ? collections.map((collection: any, index) => (
+                <option value={collection?.name} key={index} className="py-2">
+                  {collection?.name}
+                </option>
+              ))
+            : ""}
+        </select>
+
+        <Tooltip
+          title="Upload documents in the selected collection"
+          placement="top"
+        >
+          <label
+            className={`flex gap-1 items-center w-55 p-2 rounded-md ${theme.primaryButtonTheme} cursor-pointer`}
+          >
+            <IconUpload />
+            Upload Documents
+            <input
+              type="file"
+              multiple
+              accept=".doc, .docx, .pdf , .csv"
+              hidden
+              onChange={handleDocumentsUpload}
+            />
+          </label>
+        </Tooltip>
       </div>
       <CustomDataGrid
         columns={columns}

@@ -1,9 +1,10 @@
-import { FC, KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { FC, KeyboardEvent, useEffect, useRef, useState } from "react";
 
-
-import { Prompt } from '@/types/prompt';
-import HomeContext from '@/pages/home/home.context';
-import { useContext } from 'react';
+import { Prompt } from "@/types/prompt";
+import HomeContext from "@/pages/home/home.context";
+import { useContext } from "react";
+import { Tooltip } from "@mui/material";
+import { IconSquareRoundedX } from "@tabler/icons-react";
 
 interface Props {
   prompt: Prompt;
@@ -12,7 +13,9 @@ interface Props {
 }
 
 export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
-  const { state : { theme } } = useContext(HomeContext);
+  const {
+    state: { theme },
+  } = useContext(HomeContext);
 
   const [name, setName] = useState(prompt.name);
   const [description, setDescription] = useState(prompt.description);
@@ -22,30 +25,11 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   const handleEnter = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       onUpdatePrompt({ ...prompt, name, description, content: content.trim() });
       onClose();
     }
   };
-
-  useEffect(() => {
-    const handleMouseDown = (e: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-        window.addEventListener('mouseup', handleMouseUp);
-      }
-    };
-
-    const handleMouseUp = (e: MouseEvent) => {
-      window.removeEventListener('mouseup', handleMouseUp);
-      onClose();
-    };
-
-    window.addEventListener('mousedown', handleMouseDown);
-
-    return () => {
-      window.removeEventListener('mousedown', handleMouseDown);
-    };
-  }, [onClose]);
 
   useEffect(() => {
     nameInputRef.current?.focus();
@@ -68,37 +52,47 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
             className={`${theme.modalDialogTheme} inline-block max-h-[400px] transform overflow-y-auto rounded-lg  px-4 pt-5 pb-4 text-left align-bottom shadow-xl transition-all  sm:my-8 sm:max-h-[600px] sm:w-full sm:max-w-lg sm:p-6 sm:align-middle`}
             role="dialog"
           >
-            <div className={` ${theme.textColor} text-sm font-bold`}>
-              {('Name')}
+            <div className={`flex justify-end`}>
+              <Tooltip title="Close" placement="top">
+                <IconSquareRoundedX
+                  onClick={onClose}
+                  className={theme.sidebarActionButtonTheme}
+                />
+              </Tooltip>
+            </div>
+            <div className={`text-[${theme.textColor}] text-sm font-bold`}>
+              {"Name"}
             </div>
             <input
               ref={nameInputRef}
               className={`${theme.chatTextAreaTheme} mt-2 w-full rounded-lg  px-4 py-2 text-neutral-900  `}
-              placeholder={('A name for your prompt.') || ''}
+              placeholder={"A name for your prompt." || ""}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
 
-            <div className={` ${theme.textColor} mt-6 text-sm font-bold`}>
-              {('Description')}
+            <div className={`text-[${theme.textColor}] mt-6 text-sm font-bold`}>
+              {"Description"}
             </div>
             <textarea
               className={`${theme.chatTextAreaTheme} mt-2 w-full rounded-lg  px-4 py-2 text-neutral-900  `}
-              style={{ resize: 'none' }}
-              placeholder={('A description for your prompt.') || ''}
+              style={{ resize: "none" }}
+              placeholder={"A description for your prompt." || ""}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-            /> 
+            />
 
-            <div className={` ${theme.textColor} mt-6 text-sm font-bold `}>
-              {('Prompt')}
+            <div
+              className={`text-[${theme.textColor}] mt-6 text-sm font-bold `}
+            >
+              {"Prompt"}
             </div>
             <textarea
               className={`${theme.chatTextAreaTheme} mt-2 w-full rounded-lg  px-4 py-2 text-neutral-900  `}
-              style={{ resize: 'none' }}
+              style={{ resize: "none" }}
               placeholder={
-                  'Prompt content. Use {{}} to denote a variable. Ex: {{name}} is a {{adjective}} {{noun}}'
+                "Prompt content. Use {{}} to denote a variable. Ex: {{name}} is a {{adjective}} {{noun}}"
               }
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -120,7 +114,7 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
                 onClose();
               }}
             >
-              {('Save')}
+              {"Save"}
             </button>
           </div>
         </div>

@@ -174,11 +174,10 @@ export const ChatMessage: FC<Props> = memo(
 
     return (
       <div
-        className={`group md:px-4 ${
-          message.role === "assistant" || message.role === "guardrails"
-            ? `border-b border-black/10  ${theme.chatMessageTheme}`
-            : `border-b border-black/10 ${theme.chatMessageThemeUser} `
-        }`}
+        className={`group md:px-4 ${message.role === "assistant" || message.role === "guardrails"
+          ? `border-b border-black/10  ${theme.chatMessageTheme}`
+          : `border-b border-black/10 ${theme.chatMessageThemeUser} `
+          }`}
         style={{ overflowWrap: "anywhere" }}
       >
         <div className="relative m-auto flex p-4 text-base md:max-w-2xl md:gap-6 md:py-6 lg:max-w-2xl lg:px-0 xl:max-w-3xl">
@@ -236,7 +235,7 @@ export const ChatMessage: FC<Props> = memo(
                   </div>
                 ) : (
                   <div
-                    className={`prose whitespace-pre-wrap dark:prose-invert flex-1 ${theme.textColor}`}
+                    className={`prose whitespace-pre-wrap dark:prose-invert flex-1 text-[${theme.textColor}]`}
                   >
                     {message.content}
                   </div>
@@ -262,12 +261,12 @@ export const ChatMessage: FC<Props> = memo(
             ) : message.role === "guardrails" ? (
               <>
                 <div
-                  className={`prose whitespace-pre-wrap dark:prose-invert flex-1 ${theme.textColor}`}
+                  className={`prose whitespace-pre-wrap dark:prose-invert flex-1 text-[${theme.textColor}]`}
                 >
                   {message.content}
                   {message.userActionRequired &&
                     messageIndex ===
-                      (selectedConversation?.messages.length ?? 0) - 1 && (
+                    (selectedConversation?.messages.length ?? 0) - 1 && (
                       <div className="flex">
                         <button
                           className={` mt-1 flex w-[190px] flex-shrink-0 cursor-pointer gap-3 rounded-md  p-3  py-2 px-4  md:mb-0 md:mt-2 ${theme.primaryButtonTheme}`}
@@ -294,7 +293,7 @@ export const ChatMessage: FC<Props> = memo(
             ) : (
               <div className="flex flex-row">
                 {sources && sources.length > 0 ? (
-                  <Box sx={{ width: "100%", typography: "body1" }}>
+                  <Box sx={{ width: "100%", overflow: "auto", typography: "body1" }}>
                     <TabContext value={value}>
                       <Box
                         sx={{
@@ -380,7 +379,7 @@ export const AssistantMessage: FC<AssistantProps> = ({ content }) => {
   } = useContext(HomeContext);
   return (
     <MemoizedReactMarkdown
-      className={`prose dark:prose-invert flex-1 ${theme.textColor}`}
+      className={`prose dark:prose-invert flex-1 text-[${theme.textColor}]`}
       remarkPlugins={[remarkGfm, remarkMath]}
       rehypePlugins={[rehypeMathjax]}
       components={{
@@ -388,7 +387,11 @@ export const AssistantMessage: FC<AssistantProps> = ({ content }) => {
           if (children.length) {
             if (children[0] == "▍") {
               return (
-                <span className="animate-pulse cursor-default mt-1">▍</span>
+                <span className="animate-bounce cursor-default mt-1 flex items-center ml-2">
+                  <div className={`w-3 h-3 ${theme.bgLoader} mr-1 rounded-full`}></div>
+                  <div className={`w-3 h-3 ${theme.bgLoader} mr-1 rounded-full`}></div>
+                  <div className={`w-3 h-3 ${theme.bgLoader} mr-1 rounded-full`}></div>
+                </span>
               );
             }
 

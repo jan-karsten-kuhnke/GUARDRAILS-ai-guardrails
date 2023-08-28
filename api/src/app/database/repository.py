@@ -1,7 +1,10 @@
 import json
 from sqlalchemy import create_engine, text, func ,or_,and_
 from sqlalchemy.orm import sessionmaker
-from database.models import Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, EulaEntity, DocumentEntity, FolderEntity , PromptEntity , OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity,ChainEntity
+
+from database.models import Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, DocumentEntity, FolderEntity , PromptEntity , OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity, ChainEntity,  EulaEntity, DataSourcesEntity
+from database.vector_store.vector_store_model import Vector_Base, CollectionEntity
+
 from globals import Globals
 from utils.apiResponse import ApiResponse
 from flask import jsonify
@@ -9,7 +12,7 @@ from service.ingestion_service import IngestionService
 import logging
 
 
-from database.postgres import session , engine, vector_store_engine, Session
+from database.postgres import session , engine, vector_store_engine, Session , Vector_Session ,vector_session
 
 class Persistence:
     
@@ -49,14 +52,16 @@ class Persistence:
         finally:
             session.close()
             
-    def insert_document(title, location, custom_ids, description=""):
+            
+    def insert_document(title, location, custom_ids, collection_name, description=""):
         try:
             session=Session()
             document = DocumentEntity(
                     title=title,
                     description=description,
                     location=location,
-                    custom_ids=custom_ids
+                    custom_ids=custom_ids,
+                    collection_name=collection_name
                 )
             session.add(document)
             session.commit()
@@ -93,7 +98,7 @@ class Persistence:
             result = []
             for log in logs:
                 result.append({
-                    'id': str(log.id),
+                    'id': str   (log.id),
                     'created_at': log.created_at.isoformat(),
                     'user_email': log.user_email,
                     'text': log.text
@@ -134,10 +139,11 @@ class Persistence:
         finally:
             session.close()
 
-    def get_list_query(Entity, sort, range_, filter_):
+    def get_list_query(Entity, sort, range_, filter_,collection):
         try:
             query = session.query(Entity)
-            
+            query = query.filter(Entity.collection_name == eval(collection))
+
             # Apply filter conditions
             filter_dict = eval(filter_)
             if len(filter_dict) != 0:
@@ -186,6 +192,7 @@ class Persistence:
 
             # Execute the query and retrieve documents
             documents = query.all()
+            
             serialized_documents = [doc.to_dict() for doc in documents]
           
             data = {
@@ -323,6 +330,16 @@ class Persistence:
         finally:
             session.close()
 
+    def get_data_source_by_id(id):
+        try:
+            data_source = session.query(DataSourcesEntity).filter(DataSourcesEntity.id == id).first()
+            serialized_data_source = data_source.to_dict()
+            return serialized_data_source
+        except Exception as ex:
+            logging.error(f"Exception while getting data source: {ex}")
+        finally:
+            session.close()
+
     def get_folder_data(user_email):
         try:
             folders = session.query(FolderEntity).filter(FolderEntity.user_email == user_email).first()
@@ -374,7 +391,40 @@ class Persistence:
             logging.error(f"Exception while upserting prompts: {ex}")  
         finally:
             session.close()    
-        
+
+
+    def add_collection(collection_name):
+        try:
+            vector_session=Vector_Session()
+            collection = vector_session.query(CollectionEntity).filter(CollectionEntity.name == collection_name).first()
+            if collection:
+                return jsonify({"message": "collection already exists","success":False}), 500  
+            else:
+                data = CollectionEntity(name=collection_name)
+                vector_session.add(data)
+                vector_session.commit()
+                return jsonify({"message": "collection successfully added","success":True}), 200
+        except Exception as ex:
+            vector_session.rollback()
+            logging.error(f"Exception while upserting prompts: {ex}")
+            return jsonify({"message": "failed","success":False}), 500  
+        finally:
+            vector_session.close()
+
+    def get_collections():
+        try:
+            collections = vector_session.query(CollectionEntity).all()
+            result = []
+            for collection in collections:
+                result.append({
+                    'id': str(collection.uuid),
+                    'name': collection.name
+                })
+            return jsonify({"data":result,"success":True}),200
+        except Exception as ex:
+            logging.error(f"Exception while getting chat logs: {ex}")
+        finally:
+            session.close()        
         
     def get_eula_status(user_email):
         try:
@@ -389,8 +439,6 @@ class Persistence:
         except Exception as ex:
             return jsonify({"data":"","success":False,"message": "Error in retrieving eula"}), 500      
             logging.error(f"Exception while getting eula status: {ex}")
-        finally:
-            session.close()
             
     def set_eula_status(user_email):
         try:
@@ -408,6 +456,7 @@ class Persistence:
             return jsonify({"message": "Error in updating eula","success":False}), 500
         finally:
             session.close()
+
     
 
     def insert_chain(title, icon, code, params, active, group_code):
@@ -459,3 +508,4 @@ class Persistence:
         finally:
             session.close()
         
+

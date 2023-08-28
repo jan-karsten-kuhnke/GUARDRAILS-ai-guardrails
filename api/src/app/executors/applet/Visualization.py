@@ -24,27 +24,32 @@ from cryptography.fernet import Fernet
 
 class Visualization:
 
-    def execute(self, query, is_private, chat_history):
+    def execute(self, query, is_private, chat_history, params):
         try:
-            chain = Persistence.get_chain_by_code('qa-viz')
-            params = chain['params']
-        
+            model_type = params['modelType']
+            
+            
             sources = []
             
             key_str =Globals.ENCRYPTION_KEY
             key = key_str.encode('utf-8')
 
-            fernet = Fernet(key)
-            
-            encMessage = params['encodedDbUrl']
-            enc = encMessage.encode('utf-8')
+            data_source_id = params['dataSourceId']
+            data_source = Persistence.get_data_source_by_id(data_source_id)
 
-            conn_str = fernet.decrypt(enc).decode()
+            fernet = Fernet(key)
+        
+            encoded_db_url = data_source['connection_string'].encode('utf-8')
+            db_url = fernet.decrypt(encoded_db_url).decode()
             
-            llm=LlmProvider.get_llm(is_private=is_private,use_chat_model=True,max_output_token=1000,increase_model_token_limit=True)
+            llm=LlmProvider.get_llm(model_type=model_type, is_private=is_private,use_chat_model=True,max_output_token=1000,increase_model_token_limit=True)
             
-            executor = Sql()
-            sql_result = executor.execute(query=query, is_private=is_private, chat_history=chat_history)
+            sql_applet_code=params['sqlAppletCode']
+            
+            sql_chain = Persistence.get_chain_by_code(sql_applet_code)
+            sql_params = sql_chain['params']
+            executor_instance = Sql()
+            sql_result = executor_instance.execute(query=query, is_private=is_private, chat_history=chat_history, params=sql_params)
             sql_query_source = json.loads(sql_result['sources'][0])
             sql_data_source = json.loads(sql_result['sources'][1])
             
@@ -65,9 +70,11 @@ class Visualization:
             vega_chain = LLMChain(llm=llm, prompt=vega_prompt)
             config = vega_chain.run({'sql_data':sql_data, 'sql_query':sql_query, 'question':query})
 
+            config = config.replace("```JSON\n", "").replace("```", "")
+
             modified_sql_query = sql_query.replace("\n", " ")
 
-            engine = create_engine(conn_str)
+            engine = create_engine (db_url)
             
             Session = sessionmaker(bind=engine)
             session = Session()

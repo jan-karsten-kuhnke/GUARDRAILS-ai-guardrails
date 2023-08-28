@@ -14,6 +14,7 @@ class Globals:
     mongo_db_name = os.environ.get("MONGO_DB_NAME")
     pg_schema = os.environ.get("PG_SCHEMA")
     DB_URL =os.environ.get("DB_URI")
+    vector_store_pg_schema = "public"
 
     VECTOR_STORE_DB_URI=os.environ.get("VECTOR_STORE_DB_URI")
     VECTOR_STORE_COLLECTION_NAME ="documents"
@@ -43,16 +44,8 @@ class Globals:
     model_temp = 0
     model_n_batch = 8
 
-
-
-     #MODEL_TYPE
-    public_model_type=os.environ.get("PUBLIC_MODEL_TYPE")
-    private_model_type=os.environ.get("PRIVATE_MODEL_TYPE")
-
     model_temp = 0
 
-    
-    
     oidc_client_id = os.environ.get("OIDC_CLIENT_ID")
     oidc_client_secret = os.environ.get("OIDC_CLIENT_SECRET")
     oidc_redirect_uris = os.environ.get("OIDC_REDIRECT_URIS")

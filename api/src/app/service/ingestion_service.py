@@ -47,11 +47,11 @@ FILE_MAPPING = {
 }
 
 class  IngestionService :
-    def ingest_file(self,file_path: str):
+    def ingest_file(self,file_path: str,collection_name):
         embeddings = HuggingFaceEmbeddings()
 
         CONNECTION_STRING = Globals.VECTOR_STORE_DB_URI
-        COLLECTION_NAME = Globals.VECTOR_STORE_COLLECTION_NAME
+        COLLECTION_NAME = collection_name
 
         document = IngestionService.load_document(file_path)
         texts = IngestionService.process_document(document)
@@ -94,8 +94,8 @@ class  IngestionService :
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
         texts = text_splitter.split_documents(document)
 
-        # for text in texts:
-        #     text.metadata['source'] = text.metadata['source'].replace(source_directory + '/', '')
+        for text in texts:
+            text.metadata['source'] = text.metadata['source'].split( '/')[-1]
 
         logging.info(f"Split into {len(texts)} chunks of text (max. {chunk_size} tokens each)")
         #Summarize each document

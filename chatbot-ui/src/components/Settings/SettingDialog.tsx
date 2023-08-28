@@ -1,13 +1,14 @@
-import { FC, useContext, useEffect, useReducer, useRef } from 'react';
+import { FC, useContext, useEffect, useReducer, useRef } from "react";
 
+import { useCreateReducer } from "@/hooks/useCreateReducer";
 
-import { useCreateReducer } from '@/hooks/useCreateReducer';
+import { getSettings, saveSettings } from "@/utils/app/settings";
 
-import { getSettings, saveSettings } from '@/utils/app/settings';
+import { Settings } from "@/types/settings";
 
-import { Settings } from '@/types/settings';
-
-import HomeContext from '@/pages/home/home.context';
+import HomeContext from "@/pages/home/home.context";
+import { Tooltip } from "@mui/material";
+import { IconSquareRoundedX } from "@tabler/icons-react";
 
 interface Props {
   open: boolean;
@@ -19,32 +20,23 @@ export const SettingDialog: FC<Props> = ({ open, onClose }) => {
   const { state, dispatch } = useCreateReducer<Settings>({
     initialState: settings,
   });
-  const { state : { theme } } = useContext(HomeContext);
+  const {
+    state: { showOnboardingGuide, theme },
+    handleNewConversation,
+    dispatch: homeDispatch,
+  } = useContext(HomeContext);
 
   const modalRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleMouseDown = (e: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-        window.addEventListener('mouseup', handleMouseUp);
-      }
-    };
-
-    const handleMouseUp = (e: MouseEvent) => {
-      window.removeEventListener('mouseup', handleMouseUp);
-      onClose();
-    };
-
-    window.addEventListener('mousedown', handleMouseDown);
-
-    return () => {
-      window.removeEventListener('mousedown', handleMouseDown);
-    };
-  }, [onClose]);
 
   const handleSave = () => {
     // homeDispatch({ field: 'lightMode', value: state.theme });
     saveSettings(state);
+  };
+
+  const hanldeShowOnboardingGuide = () => {
+    onClose();
+    handleNewConversation();
+    homeDispatch({ field: "showOnboardingGuide", value: true });
   };
 
   // Render nothing if the dialog is not open.
@@ -67,9 +59,23 @@ export const SettingDialog: FC<Props> = ({ open, onClose }) => {
             className={`${theme.modalDialogTheme} inline-block max-h-[400px] transform overflow-y-auto rounded-lg px-4 pt-5 pb-4 text-left align-bottom shadow-xl transition-all sm:my-8 sm:max-h-[600px] sm:w-full sm:max-w-lg sm:p-6 sm:align-middle`}
             role="dialog"
           >
-            <div className={`text-lg pb-4 font-bold ${theme.textColor}`}>
-              {('Settings')}
+            <div
+              className={`text-lg pb-4 font-bold text-[${theme.textColor}] flex justify-between`}
+            >
+              <span>{"Settings"}</span>
+              <Tooltip title="Close" placement="top">
+                <IconSquareRoundedX
+                  onClick={onClose}
+                  className={theme.sidebarActionButtonTheme}
+                />
+              </Tooltip>
             </div>
+            <button
+              className={`${theme.primaryButtonTheme} p-2 rounded-md text-sm transition-colors duration-200`}
+              onClick={hanldeShowOnboardingGuide}
+            >
+              Show App Guide
+            </button>
           </div>
         </div>
       </div>

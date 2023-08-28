@@ -24,7 +24,7 @@ export const PromptbarSettings: FC<Props> = () => {
         <div className={`pt-6 ${theme.dividerTopTheme}`}>
           <label
             htmlFor="tilelist"
-            className={`block mb-2 text-sm font-medium ${theme.textColor}`}
+            className={`block mb-2 text-sm font-medium text-[${theme.textColor}]`}
           >
             Select Task
           </label>
