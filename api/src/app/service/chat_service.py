@@ -179,16 +179,18 @@ class chat_service:
                         logging.error("error: "+str(e))
                 elif (executor == "qaRetrieval"):
                     try:
-                        custom_ids=[]
                         is_document_selected=False
                         if qa_document_id:
                             document_obj=Persistence.get_document_by_id(qa_document_id)
                             title=document_obj['title']
                             is_document_selected=True
+                            params['title']=title
                             
+                        params['collection_name']=collection_name
+                        params['is_document_selected']=is_document_selected
                         logging.info("calling qa retrieval executor")
                         executor_instance = QaRetrieval()
-                        res = executor_instance.execute(query=prompt, is_private=is_private, chat_history=history,collection_name=collection_name, params=params,is_document_selected=is_document_selected,title=title)
+                        res = executor_instance.execute(query=prompt, is_private=is_private, chat_history=history, params=params)
 
                     except Exception as e:
                         yield ("Sorry. Some error occured. Please try again.")

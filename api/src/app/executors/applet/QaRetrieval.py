@@ -18,7 +18,7 @@ import logging
 
 class QaRetrieval:
     
-    def execute(self, query, is_private, chat_history,collection_name, params, is_document_selected,title):
+    def execute(self, query, is_private, chat_history, params):
     
         model_type = params['modelType']
 
@@ -26,7 +26,7 @@ class QaRetrieval:
         embeddings = HuggingFaceEmbeddings()
         
         CONNECTION_STRING =Globals.VECTOR_STORE_DB_URI
-        COLLECTION_NAME = collection_name
+        COLLECTION_NAME = params['collection_name']
         
         store = PGVector(
             collection_name=COLLECTION_NAME,
@@ -34,9 +34,9 @@ class QaRetrieval:
             embedding_function=embeddings,
         )
         
-        if is_document_selected:
+        if params['is_document_selected']:
             retriever=store.as_retriever(
-               search_kwargs={'filter': {'source':title}}
+               search_kwargs={'filter': {'source' : params['title']}}
             )  
         else:
             retriever = store.as_retriever(
