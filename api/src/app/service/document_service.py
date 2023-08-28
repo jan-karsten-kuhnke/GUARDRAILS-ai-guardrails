@@ -8,10 +8,10 @@ import logging
 from oidc import get_current_user_email
 
 class DocumentService:
-    def create_document(filename, filepath, description=""):
+    def create_document(filename, filepath, task_params, description=""):
         try:
+            collection_name = task_params['collectionName']
             ingestion_service = IngestionService()
-            collection_name = get_current_user_email().split('@')[0]
             custom_ids = ingestion_service.ingest_file(filepath,collection_name=collection_name)
             Persistence.insert_document(filename, filepath, custom_ids,collection_name=collection_name)
 

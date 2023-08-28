@@ -3,7 +3,10 @@ import { ChangeEvent } from "react";
 import { IconUpload } from "@tabler/icons-react";
 import { Message } from "@/types/chat";
 import HomeContext from "@/pages/home/home.context";
-import { getCollections , getDocumentsByCollectionName  } from "@/services/DocsService";
+import {
+  getCollections,
+  getDocumentsByCollectionName,
+} from "@/services/DocsService";
 
 interface Props {
   inputs: [
@@ -17,7 +20,14 @@ interface Props {
 
 const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
   const {
-    state: { theme, selectedTile, collections, selectedCollection , documents, selectedDocument},
+    state: {
+      theme,
+      selectedTile,
+      collections,
+      selectedCollection,
+      documents,
+      selectedDocument,
+    },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -50,18 +60,13 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
         getDocumentsByCollectionName(res?.data?.data[0]?.name).then((res) => {
           if (res?.data?.success && res?.data?.data?.length) {
             homeDispatch({ field: "documents", value: res?.data?.data });
-          }
-          else
-          {
+          } else {
             homeDispatch({ field: "documents", value: [] });
           }
         });
       }
-      
-
     });
   };
-
 
   useEffect(() => {
     handleGetCollections();
@@ -72,16 +77,13 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
     getDocumentsByCollectionName(name).then((res) => {
       if (res?.data?.success && res?.data?.data?.length) {
         homeDispatch({ field: "documents", value: res?.data?.data });
+      } else {
+        homeDispatch({ field: "documents", value: [] });
       }
-      else
-          {
-            homeDispatch({ field: "documents", value: [] });
-          }
     });
   };
-
   const handleDocumentSelect = (id: any) => {
-    if(id == "All"){
+    if (id == "All") {
       homeDispatch({ field: "selectedDocument", value: undefined });
       return;
     }
@@ -90,45 +92,49 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
 
   return (
     <>
-      {selectedTile &&
-        inputs.map((input, index) => {
-          if (input.key === "files" && input.type === "fileInput") {
-            return (
-              <label
-                key={index}
-                className={`flex gap-1 items-center w-32 p-2.5 rounded-md ${
-                  selectedTile.has_access && theme.secondaryButtonTheme
-                } 
+      <div className="flex justify-between items-center">
+        {selectedTile &&
+          inputs.map((input, index) => {
+            if (input.key === "files" && input.type === "fileInput") {
+              return (
+                <div className="w-1/2 mr-2" key={index}>
+                  <div className={`text-[${theme.textColor}] pb-2`}>
+                    Choose file
+                  </div>
+                  <label
+                    className={`flex gap-1 items-center  p-2.5 rounded-md ${
+                      selectedTile.has_access && theme.secondaryButtonTheme
+                    } 
             ${
               selectedTile.has_access
                 ? "cursor-pointer"
                 : "cursor-not-allowed text-gray-400"
             }`}
-              >
-                <IconUpload />
-                Upload File
-                {selectedTile.has_access ? (
-                  <input
-                    type="file"
-                    accept=".pdf "
-                    hidden
-                    onChange={handleDocumentUpload}
-                  />
-                ) : (
-                  ""
-                )}
-              </label>
-            );
-          } else if (
-            input.key === "collection" &&
-            input.type === "collectionPicker"
-          ) {
-            {
-              /* Collection Dropdown */
-            }
-            return (
-              <div key={index} className="flex">
-                <div className="w-1/2 mr-2">
+                  >
+                    <IconUpload />
+                    Upload File
+                    {selectedTile.has_access ? (
+                      <input
+                        type="file"
+                        accept=".pdf "
+                        hidden
+                        onChange={handleDocumentUpload}
+                      />
+                    ) : (
+                      ""
+                    )}
+                  </label>
+                </div>
+              );
+            } else if (
+              input.key === "collection" &&
+              input.type === "collectionPicker"
+            ) {
+              {
+                /* Collection Dropdown */
+              }
+              return (
+                <div className="w-1/2 mr-2" key={index}>
                   <div className={`text-[${theme.textColor}] pb-2`}>
                     Choose Collection
                   </div>
@@ -152,8 +158,13 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
                       : ""}
                   </select>
                 </div>
-             
-                <div className="w-1/2">
+              );
+            } else if (
+              input.key === "document" &&
+              input.type === "documentPicker"
+            ) {
+              return (
+                <div key={index} className="w-1/2">
                   <div className={`text-[${theme.textColor}] pb-2`}>
                     Choose Document
                   </div>
@@ -164,13 +175,9 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
                     onChange={(ev) => handleDocumentSelect(ev.target.value)}
                     placeholder="Choose Document"
                   >
-                    <option
-                        value={undefined}
-                        selected  
-                        className="py-2"
-                      >
-                       All
-                      </option>
+                    <option value={undefined} className="py-2">
+                      All
+                    </option>
                     {documents?.length
                       ? documents.map((documents: any, index) => (
                           <option
@@ -184,10 +191,10 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
                       : ""}
                   </select>
                 </div>
-              </div>
-            );
-          }
-        })}
+              );
+            }
+          })}
+      </div>
     </>
   );
 };
