@@ -2,7 +2,7 @@ import json
 from sqlalchemy import create_engine, text, func ,or_,and_
 from sqlalchemy.orm import sessionmaker
 
-from database.models import Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, DocumentEntity, FolderEntity , PromptEntity , OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity, ChainEntity,  EulaEntity, DataSourcesEntity
+from database.models import Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, DocumentEntity, FolderEntity , PromptEntity , OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity, ChainEntity,  EulaEntity, DataSourceEntity
 from database.vector_store.vector_store_model import Vector_Base, CollectionEntity
 
 from globals import Globals
@@ -89,6 +89,27 @@ class Persistence:
             return jsonify({"message": "error"}), 500
         finally:
             session.close()
+
+    def insert_data_source(name, connection_string, schemas=[], tables_to_include=[], custom_schema_description=""):
+        try:
+            session=Session()
+            data_source = DataSourceEntity(
+                    name=name,
+                    connection_string=connection_string,
+                    schemas=schemas,
+                    tables_to_include=tables_to_include,
+                    custom_schema_description=custom_schema_description
+                )
+            session.add(data_source)
+            session.commit()
+            return jsonify({"message": "successfully added data source"}), 200
+        except Exception as ex:
+            logging.error(f"Exception while adding datasource: {ex}")
+            session.rollback()
+            return jsonify({"message": "error in adding data source"}), 500
+        finally:
+            session.close()
+
         
 
     
@@ -139,10 +160,11 @@ class Persistence:
         finally:
             session.close()
 
-    def get_list_query(Entity, sort, range_, filter_,collection):
+    def get_list_query(Entity, sort, range_, filter_, collection=None):
         try:
             query = session.query(Entity)
-            query = query.filter(Entity.collection_name == eval(collection))
+            if(collection):
+                query = query.filter(Entity.collection_name == eval(collection))
 
             # Apply filter conditions
             filter_dict = eval(filter_)
@@ -272,6 +294,30 @@ class Persistence:
             return jsonify({"message": "error"}), 500
         finally:
             session.close()
+
+    def update_data_source(id, name, connection_string, schemas, tables_to_include, custom_schema_description):
+        try:
+            session=Session()
+            data_source = session.query(DataSourceEntity).filter(DataSourceEntity.id == id).first()
+            if not data_source:
+                return jsonify({"message": "not found"}), 404
+            if name is not None:
+                data_source.name = name
+            if connection_string is not None:
+                data_source.connection_string = connection_string
+            if schemas is not None:
+                data_source.schemas = schemas
+            if tables_to_include is not None:
+                data_source.tables_to_include = tables_to_include
+            if custom_schema_description is not None:
+                data_source.custom_schema_description = custom_schema_description
+            session.commit()
+            return jsonify({"message": "successfully updated data source", "data_source": data_source.to_dict()}), 200
+        except Exception as e:
+            session.rollback()
+            return jsonify({"message": "error in updating data source"}), 500
+        finally:
+            session.close()
     
     def delete_document(document_id):
         try:
@@ -332,7 +378,7 @@ class Persistence:
 
     def get_data_source_by_id(id):
         try:
-            data_source = session.query(DataSourcesEntity).filter(DataSourcesEntity.id == id).first()
+            data_source = session.query(DataSourceEntity).filter(DataSourceEntity.id == id).first()
             serialized_data_source = data_source.to_dict()
             return serialized_data_source
         except Exception as ex:
