@@ -17,9 +17,6 @@ import logging
 from utils.util import utils
 
 class QaRetrieval:
-    @classmethod
-    def get_class_name(cls):
-        return cls.__name__
 
     def execute(self, query, is_private, chat_history,collection_name, params):
         start_time = time.time()
@@ -45,7 +42,7 @@ class QaRetrieval:
             retriever = store.as_retriever(
             )
         
-        llm=LlmProvider.get_llm(class_name= self.get_class_name(),model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
+        llm=LlmProvider.get_llm(class_name= __class__.__name__,model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
 
         chain = ConversationalRetrievalChain.from_llm(
             llm=llm,

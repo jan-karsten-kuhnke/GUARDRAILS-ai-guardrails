@@ -15,10 +15,7 @@ from executors.utils.AppletResponse import AppletResponse
 from utils.util import utils
 
 class Extraction:
-    @classmethod
-    def get_class_name(cls):
-        return cls.__name__
-    
+
     def execute(self,filepath,document_array,is_document_uploaded, params):
         start_time = time.time()
         model_type = params['modelType']
@@ -47,7 +44,7 @@ class Extraction:
             "required": []
         }
 
-        llm = LlmProvider.get_llm(class_name= self.get_class_name(),model_type=model_type, is_private=False, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
+        llm = LlmProvider.get_llm(class_name= __class__.__name__,model_type=model_type, is_private=False, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
 
         chain = create_extraction_chain(schema=schema, llm=llm)
 

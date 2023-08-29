@@ -18,14 +18,10 @@ from datetime import datetime
 
 
 class Conversation:
-    @classmethod
-    def get_class_name(cls):
-        return cls.__name__
-    
+
     def execute(self, query, is_private, chat_history, params):
         start_time = time.time()
         model_type = params['modelType']
-        
         curr_date = datetime.today()
         
         memory = ConversationBufferMemory(memory_key="chat_history",return_messages=True)
@@ -33,7 +29,7 @@ class Conversation:
         for history in chat_history:
             memory.save_context({"input": history[0]}, {"output": history[1]})
         
-        llm=LlmProvider.get_llm(class_name= self.get_class_name(),model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
+        llm=LlmProvider.get_llm(class_name= __class__.__name__,model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
         
         _DEFAULT_TEMPLATE = f"""You are ChatGPT, a large language model trained by OpenAI, based on the GPT-3.5 architecture , and you like explaining in detail , so answer in detail as possible.\nCurrent date: {curr_date}.
 

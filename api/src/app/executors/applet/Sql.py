@@ -20,9 +20,6 @@ from utils.encryption import Encryption
 
 
 class Sql:
-    @classmethod
-    def get_class_name(cls):
-        return cls.__name__
 
     def execute(self, query, is_private, chat_history, params):
         start_time = time.time()
@@ -65,13 +62,12 @@ class Sql:
             include_tables = tables
         )
         
-        llm=LlmProvider.get_llm(class_name=self.get_class_name(),model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
+        llm=LlmProvider.get_llm(class_name= __class__.__name__,model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
         
         chain = SQLDatabaseSequentialChain.from_llm(
             llm, db, verbose=True, return_intermediate_steps=True,decider_prompt=DECIDER_PROMPT,
             query_prompt=PROMPT ,**{'top_k':10}
         )
-        
 
         sources = []
         # Prepare the chain
