@@ -20,12 +20,17 @@ from database.repository import Persistence
 from executors.applet.Sql import Sql
 from executors.utils.AppletResponse import AppletResponse
 from cryptography.fernet import Fernet
-
+import logging,time
+from utils.util import utils
 
 class Visualization:
+    @classmethod
+    def get_class_name(cls):
+        return cls.__name__
 
     def execute(self, query, is_private, chat_history, params):
         try:
+            start_time = time.time()
             model_type = params['modelType']
             
             
@@ -42,7 +47,7 @@ class Visualization:
             encoded_db_url = data_source['connection_string'].encode('utf-8')
             db_url = fernet.decrypt(encoded_db_url).decode()
             
-            llm=LlmProvider.get_llm(model_type=model_type, is_private=is_private,use_chat_model=True,max_output_token=1000,increase_model_token_limit=True)
+            llm=LlmProvider.get_llm(class_name= self.get_class_name(),model_type=model_type, is_private=is_private,use_chat_model=True,max_output_token=1000,increase_model_token_limit=True)
             
             sql_applet_code=params['sqlAppletCode']
             
@@ -110,5 +115,7 @@ class Visualization:
         sources.append(json.dumps(sql_result_source))
 
         response=AppletResponse(answer, sources)
+        execution_time = round(time.time() - start_time,2)
+        logging.info(utils.logging_info(self.get_class_name(),"Execution Time (s): ", execution_time))
 
         return response.obj()
