@@ -1,4 +1,4 @@
-import json
+import json,time
 import random
 from langchain import OpenAI, PromptTemplate
 from langchain.chains import ConversationChain
@@ -15,12 +15,15 @@ from executors.wrappers.SQLSequentialChainWrapper import SQLDatabaseSequentialCh
 from executors.wrappers.SqlWrapper import SqlWrapper
 from langchain.output_parsers.list import CommaSeparatedListOutputParser
 from cryptography.fernet import Fernet
-
+from utils.util import utils
 
 class Sql:
+    @classmethod
+    def get_class_name(cls):
+        return cls.__name__
 
     def execute(self, query, is_private, chat_history, params):
-
+        start_time = time.time()
         model_type = params['modelType']
         
         PROMPT_SUFFIX =params['promptSuffix']
@@ -65,7 +68,7 @@ class Sql:
             include_tables = tables
         )
         
-        llm=LlmProvider.get_llm(model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
+        llm=LlmProvider.get_llm(class_name=self.get_class_name(),model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
         
         chain = SQLDatabaseSequentialChain.from_llm(
             llm, db, verbose=True, return_intermediate_steps=True,decider_prompt=DECIDER_PROMPT,
@@ -117,5 +120,6 @@ class Sql:
         sources.append(json.dumps(sql_result_source))
 
         response=AppletResponse(answer, sources)
-
+        execution_time = round(time.time() - start_time,2)
+        logging.info(utils.logging_info(self.get_class_name(),"Execution Time (s): ", execution_time))
         return response.obj()

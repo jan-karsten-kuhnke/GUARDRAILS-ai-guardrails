@@ -10,11 +10,17 @@ from executors.utils.LlmProvider import LlmProvider
 from database.repository import Persistence
 from langchain.chat_models import ChatOpenAI
 from langchain.chains import create_extraction_chain
-import json
+import json,time,logging
 from executors.utils.AppletResponse import AppletResponse
+from utils.util import utils
 
 class Extraction:
+    @classmethod
+    def get_class_name(cls):
+        return cls.__name__
+    
     def execute(self,filepath,document_array,is_document_uploaded, params):
+        start_time = time.time()
         model_type = params['modelType']
 
         if is_document_uploaded:
@@ -41,7 +47,7 @@ class Extraction:
             "required": []
         }
 
-        llm = LlmProvider.get_llm(model_type=model_type, is_private=False, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
+        llm = LlmProvider.get_llm(class_name= self.get_class_name(),model_type=model_type, is_private=False, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
 
         chain = create_extraction_chain(schema=schema, llm=llm)
 
@@ -57,5 +63,6 @@ class Extraction:
 """
       
         response=AppletResponse(answer, [])
-
+        execution_time = round(time.time() - start_time,2)
+        logging.info(utils.logging_info(self.get_class_name(),"Execution Time (s): ", execution_time))
         return response.obj()
