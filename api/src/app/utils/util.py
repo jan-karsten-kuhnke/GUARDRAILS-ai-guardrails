@@ -1,3 +1,4 @@
+import datetime
 
 class utils:
     def rename_id(data):
@@ -9,3 +10,12 @@ class utils:
                 data['id'] = data['_id']
                 del data['_id']
         return data
+    
+    def logging_info(class_name = None, msg_type= None, content=None):
+        result =  {
+            'Timestamp': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            'Class Name': class_name,
+            'message': f'{msg_type} {content}'
+        }
+        return result
+    

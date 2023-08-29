@@ -3,14 +3,16 @@ from langchain.chat_models import ChatOpenAI, ChatVertexAI
 from langchain.llms import  VertexAI
 from langchain import OpenAI
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-
+# from executors.utils.helper import MyCustomHandler
+from typing import Any
+# from executors.utils.LlmCallbackHandler import LlmCallbackHandler
+from executors.utils.LlmCallbackHandler import LlmCallbackHandler
 
 class LlmProvider:
-    def get_llm(model_type="OpenAI", is_private=False, use_chat_model= False, max_output_token = 1000 , increase_model_token_limit=False):
+    def get_llm(class_name = None,model_type="OpenAI", is_private=False, use_chat_model= False, max_output_token = 1000 , increase_model_token_limit=False):
         private_llm: Any = None
         public_llm: Any = None
-
-        callbacks = [StreamingStdOutCallbackHandler()]
+        callbacks = [StreamingStdOutCallbackHandler(),LlmCallbackHandler(class_name=class_name)]
         temp = Globals.model_temp
         
             
