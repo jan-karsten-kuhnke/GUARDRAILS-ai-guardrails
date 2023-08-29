@@ -2,7 +2,7 @@ import json
 from sqlalchemy import create_engine, text, func ,or_,and_
 from sqlalchemy.orm import sessionmaker
 
-from database.models import Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, DocumentEntity, FolderEntity , PromptEntity , OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity, ChainEntity,  EulaEntity, DataSourcesEntity
+from database.models import Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, DocumentEntity, FolderEntity , PromptEntity , OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity, ChainEntity,  EulaEntity, DataSourceEntity
 from database.vector_store.vector_store_model import Vector_Base, CollectionEntity
 
 from globals import Globals
@@ -89,6 +89,27 @@ class Persistence:
             return jsonify({"message": "error"}), 500
         finally:
             session.close()
+
+    def insert_data_source(name, connection_string, schemas=[], tables_to_include=[], custom_schema_description=""):
+        try:
+            session=Session()
+            data_source = DataSourceEntity(
+                    name=name,
+                    connection_string=connection_string,
+                    schemas=schemas,
+                    tables_to_include=tables_to_include,
+                    custom_schema_description=custom_schema_description
+                )
+            session.add(data_source)
+            session.commit()
+            return jsonify({"message": "successfully added data source"}), 200
+        except Exception as ex:
+            logging.error(f"Exception while adding datasource: {ex}")
+            session.rollback()
+            return jsonify({"message": "error in adding data source"}), 500
+        finally:
+            session.close()
+
         
 
     
@@ -139,10 +160,11 @@ class Persistence:
         finally:
             session.close()
 
-    def get_list_query(Entity, sort, range_, filter_,collection):
+    def get_list_query(Entity, sort, range_, filter_, collection=None):
         try:
             query = session.query(Entity)
-            query = query.filter(Entity.collection_name == eval(collection))
+            if(collection):
+                query = query.filter(Entity.collection_name == eval(collection))
 
             # Apply filter conditions
             filter_dict = eval(filter_)
@@ -272,6 +294,40 @@ class Persistence:
             return jsonify({"message": "error"}), 500
         finally:
             session.close()
+
+    def update_data_source(id, name, connection_string, schemas, tables_to_include, custom_schema_description):
+        try:
+            session=Session()
+            data_source = session.query(DataSourceEntity).filter(DataSourceEntity.id == id).first()
+            if not data_source:
+                return jsonify({"message": "not found"}), 404
+            if name is not None:
+                data_source.name = name
+            if connection_string is not None:
+                data_source.connection_string = connection_string
+            if schemas is not None:
+                data_source.schemas = schemas
+            if tables_to_include is not None:
+                data_source.tables_to_include = tables_to_include
+            if custom_schema_description is not None:
+                data_source.custom_schema_description = custom_schema_description
+            session.commit()
+            return jsonify({"message": "successfully updated data source", "data_source": data_source.to_dict()}), 200
+        except Exception as e:
+            session.rollback()
+            return jsonify({"message": "error in updating data source"}), 500
+        finally:
+            session.close()
+    
+    def get_document_by_id(id):
+        try:
+            document = session.query(DocumentEntity).filter(DocumentEntity.id == id).first()
+            res = document.to_dict()
+            return res
+        except Exception as ex:
+            logging.error(f"Exception while getting document: {ex}")
+        finally:
+            session.close()
     
     def delete_document(document_id):
         try:
@@ -299,11 +355,11 @@ class Persistence:
             connection.close()
             session.close()
             
-    def get_document_by_id(document_id):
+    def get_pgvector_document_by_id(document_id):
         try:
-            document = session.query(DocumentEntity).filter(DocumentEntity.id == document_id).first()
-            serialized_document = document.to_dict()
-            custom_ids = serialized_document['custom_ids']
+            document = Persistence.get_document_by_id(document_id)
+
+            custom_ids = document['custom_ids']
             comma_separated_custom_ids = ', '.join([f"'{id}'" for id in custom_ids])
             
             connection = vector_store_engine.connect()
@@ -314,7 +370,7 @@ class Persistence:
             
             for r in result:
                 rows.append(r[0])
-            return {"docs":rows,"metadata":serialized_document}
+            return {"docs":rows,"metadata":document}
         except Exception as ex:
             logging.error(f"Exception while getting document: {ex}")
         finally:
@@ -332,7 +388,7 @@ class Persistence:
 
     def get_data_source_by_id(id):
         try:
-            data_source = session.query(DataSourcesEntity).filter(DataSourcesEntity.id == id).first()
+            data_source = session.query(DataSourceEntity).filter(DataSourceEntity.id == id).first()
             serialized_data_source = data_source.to_dict()
             return serialized_data_source
         except Exception as ex:
@@ -424,7 +480,23 @@ class Persistence:
         except Exception as ex:
             logging.error(f"Exception while getting chat logs: {ex}")
         finally:
-            session.close()        
+            session.close()   
+            
+    def get_documents_by_collection_name(collection_name):
+        try:
+            documents = session.query(DocumentEntity).filter(DocumentEntity.collection_name == collection_name).all()
+            result = []
+            for document in documents:
+                result.append({
+                    'id': str(document.id),
+                    'title': document.title,
+                })
+            return jsonify({"data":result,"success":True}),200
+        except Exception as ex:
+            return jsonify({"data":"","success":False,"message": "Error in retrieving documents from collection"}), 500
+            logging.error(f"Exception while getting documents: {ex}")
+        finally:
+            session.close()         
         
     def get_eula_status(user_email):
         try:
@@ -456,3 +528,56 @@ class Persistence:
             return jsonify({"message": "Error in updating eula","success":False}), 500
         finally:
             session.close()
+
+    
+
+    def insert_chain(title, icon, code, params, active, group_code):
+        try:
+            session=Session()
+            chain = ChainEntity(
+                    title=title,
+                    icon=icon,
+                    code=code,
+                    params=params,
+                    is_active=active,
+                    group_code=group_code
+            )
+            session.add(chain)
+            session.commit()
+            return jsonify({"message": "Successfully inserted chain","success":True}), 200
+        except Exception as e:
+            logging.error(f"Exception while inserting chain: {e}")
+            session.rollback()
+            return jsonify({"message": "Error in inserting chain","success":False}), 500
+        finally:
+            session.close()
+    
+    def update_chain(id, data):
+        try:
+            session=Session()
+            chain=session.query(ChainEntity).filter(ChainEntity.id == id).first()
+            if chain:
+                if 'title' in data:
+                    chain.title = data['title']
+                if 'icon' in data:
+                    chain.icon = data['icon']
+                if 'code' in data:
+                    chain.code = data['code']
+                if 'params' in data:
+                    chain.params = data['params']
+                if 'is_active' in data:
+                    chain.is_active = data['is_active']
+                if 'group_code' in data:
+                    chain.group_code = data['group_code']
+            else:
+                return jsonify({"message": "Cannot find the chain","success":False}), 500
+            session.commit()
+            return jsonify({"message": "Successfully updated chain","success":True}), 200
+        except Exception as e:
+            logging.error(f"Exception while updating chain: {e}")
+            session.rollback()
+            return jsonify({"message": "Error in updating chain","success":False}), 500
+        finally:
+            session.close()
+        
+

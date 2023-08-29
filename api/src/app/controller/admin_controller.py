@@ -9,7 +9,7 @@ from marshmallow import Schema, fields,validate
 from oidc import get_current_user_email
 from oidc import get_current_user_roles
 from oidc import oidc
-from database.models import  AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity,CustomRuleEntity,PredefinedRuleEntity
+from database.models import  AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, CustomRuleEntity, PredefinedRuleEntity
 
 
 adminendpoints = SmorestBlueprint('admin', __name__)
@@ -197,4 +197,41 @@ def complete_request():
     approved = data['approved']
     return admin_service.complete_request(request_id, approved)
 
+@adminendpoints.route('/insert_chain', methods=['POST'])
+@oidc.accept_token(require_token=True)
+def insert_chain():
+    data = request.json
+    title = data['title']
+    icon = data['icon']
+    code = data['code']
+    params=data['params']
+    active=data['is_active']
+    group_code=data['group_code']
+    return admin_service.insert_chain(title, icon, code, params, active, group_code)
+
+
+@adminendpoints.route('/update_chain/<id>',methods=['POST'])
+@oidc.accept_token(require_token=True)
+def update_chain(id):
+    data = request.json
+    return admin_service.update_chain(id, data) 
+
+
+@adminendpoints.route('/data_source', methods=['POST'])
+@oidc.accept_token(require_token=True)
+def data_source_create():
+    data = request.json
+    if 'name' not in data or 'connection_string' not in data:
+        return {'success': False, 'message': 'Missing required fields'}, 400
     
+    return admin_service.insert_data_source(data)
+
+
+@adminendpoints.route('/data_source/<data_source_id>', methods=['PUT'])
+@oidc.accept_token(require_token=True)
+def reject_escalation(data_source_id):
+    data = request.json
+    return admin_service.update_data_source(data_source_id, data)
+
+
+

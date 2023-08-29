@@ -95,7 +95,7 @@ class  IngestionService :
         texts = text_splitter.split_documents(document)
 
         for text in texts:
-            text.metadata['source'] = text.metadata['source'].split( '/')[-1]
+            text.metadata['source'] = text.metadata['source'].split( '/')[-1].split('\\')[-1]
 
         logging.info(f"Split into {len(texts)} chunks of text (max. {chunk_size} tokens each)")
         #Summarize each document

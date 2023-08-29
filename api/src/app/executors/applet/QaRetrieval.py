@@ -29,7 +29,7 @@ class QaRetrieval:
         embeddings = HuggingFaceEmbeddings()
         
         CONNECTION_STRING =Globals.VECTOR_STORE_DB_URI
-        COLLECTION_NAME = collection_name
+        COLLECTION_NAME = params['collection_name']
         
         store = PGVector(
             collection_name=COLLECTION_NAME,
@@ -37,7 +37,13 @@ class QaRetrieval:
             embedding_function=embeddings,
         )
         
-        retriever = store.as_retriever()
+        if params['is_document_selected']:
+            retriever=store.as_retriever(
+               search_kwargs={'filter': {'source' : params['title']}}
+            )  
+        else:
+            retriever = store.as_retriever(
+            )
         
         llm=LlmProvider.get_llm(class_name= self.get_class_name(),model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
 
