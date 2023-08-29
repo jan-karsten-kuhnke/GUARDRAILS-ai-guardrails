@@ -15,9 +15,9 @@ class LlmCallbackHandler(BaseCallbackHandler):
 
     def on_llm_end(self, response, **kwargs):
         token_usage = response.llm_output['token_usage'] if 'token_usage' in response.llm_output else {}
-        logging.debug(utils.logging_info(self.class_name,"Input Token Count: ", token_usage['prompt_tokens'] if 'prompt_tokens' in token_usage else 0))
-        logging.debug(utils.logging_info(self.class_name,"Output Token Count: ", token_usage['completion_tokens'] if 'completion_tokens' in token_usage else 0))
-        logging.debug(utils.logging_info(self.class_name,"Total Token Count: ", token_usage['total_tokens'] if 'total_tokens' in token_usage else 0))
+        logging.debug(utils.logging_info(self.class_name, "Input Token Count: ", token_usage.get('prompt_tokens', 0)))
+        logging.debug(utils.logging_info(self.class_name, "Output Token Count: ", token_usage.get('completion_tokens', 0)))
+        logging.debug(utils.logging_info(self.class_name, "Total Token Count: ", token_usage.get('total_tokens', 0)))
 
     def on_llm_error(self, error, **kwargs):
         logging.debug(utils.logging_info(self.class_name,"LLM Error: ", error))

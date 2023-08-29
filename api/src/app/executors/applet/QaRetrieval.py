@@ -64,5 +64,5 @@ class QaRetrieval:
         
         response=AppletResponse(answer, sources)
         execution_time = round(time.time() - start_time,2)
-        logging.info(utils.logging_info(self.get_class_name(),"Execution Time (s): ", execution_time))
+        logging.info(utils.logging_info(__class__.__name__,"Execution Time (s): ", execution_time))
         return response.obj()
