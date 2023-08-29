@@ -150,7 +150,7 @@ class chat_service:
                     try:
                         logging.info("calling summarize brief executor")
                         if(not is_document_uploaded):
-                            DocumentService.create_document(filename,filepath)
+                            DocumentService.create_document(filename,filepath,task_params)
                         executor_instance = Summarize()
                         res = executor_instance.execute(filepath=filepath,document_array=document_array,is_document_uploaded=is_document_uploaded, params=params)
 
@@ -161,7 +161,7 @@ class chat_service:
                 elif (executor == "extraction"):
                     try:
                         if(not is_document_uploaded):
-                            DocumentService.create_document(filename,filepath)
+                            DocumentService.create_document(filename,filepath,task_params)
                         executor_instance = Extraction()
                         res= executor_instance.execute(filepath=filepath,document_array=document_array,is_document_uploaded=is_document_uploaded, params=params)
 
