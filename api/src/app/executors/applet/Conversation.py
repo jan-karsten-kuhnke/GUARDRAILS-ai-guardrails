@@ -13,7 +13,7 @@ from database.repository import Persistence
 from typing import Any
 import logging,time
 from executors.utils.AppletResponse import AppletResponse
-from utils.util import utils
+from utils.util import log
 from datetime import datetime
 
 
@@ -53,5 +53,5 @@ class Conversation:
         
         response=AppletResponse(answer, [])
         execution_time = round(time.time() - start_time,2)
-        logging.info(utils.logging_info(__class__.__name__,"Execution Time (s): ", execution_time))
+        logging.info(log(__class__.__name__,"Execution Time (s): ", execution_time))
         return response.obj()

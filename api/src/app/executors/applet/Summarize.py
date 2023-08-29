@@ -10,7 +10,7 @@ from executors.utils.LlmProvider import LlmProvider
 from database.repository import Persistence
 from executors.utils.AppletResponse import AppletResponse
 import logging,time
-from utils.util import utils
+from utils.util import log
 
 class Summarize:
     
@@ -40,7 +40,7 @@ class Summarize:
         
         response=AppletResponse(result["output_text"], [])
         execution_time = round(time.time() - start_time,2)
-        logging.info(utils.logging_info(__class__.__name__,"Execution Time (s): ", execution_time))
+        logging.info(log(__class__.__name__,"Execution Time (s): ", execution_time))
         return response.obj()
 
 

@@ -15,7 +15,7 @@ from executors.wrappers.SQLSequentialChainWrapper import SQLDatabaseSequentialCh
 from executors.wrappers.SqlWrapper import SqlWrapper
 from langchain.output_parsers.list import CommaSeparatedListOutputParser
 from cryptography.fernet import Fernet
-from utils.util import utils
+from utils.util import log
 from utils.encryption import Encryption
 
 
@@ -74,7 +74,7 @@ class Sql:
         try:
             result = chain(query)
             intermediate_steps = result['intermediate_steps'] if result['intermediate_steps'] else None
-            logging.debug(utils.logging_info(__class__.__name__,"Intermediate Steps : ", intermediate_steps))
+            logging.debug(log(__class__.__name__,"Intermediate Steps : ", intermediate_steps))
             answer = result["result"]
             sql_results = (
                 result["intermediate_steps"][0]["input"]
@@ -116,5 +116,5 @@ class Sql:
 
         response=AppletResponse(answer, sources)
         execution_time = round(time.time() - start_time,2)
-        logging.info(utils.logging_info(__class__.__name__,"Execution Time (s): ", execution_time))
+        logging.info(log(__class__.__name__,"Execution Time (s): ", execution_time))
         return response.obj()
