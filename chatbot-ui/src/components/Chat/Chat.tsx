@@ -158,6 +158,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 conversation_id: selectedConversation.id,
                 isOverride: isOverRide,
                 task: selectedTask,
+                params
               };
               formData.append("data", JSON.stringify(payload));
               response = await executeOnDoc(formData);
