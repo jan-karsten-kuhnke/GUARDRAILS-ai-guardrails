@@ -18,7 +18,7 @@ from utils.util import utils
 
 class QaRetrieval:
 
-    def execute(self, query, is_private, chat_history,collection_name, params):
+    def execute(self, query, is_private, chat_history, params):
         start_time = time.time()
         model_type = params['modelType']
 
