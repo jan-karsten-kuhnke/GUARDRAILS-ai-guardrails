@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package.json ./
 
 # Install app dependencies
-RUN yarn install --production --network-timeout 1000000
+RUN yarn install  --network-timeout 1000000
 
 # Copy the rest of the application code to the container
 COPY . .
