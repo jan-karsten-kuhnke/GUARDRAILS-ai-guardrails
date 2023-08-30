@@ -1,6 +1,5 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  // mode: 'jit',
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
@@ -8,8 +7,8 @@ module.exports = {
   theme: {
     extend: {
       typography: ({ theme }) => ({
-        DEFAULT:{
-          css:{
+        DEFAULT: {
+          css: {
             '--tw-prose-body': '#374151',
             '--tw-prose-headings': '#111827',
             '--tw-prose-lead': '#4b5563',
