@@ -76,13 +76,13 @@ class admin_service:
     def approve_escalation(conversation_id, user_email):
         data=conversation_context.approve_escalation(conversation_id)
         message = f"Request Approved by: {user_email}"
-        chat_service.update_conversation(conversation_id,message,'guardrails',user_email,model=None,user_action_required=False)
+        chat_service.update_conversation(conversation_id,message,'guardrails',user_email,task=None,user_action_required=False)
         return data
 
     def reject_escalation(conversation_id, user_email):
         data=conversation_context.reject_escalation(conversation_id)
         message = f"Request Rejected by: {user_email}"
-        chat_service.update_conversation(conversation_id,message,'guardrails',user_email,model=None,user_action_required=False)
+        chat_service.update_conversation(conversation_id,message,'guardrails',user_email,task=None,user_action_required=False)
         return data
 
 

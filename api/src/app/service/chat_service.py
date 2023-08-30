@@ -39,6 +39,7 @@ class conversation_obj(TypedDict):
     state: str
     assigned_to: list
     task: str
+    task_params: dict
 
 
 class message_obj(TypedDict):
@@ -57,10 +58,10 @@ class chat_service:
     def chat_completion(data, current_user_email, token, filename=None, filepath=None):
         try:
             task = str(data["task"]) if "task" in data else None
-            task_params=data["params"] if "params" in data else None
-            document_id =task_params["documentId"] if "documentId" in task_params else None
+            task_params = data["params"] if "params" in data else None
+            document_id = task_params["documentId"] if "documentId" in task_params else None
             collection_name = task_params["collectionName"] if "collectionName" in task_params else None
-            qa_document_id=task_params["qaDocumentId"] if "qaDocumentId" in task_params else None
+            qa_document_id = task_params["qaDocumentId"] if "qaDocumentId" in task_params else None
             
             is_private = bool(
                 data["isPrivate"]) if "isPrivate" in data else False
@@ -110,7 +111,7 @@ class chat_service:
             stop_conversation, stop_response, updated_prompt, role = chat_service.validate_prompt(
                 prompt, is_override, pii_scan, nsfw_scan, current_user_email, conversation_id)
             chat_service.update_conversation(
-                conversation_id, updated_prompt, 'user', current_user_email, task, title)
+                conversation_id, updated_prompt, 'user', current_user_email, task, title, task_params)
 
             current_completion = ''
             user_action_required = False
@@ -234,7 +235,7 @@ class chat_service:
 
             chat_service.save_chat_log(current_user_email, updated_prompt)
             chat_service.update_conversation(
-                conversation_id, current_completion, role, current_user_email, task, None, msg_info, user_action_required)
+                conversation_id, current_completion, role, current_user_email, task, None, task_params, msg_info, user_action_required)
         except Exception as e:
             yield (json.dumps({"error": "error"}))
             logging.error("Error in chat completion: "+str(e))
@@ -270,8 +271,7 @@ class chat_service:
             logging.info("returning from pii")
             return stop_conversation, stop_response, updated_prompt, role
 
-    def create_Conversation(prompt, email, model, msg_info, title=None, id=None,):
-        task = model
+    def create_Conversation(prompt, email, task, msg_info, title=None, id=None, task_params=None):
         message = message_obj(
             id=str(uuid.uuid4()),
             role="user",
@@ -289,25 +289,25 @@ class chat_service:
             created=datetime.now(),
             messages=messages,
             user_email=email,
-            title=title if title else openai_wrapper.gen_title(prompt, model),
-            model_name=model,
+            title=title if title else openai_wrapper.gen_title(prompt, task),
             state='active',
             assigned_to=[],
-            task=task
+            task=task,
+            task_params=task_params
         )
         new_conversation_id = conversation_context.insert_conversation(
             conversation)
         return new_conversation_id
 
-    def update_conversation(conversation_id, content, role, user_email, model, title=None, msg_info=None, user_action_required=False):
+    def update_conversation(conversation_id, content, role, user_email, task, title=None, task_params=None, msg_info=None, user_action_required=False):
         conversation = conversation_context.get_conversation_by_id(
             conversation_id, user_email)
         if (conversation == None):
             chat_service.create_Conversation(
-                content, user_email, model, msg_info, title, conversation_id)
+                content, user_email, task, msg_info, title, conversation_id, task_params)
             return
-        if (model is None or not model):
-            model = conversation['model']
+        if (task is None or not task):
+            task = conversation['task']
         messages = conversation['messages']
         message = message_obj(
             id=str(uuid.uuid4()),
@@ -317,7 +317,7 @@ class chat_service:
             children=[],
             user_action_required=user_action_required,
             msg_info=msg_info,
-            task=model
+            task=task
         )
 
        # find message with last node id
@@ -330,7 +330,7 @@ class chat_service:
 
         conversation['last_node'] = message['id']
         conversation['updated'] = datetime.now()
-        conversation['model'] = model
+        conversation['task_params'] = task_params
 
         messages.append(message)
         conversation_context.update_conversation(conversation_id, conversation)
@@ -385,5 +385,5 @@ class chat_service:
         csv_email = ','.join(group_managers_emails)
         message = f"Request sent for approval to: {csv_email}"
         chat_service.update_conversation(conversation_id, message, 'guardrails',
-                                         user_email, model=None, msg_info=None, user_action_required=False)
+                                         user_email, task=None, msg_info=None, user_action_required=False)
         return message
