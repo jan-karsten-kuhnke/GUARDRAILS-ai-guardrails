@@ -1,6 +1,7 @@
 export const darkTheme = {
   primaryColor: "#202123",
   textColor: "#ffffff",
+  botMsgTextColorTheme: "text-[#d1d5db]",
   textColorSecondary: "#9CA3AF",
   primaryButtonTheme:
     "bg-[#202123] text-[#ffffff] hover:bg-[#343541] border border-white/20",
@@ -19,7 +20,7 @@ export const darkTheme = {
   taskSelectTheme: "bg-[#70738d] text-[#fff]",
   chatBackground: "bg-[#343541]",
   chatItemsBorder: "border border-neutral-600",
-  chatTitleTheme: "bg-[#444654] text-neutral-200",
+  chatTitleTheme: "bg-[#54566a] text-neutral-200",
   tilesTheme: {
     hover: "hover:bg-[#2d2f32]",
     selected: "bg-[#202123]",
