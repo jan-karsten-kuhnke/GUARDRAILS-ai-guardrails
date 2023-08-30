@@ -35,6 +35,7 @@ import rehypeMathjax from "rehype-mathjax";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import Visualization from "./components/Visualization";
+import { isDark } from '@/styles';
 
 export interface Props {
   message: Message;
@@ -191,7 +192,7 @@ export const ChatMessage: FC<Props> = memo(
             )}
           </div>
 
-          <div className="prose mt-[-2px] w-full dark:prose-invert">
+          <div className={`prose mt-[-2px] w-full dark:prose-invert ${isDark?`dark `:' '}`}>
             {message.role === "user" ? (
               <div className="flex w-full">
                 {isEditing ? (
@@ -379,7 +380,7 @@ export const AssistantMessage: FC<AssistantProps> = ({ content }) => {
   } = useContext(HomeContext);
   return (
     <MemoizedReactMarkdown
-      className={`prose dark:prose-invert flex-1 ${theme.botMsgTextColorTheme} font-normal`}
+      className={`prose dark:prose-invert ${isDark?`dark `:''}flex-1 ${theme.botMsgTextColorTheme} font-normal`}
       remarkPlugins={[remarkGfm, remarkMath]}
       rehypePlugins={[rehypeMathjax]}
       components={{
