@@ -1,11 +1,11 @@
-import ssl
+
 import pymongo
-import certifi
+
 from utils.apiResponse import ApiResponse
 from globals import *
 
 uri = Globals.mongo_uri
-client = pymongo.MongoClient(uri,tlsCAFile=certifi.where())
+client = pymongo.MongoClient(uri)
 db = client[Globals.mongo_db_name]
 
 conversations_collection = db["conversations"]
