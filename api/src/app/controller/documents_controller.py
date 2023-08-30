@@ -43,7 +43,7 @@ def create_document():
     collection_name = request.form['collectionName']
     uploaded_by = get_current_user_email()
     uploaded_at = str(datetime.now())
-    metadata = json.loads(request.form['apiMetadata']) if 'apiMetadata' in request.form else {}
+    metadata = json.loads(request.form['metaData']) if 'metaData' in request.form else {}
     temp_dir_name = "temp-" + str(time())
     os.mkdir(temp_dir_name)
     for file in files:
