@@ -1,6 +1,7 @@
 export const darkTheme = {
   primaryColor: "#202123",
   textColor: "#ffffff",
+  botMsgTextColorTheme: "text-[#d1d5db]",
   textColorSecondary: "#9CA3AF",
   primaryButtonTheme:
     "bg-[#202123] text-[#ffffff] hover:bg-[#343541] border border-white/20",

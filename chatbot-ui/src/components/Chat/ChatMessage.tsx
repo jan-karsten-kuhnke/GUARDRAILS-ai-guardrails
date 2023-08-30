@@ -235,7 +235,7 @@ export const ChatMessage: FC<Props> = memo(
                   </div>
                 ) : (
                   <div
-                    className={`prose whitespace-pre-wrap dark:prose-invert flex-1 text-[${theme.textColor}]`}
+                    className={`prose whitespace-pre-wrap dark:prose-invert flex-1 text-[${theme.textColor}] font-normal`} 
                   >
                     {message.content}
                   </div>
@@ -379,7 +379,7 @@ export const AssistantMessage: FC<AssistantProps> = ({ content }) => {
   } = useContext(HomeContext);
   return (
     <MemoizedReactMarkdown
-      className={`prose dark:prose-invert flex-1 text-[${theme.textColor}]`}
+      className={`prose dark:prose-invert flex-1 ${theme.botMsgTextColorTheme} font-normal`}
       remarkPlugins={[remarkGfm, remarkMath]}
       rehypePlugins={[rehypeMathjax]}
       components={{
