@@ -12,7 +12,7 @@ def get_current_user_email():
 def get_current_user_groups():
     token = request.headers['authorization'].split(' ')[1]
     user_info = oidc._get_token_info(token)
-    return user_info['groups']
+    return user_info['groups'] if 'groups' in user_info else []
 
 def get_current_user_roles():
     token = request.headers['authorization'].split(' ')[1]
