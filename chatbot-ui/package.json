@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host --force",
-    "serve": "vite --host --force --no-hmr",
+    "serve": "tsc && vite build && vite preview",
     "build": "tsc && vite build",
     "start": "vite --host",
     "preview": "vite preview"
+    
   },
   "dependencies": {
     "@emotion/react": "^11.10.8",
