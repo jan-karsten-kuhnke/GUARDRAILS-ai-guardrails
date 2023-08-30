@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host --force",
+    "serve": "vite --host --force --no-hmr",
     "build": "tsc && vite build",
     "start": "vite --host",
     "preview": "vite preview"

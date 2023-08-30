@@ -16,11 +16,8 @@ COPY . .
 # Build the app
 RUN yarn build
 
-# Install a production server (e.g., serve) globally
-RUN yarn global add serve
-
-# Expose port 3000 (or the port your production server uses)
+# Expose port 3000
 EXPOSE 3000
 
-# Start the production server
-CMD ["serve", "-s", "dist", "-l", "3000"]
+# Start the app
+CMD ["yarn", "serve"]
