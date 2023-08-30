@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package.json ./
 
 # Install app dependencies
-RUN yarn install  --network-timeout 1000000
+RUN yarn install --production --network-timeout 1000000
 
 # Copy the rest of the application code to the container
 COPY . .
@@ -16,8 +16,11 @@ COPY . .
 # Build the app
 RUN yarn build
 
-# Expose port 3000
+# Install a production server (e.g., serve) globally
+RUN yarn global add serve
+
+# Expose port 3000 (or the port your production server uses)
 EXPOSE 3000
 
-# Start the app
-CMD ["yarn", "dev"]
+# Start the production server
+CMD ["serve", "-s", "build", "-l", "3000"]
