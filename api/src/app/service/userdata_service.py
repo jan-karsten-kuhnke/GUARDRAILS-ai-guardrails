@@ -26,7 +26,7 @@ class userdata_service:
         user_groups = get_current_user_groups()
         all_chains  = session.query(ChainEntity).all()
         previous_requests = []
-        if(Globals.applet_access_request_feature_flag == "true"):
+        if(Globals.applet_access_request_feature_flag == "Enabled"):
             previous_requests = flowable_wrapper.get_submitted_requests_code(user_email)
             
         res = []
