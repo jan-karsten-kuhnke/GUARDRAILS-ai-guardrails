@@ -77,6 +77,8 @@ class Globals:
 
     applet_access_request_feature_flag=os.environ.get("APPLET_ACCESS_REQUEST")
     
+    logging_level = os.environ.get("LOGGING_LEVEL")
+
     def prepare_client_secrets():
         if os.path.isfile("client_secrets.json"):
             logging.info("removing existing client_secrets.json")

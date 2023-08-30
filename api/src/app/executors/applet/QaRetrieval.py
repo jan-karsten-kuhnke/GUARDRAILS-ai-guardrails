@@ -1,4 +1,4 @@
-import json
+import json, time, logging
 import random
 from langchain import OpenAI
 from langchain.chat_models import ChatOpenAI
@@ -14,12 +14,12 @@ from langchain.vectorstores.pgvector import PGVector
 from executors.utils.AppletResponse import AppletResponse
 from typing import Any
 import logging
-
+from utils.util import log
 
 class QaRetrieval:
-    
+
     def execute(self, query, is_private, chat_history, params):
-    
+        start_time = time.time()
         model_type = params['modelType']
 
 
@@ -42,7 +42,7 @@ class QaRetrieval:
             retriever = store.as_retriever(
             )
         
-        llm=LlmProvider.get_llm(model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
+        llm=LlmProvider.get_llm(class_name= __class__.__name__,model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
 
         chain = ConversationalRetrievalChain.from_llm(
             llm=llm,
@@ -63,5 +63,6 @@ class QaRetrieval:
         db = None
         
         response=AppletResponse(answer, sources)
-
+        execution_time = round(time.time() - start_time,2)
+        logging.info(log(__class__.__name__,"Execution Time (s): ", execution_time))
         return response.obj()
