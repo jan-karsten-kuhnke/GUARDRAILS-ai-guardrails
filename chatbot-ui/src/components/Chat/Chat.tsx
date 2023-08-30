@@ -523,7 +523,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               <div
                 className={`sticky top-0 z-10 flex justify-center py-4 ${theme.chatTitleTheme}`}
               >
-                {selectedTile?.title}
+                New Conversation
               </div>
               {selectedConversation?.messages.map((message, index) => (
                 <MemoizedChatMessage
