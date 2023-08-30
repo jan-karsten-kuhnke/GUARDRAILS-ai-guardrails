@@ -39,7 +39,10 @@ export const PromptbarSettings: FC<Props> = () => {
                 </option>
               ))}
           </select>
-          <PublicPrivateSwitch size={25} />
+          {/* Disable PublicPrivateSwitch component
+              Note:Don't uncomment the bellow commected code
+          */}
+          {/* <PublicPrivateSwitch size={25} /> */}
         </div>
       ) : (
         <></>

@@ -507,7 +507,10 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     />
                   </div>
                 ) : ""}
-                {selectedTile?.has_access ? (
+                {/*Disable PublicPrivateSwitch component
+                   Note:Don't uncomment the bellow commected code
+                */}
+                {/* {selectedTile?.has_access ? (
                   <div
                     className={`w-full justify-center rounded-lg p-4 ${theme.chatItemsBorder}`}
                   >
@@ -515,7 +518,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   </div>
                 ) : (
                   ""
-                )}
+                )} */}
               </div>
             </>
           ) : (
