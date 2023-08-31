@@ -17,7 +17,6 @@ from langchain.output_parsers.list import CommaSeparatedListOutputParser
 from cryptography.fernet import Fernet
 from utils.util import log
 from utils.encryption import Encryption
-from functools import lru_cache
 
 
 class Sql:
@@ -48,7 +47,20 @@ class Sql:
         )
         
         data_source_id = params['dataSourceId']
-        db = Sql.get_db(data_source_id)
+        data_source = Persistence.get_data_source_by_id(data_source_id)
+
+        db_url = Encryption.decrypt(data_source['connection_string'])
+
+        db_schemas = data_source['schemas'] if data_source['schemas'] else []
+        tables = data_source['tables_to_include'] if data_source['tables_to_include'] else []
+
+
+
+        db = SqlWrapper.from_uri(
+            database_uri = db_url,
+            schemas = db_schemas,
+            include_tables = tables
+        )
         
         llm=LlmProvider.get_llm(class_name= __class__.__name__,model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
         
@@ -106,21 +118,3 @@ class Sql:
         execution_time = round(time.time() - start_time,2)
         logging.info(log(__class__.__name__,"Execution Time (s): ", execution_time))
         return response.obj()
-    @lru_cache(maxsize=5)
-    def get_db(data_source_id):
-        data_source = Persistence.get_data_source_by_id(data_source_id)
-
-        db_url = Encryption.decrypt(data_source['connection_string'])
-
-        db_schemas = data_source['schemas'] if data_source['schemas'] else []
-        tables = data_source['tables_to_include'] if data_source['tables_to_include'] else []
-
-
-
-        db = SqlWrapper.from_uri(
-            database_uri = db_url,
-            schemas = db_schemas,
-            include_tables = tables
-        )
-        
-        return db
