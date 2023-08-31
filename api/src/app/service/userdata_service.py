@@ -43,7 +43,6 @@ class userdata_service:
                 chain_dict['has_access'] = False
             
             chain_dict['request_submitted'] = True if group_code in previous_requests else False
-            chain_dict['request_submitted'] = False
             res.append(chain_dict)
         res.sort(key=lambda x: x['dispalyOrder'])
         return res
