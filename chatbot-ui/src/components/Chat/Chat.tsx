@@ -436,9 +436,15 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       handleSelectedTile(foundTile);
     }
 
-    if(selectedConversation?.task_params && selectedConversation?.task === QA_RETRIEVAL_CODE){
+    if(selectedConversation?.task_params && selectedConversation?.task_params?.collectionName){
       homeDispatch({field: "selectedCollection", value: selectedConversation?.task_params?.collectionName})
+    }
+
+    if(selectedConversation?.task_params && selectedConversation?.task_params?.qaDocumentId){
       homeDispatch({field: "selectedDocument", value: selectedConversation?.task_params?.qaDocumentId})
+    }
+    else{
+      homeDispatch({field: "selectedDocument", value: undefined})
     }
   },[selectedConversation])
 
