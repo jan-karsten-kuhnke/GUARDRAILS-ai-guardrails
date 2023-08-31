@@ -7,7 +7,7 @@ import os
 from oidc import oidc
 from oidc import get_current_user_email
 from oidc import get_current_user_groups
-from utils.util import utils
+from utils.util import rename_id
 import json
 
 endpoints = SmorestBlueprint('chat', __name__)
@@ -34,7 +34,7 @@ def get_conversations():
     flag = archived_param.lower() == 'true'
     user_email = get_current_user_email()
     conversations = chat_service.get_conversations(user_email, flag)
-    return utils.rename_id(conversations)
+    return rename_id(conversations)
 
 
 @endpoints.route('/conversations/<conversation_id>', methods=['GET'])

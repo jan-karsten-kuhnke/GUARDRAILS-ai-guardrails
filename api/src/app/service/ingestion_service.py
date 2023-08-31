@@ -47,14 +47,14 @@ FILE_MAPPING = {
 }
 
 class  IngestionService :
-    def ingest_file(self,file_path: str,collection_name):
+    def ingest_file(self,file_path: str,collection_name,uploaded_by,uploaded_at,metadata={}):
         embeddings = HuggingFaceEmbeddings()
 
         CONNECTION_STRING = Globals.VECTOR_STORE_DB_URI
         COLLECTION_NAME = collection_name
 
         document = IngestionService.load_document(file_path)
-        texts = IngestionService.process_document(document)
+        texts = IngestionService.process_document(document,uploaded_by,uploaded_at,metadata)
     
         store = PGVector(
             collection_name=COLLECTION_NAME,
@@ -86,7 +86,7 @@ class  IngestionService :
         return documents
 
 
-    def process_document(document: list) -> List[Document]:
+    def process_document(document: list,uploaded_by,uploaded_at,metadata) -> List[Document]:
         if not document:
             logging.info("No document found")
             exit(0)
@@ -96,6 +96,12 @@ class  IngestionService :
 
         for text in texts:
             text.metadata['source'] = text.metadata['source'].split( '/')[-1].split('\\')[-1]
+            text.metadata['uploaded_by'] = uploaded_by
+            text.metadata['uploaded_at'] = uploaded_at
+            if len(metadata) != 0:
+                for key,val in metadata.items():
+                    text.metadata[key] = val
+
 
         logging.info(f"Split into {len(texts)} chunks of text (max. {chunk_size} tokens each)")
         #Summarize each document

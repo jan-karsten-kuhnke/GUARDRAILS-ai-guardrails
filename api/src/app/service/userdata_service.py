@@ -4,6 +4,7 @@ from database.postgres import session
 from oidc import get_current_user_groups
 from integration.flowable_wrapper import flowable_wrapper
 from database.repository import Persistence
+from globals import Globals
 
 class userdata_service:
     def get_all_folders(user_email):
@@ -23,9 +24,11 @@ class userdata_service:
 
     def get_tiles(user_email):
         user_groups = get_current_user_groups()
-        previous_requests = flowable_wrapper.get_submitted_requests_code(user_email)
-
         all_chains  = session.query(ChainEntity).all()
+        previous_requests = []
+        if(Globals.applet_access_request_feature_flag == "Enabled"):
+            previous_requests = flowable_wrapper.get_submitted_requests_code(user_email)
+            
         res = []
 
         for chain in all_chains:
@@ -40,7 +43,6 @@ class userdata_service:
                 chain_dict['has_access'] = False
             
             chain_dict['request_submitted'] = True if group_code in previous_requests else False
-            chain_dict['request_submitted'] = False
             res.append(chain_dict)
         res.sort(key=lambda x: x['dispalyOrder'])
         return res

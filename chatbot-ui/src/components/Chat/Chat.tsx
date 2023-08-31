@@ -496,9 +496,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         >
           {selectedConversation?.messages.length === 0 ? (
             <>
-              <div className="mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-5 md:pt-12 sm:max-w-[600px]">
+              <div className="mx-auto flex flex-col space-y-5 md:space-y-10 px-3 pt-5 md:pt-12 sm:max-w-[800px]">
                 <div className="text-center text-3xl font-semibold">
-                  <div className="mx-auto flex h-full w-[300px] flex-col justify-center space-y-6 sm:w-[600px]">
+                  <div className="mx-auto flex h-full w-[300px] flex-col justify-center space-y-6 sm:w-[800px]">
                     <div
                       className={`text-center text-4xl font-bold text-[${theme.textColor}]`}
                     >
@@ -538,7 +538,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     />
                   </div>
                 ) : ""}
-                {selectedTile?.has_access ? (
+
+                {/*Disable PublicPrivateSwitch component
+                   Note:Don't uncomment the bellow commected code
+                */}
+
+                {/* {selectedTile?.has_access ? (
                   <div
                     className={`w-full justify-center rounded-lg p-4 ${theme.chatItemsBorder}`}
                   >
@@ -546,15 +551,15 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                   </div>
                 ) : (
                   ""
-                )}
+                )} */}
               </div>
             </>
           ) : (
             <>
               <div
-                className={`sticky top-0 z-10 flex justify-center py-2 text-sm ${theme.chatTitleTheme}`}
+                className={`sticky top-0 z-10 flex justify-center py-4 ${theme.chatTitleTheme}`}
               >
-                {selectedConversation?.title}
+                New Conversation
               </div>
               {selectedConversation?.messages.map((message, index) => (
                 <MemoizedChatMessage

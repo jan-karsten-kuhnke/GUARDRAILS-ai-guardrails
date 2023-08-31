@@ -70,7 +70,15 @@ class Globals:
     keycloak_admin_password=os.environ.get("KEYCLOAK_ADMIN_PASSWORD")
     
     open_ai_api_key=os.environ.get("OPENAI_API_KEY")
+
+
+
+    #FeatureFlaga
+
+    applet_access_request_feature_flag=os.environ.get("APPLET_ACCESS_REQUEST")
     
+    logging_level = os.environ.get("LOGGING_LEVEL")
+
     def prepare_client_secrets():
         if os.path.isfile("client_secrets.json"):
             logging.info("removing existing client_secrets.json")

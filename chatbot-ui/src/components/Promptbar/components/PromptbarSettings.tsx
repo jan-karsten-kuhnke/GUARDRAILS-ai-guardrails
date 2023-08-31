@@ -16,7 +16,10 @@ export const PromptbarSettings: FC<Props> = () => {
     <>
       {selectedConversation?.messages.length != 0 ? (
         <div className={`pt-1 ${theme.dividerTopTheme}`}>
-          <PublicPrivateSwitch size={25} />
+          {/* Disable PublicPrivateSwitch component
+              Note:Don't uncomment the below commented code
+          */}
+          {/* <PublicPrivateSwitch size={25} /> */}
         </div>
       ) : (
         <></>

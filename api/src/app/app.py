@@ -16,7 +16,13 @@ from globals import *
 
 Globals.prepare_client_secrets()
 app = Flask(__name__)
-logging.basicConfig(level=logging.INFO)
+# sets the root level of the logger 
+def configure_logging():
+    log_level = os.environ.get("LOGGING_LEVEL", "DEBUG")
+    log_level = getattr(logging, log_level.upper(), logging.DEBUG)
+    logging.getLogger().setLevel(log_level)
+
+
 app.config["PROPAGATE_EXCEPTIONS"] = True
 app.config["API_TITLE"] = "AI-Guardrails Swagger"
 app.config["API_VERSION"] = "v1"
@@ -70,6 +76,7 @@ app.config.update({
 oidc.init_app(app)
 
 def create_app():
+    configure_logging()
     logging.info("starting server")
     app.run(host = '0.0.0.0', debug=True,port=8080,threaded=True)
     return app

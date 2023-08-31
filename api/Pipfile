@@ -22,7 +22,7 @@ transformers = "4.29.2"
 sentencepiece = "0.1.99"
 flask-smorest = "0.42.0"
 marshmallow = "3.19.0"
-langchain = "0.0.237"
+langchain = "0.0.275"
 pypdf = "3.11.0"
 tiktoken = "0.4.0"
 pydantic = "~=1.10.8"
@@ -43,6 +43,7 @@ pdfminer = {six = "20221105"}
 pgvector = "0.2.1"
 cryptography = "41.0.3"
 pymssql = "2.2.8"
+
 
 [dev-packages]
 black = "*"

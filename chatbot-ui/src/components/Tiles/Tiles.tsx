@@ -97,24 +97,22 @@ const Tiles: FC = () => {
       <div
         className={`flex justify-between items-center p-2 px-4 rounded-lg ${theme.tilesTheme.header}`}
       >
-        <span className={`text-xl ml-3`}>Select task</span>
+        <span className={`text-xl ml-3`}>Select Task</span>
         <div className="flex">
           <Tooltip title="Refresh tasks" placement="top">
             <button
-              className={`${
-                loading && "animate-spin opacity-50 cursor-not-allowed"
-              } m-1 hover:scale-110 transition-transform duration-300 ease-in-out p-0.5 mr-2 border rounded-full`}
+              className={`${loading && "animate-spin opacity-50 cursor-not-allowed"
+                } m-1 hover:scale-110 transition-transform duration-300 ease-in-out p-0.5 mr-2 border rounded-full`}
               onClick={handleGetTiles}
             >
               <IconRefreshDot />
             </button>
           </Tooltip>
-          <Divider orientation="vertical" flexItem sx={{ margin: "0 20px",backgroundColor: "white", opacity: 0.3 }} />
+          <Divider orientation="vertical" flexItem sx={{ margin: "0 20px", backgroundColor: "white", opacity: 0.3 }} />
           <span>
             <button
-              className={`m-1 hover:scale-110 transition-transform duration-300 ease-in-out p-0.5 mr-2 border rounded-full ${
-                scrollX === 0 && "opacity-30 cursor-not-allowed hover:scale-100"
-              }`}
+              className={`m-1 hover:scale-110 transition-transform duration-300 ease-in-out p-0.5 mr-2 border rounded-full ${scrollX === 0 && "opacity-30 cursor-not-allowed hover:scale-100"
+                }`}
               onClick={() => slide(-300)}
               disabled={scrollX === 0}
             >
@@ -122,9 +120,8 @@ const Tiles: FC = () => {
             </button>
 
             <button
-              className={`m-1 hover:scale-110 transition-transform duration-300 ease-in-out p-0.5 border rounded-full ${
-                scrolEnd && "opacity-30 cursor-not-allowed hover:scale-100"
-              }`}
+              className={`m-1 hover:scale-110 transition-transform duration-300 ease-in-out p-0.5 border rounded-full ${scrolEnd && "opacity-30 cursor-not-allowed hover:scale-100"
+                }`}
               onClick={() => slide(+300)}
               disabled={scrolEnd}
             >
@@ -146,10 +143,9 @@ const Tiles: FC = () => {
               text-[${theme.textColorSecondary}]
               ${selectedTile.code !== curr_tile.code && theme.tilesTheme.hover}
               ${theme.chatItemsBorder}
-              ${
-                selectedTile.code === curr_tile.code &&
+              ${selectedTile.code === curr_tile.code &&
                 theme.tilesTheme.selected
-              }
+                }
               ${!curr_tile.is_active && "opacity-30"}
               ${!curr_tile.has_access && "opacity-50"}`}
               onClick={(e) => {

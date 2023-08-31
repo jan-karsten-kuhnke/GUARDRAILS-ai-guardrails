@@ -63,6 +63,9 @@ class chat_service:
             collection_name = task_params["collectionName"] if "collectionName" in task_params else None
             qa_document_id = task_params["qaDocumentId"] if "qaDocumentId" in task_params else None
             
+            uploaded_by = current_user_email
+            uploaded_at = str(datetime.now())
+
             is_private = bool(
                 data["isPrivate"]) if "isPrivate" in data else False
             pii_scan = True
@@ -151,7 +154,7 @@ class chat_service:
                     try:
                         logging.info("calling summarize brief executor")
                         if(not is_document_uploaded):
-                            DocumentService.create_document(filename,filepath,task_params)
+                            DocumentService.create_document(filename,filepath,task_params,uploaded_by,uploaded_at)
                         executor_instance = Summarize()
                         res = executor_instance.execute(filepath=filepath,document_array=document_array,is_document_uploaded=is_document_uploaded, params=params)
 
@@ -162,7 +165,7 @@ class chat_service:
                 elif (executor == "extraction"):
                     try:
                         if(not is_document_uploaded):
-                            DocumentService.create_document(filename,filepath,task_params)
+                            DocumentService.create_document(filename,filepath,task_params,uploaded_by,uploaded_at)
                         executor_instance = Extraction()
                         res= executor_instance.execute(filepath=filepath,document_array=document_array,is_document_uploaded=is_document_uploaded, params=params)
 
