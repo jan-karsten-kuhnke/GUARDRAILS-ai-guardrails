@@ -126,11 +126,23 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         let response: any;
 
         //params for selected tiles
+        let sendCollectionName = false
+        let sendQaDocumentId = false
+
+        selectedTile?.params?.inputs?.forEach((item:any) => {
+          const { type } = item;
+          if (type === 'collectionPicker') {
+            sendCollectionName = true
+          }
+          else if (type === 'documentPicker') {
+            sendQaDocumentId = true
+          }
+        })
 
         let params: any = {
           ...documentId ? { documentId } : {},
-          ...selectedCollection ? { collectionName: selectedCollection } : {},
-          ...selectedDocument ? { qaDocumentId: selectedDocument } : {},
+          ...( selectedCollection && sendCollectionName ) ? { collectionName: selectedCollection } : {},
+          ...( selectedDocument && sendQaDocumentId ) ? { qaDocumentId: selectedDocument } : {},
         };
         if (
           selectedTile.params?.useExecuteOnDoc
