@@ -9,7 +9,7 @@ from oidc import get_current_user_email
 from oidc import get_current_user_groups
 from utils.util import rename_id
 import json
-from utils.util import validate_fields
+from utils.util import validate_chat_fields
 endpoints = SmorestBlueprint('chat', __name__)
 
 @endpoints.route('/completions', methods=['POST'])
@@ -18,8 +18,8 @@ def chat_completion():
     try:
         data = request.get_json(silent=True)
         data.setdefault('isOverride', False)
-        required_fields = ['message', 'conversation_id', 'task','params']
-        validation_result = validate_fields(data, required_fields)
+        required_fields = ['message', 'conversation_id', 'task', 'params']
+        validation_result = validate_chat_fields(data, required_fields)
         if validation_result:
             return validation_result
         user_email = get_current_user_email()
@@ -76,7 +76,7 @@ def archive_conversation(conversation_id):
 def update_conversation_properties(conversation_id):
     data = request.get_json(silent=True)
     required_fields = ['title', 'folderId']
-    validation_result = validate_fields(data, required_fields)
+    validation_result = validate_chat_fields(data, required_fields)
     if validation_result:
         return validation_result
     
@@ -101,9 +101,9 @@ def request_approval(conversation_id):
 def execute_on_document():
     data = json.loads(request.form['data'])
     data.setdefault('isOverride', False)
-    print("document data ",data)
     required_fields = ['conversation_id', 'task', 'params']
-    validation_result = validate_fields(data, required_fields)
+    required_params_fields = ['collectionName']
+    validation_result = validate_chat_fields(data, required_fields,required_params_fields)
     if validation_result:
         return validation_result
     
