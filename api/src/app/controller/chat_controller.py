@@ -102,8 +102,7 @@ def execute_on_document():
     data = json.loads(request.form['data'])
     data.setdefault('isOverride', False)
     required_fields = ['conversation_id', 'task', 'params']
-    required_params_fields = ['collectionName']
-    validation_result = validate_chat_fields(data, required_fields,required_params_fields)
+    validation_result = validate_chat_fields(data, required_fields)
     if validation_result:
         return validation_result
     
