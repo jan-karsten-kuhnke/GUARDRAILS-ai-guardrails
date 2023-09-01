@@ -1,41 +1,169 @@
 {
-    "swagger": "2.0",
-    "info": {
-      "title": "Ai-Harness API documentation",
-      "description": "A documentation of the APIs that is being used in Ai-harness.",
-      "version": "1.0"
+  "swagger": "2.0",
+  "info": {
+    "description": "A documentation of the APIs that is being used in Ai-harness.",
+    "version": "1.0.6",
+    "title": "AI-Harness Api documentation"
+  },
+  "tags": [
+    {
+      "name": "api/chat",
+      "description": "chat endpoints"
     },
-    "basePath": "/api",
-    "schemes": [
-      "http"
-    ],
-    "consumes": [
-      "application/json"
-    ],
-    "produces": [
-      "application/json"
-    ],
-    "paths": {
-      "/hello": {
+    { "name": "api/user", "description": "user endpoints" },
+    {
+      "name": "api/docs",
+      "description": "document endpoints"
+    }
+  ],
+  "schemes": ["https", "http"],
+  "paths": {
+    "/completions": {
+      "post": {
+        "tags": ["api/chat"],
+        "summary": "Returns response of users prompts from ai",
+        "description": "",
+        "consumes": ["application/json"],
+        "produces": ["text/event-stream"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "data object that are required to get the response from ai",
+            "required": true,
+            "schema": { "$ref": "#/definitions/Completion" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully returns readable stream response."
+          },
+          "400": { "description": "Missing required fields." }
+        }
+      }
+    },
+    "/conversation": {
+      "get": {
+        "tags": ["api/chat"],
+        "summary": "Returns all the conversation of user",
+        "description": "",
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "Successfully returns all the conversation",
+            "schema": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/Conversation" }
+            }
+          },
+          "400": { "description": "Error in returning conversation" }
+        }
+      }
+    },
+    "/documents/{document_id}": {
         "get": {
-          "summary": "Returns a simple greeting message.",
-          "produces": [
-            "application/json"
+            "tags": ["api/docs"],
+            "summary": "Returns the document by id",
+            "description": "",
+            "produces": ["application/json"],
+            "consumes": ["application/json"],
+            "parameters": [
+                {
+                  "name": "document_id",
+                  "in": "path",
+                  "description": "Document id to get",
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+            "responses": {
+              "200": {
+                "description": "Successfully returns the document",
+                "schema": {"$ref": "#/definitions/Document" }
+              },
+              "400": { "description": "Error in returning the document" }
+            }
+          },
+        "delete": {
+          "tags": ["api/docs"],
+          "summary": "Deletes a document",
+          "description": "",
+          "produces": ["application/json"],
+          "parameters": [
+            {
+              "name": "document_id",
+              "in": "path",
+              "description": "Document id to delete",
+              "required": true,
+              "type": "string"
+            }
           ],
           "responses": {
-            "200": {
-              "description": "Successful response.",
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "message": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
+            "200":{"description": "Successfully deleted document"},
+            "400": { "description": "Invalid document Id" }
           }
         }
       }
+  },
+  "definitions": {
+    "Completion": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "prompt": { "type": "string" },
+        "task": { "type": "string" },
+        "isOverride": { "type": "boolean" },
+        "conversation_id": { "type": "string" },
+        "params": { "$ref": "#/definitions/Params" }
+      }
+    },
+    "Params": {
+      "type": "object",
+      "properties": {
+        "collectionName": { "type": "string" },
+        "qaDocumentId": { "type": "string" },
+        "documentId": { "type": "string" }
+      }
+    },
+    "Conversation": {
+      "type": "object",
+      "properties": {
+        "_id": { "type": "string" },
+        "title": { "type": "string" },
+        "root_message": { "type": "string" },
+        "last_node": { "type": "string" },
+        "is_active": { "type": "boolean" },
+        "messages": {
+          "type": "array",
+          "xml": { "wrapped": true },
+          "items": { "type": "object", "xml": { "name": "messages" } }
+        },
+        "created": { "type": "string" },
+        "updated": { "type": "string" },
+        "user_email": { "type": "string" },
+        "state": { "type": "string" },
+        "assigned_to": {
+          "type": "array",
+          "xml": { "wrapped": true },
+          "items": { "type": "string", "xml": { "name": "messages" } }
+        },
+        "task": { "type": "string" }
+      }
+    },
+    "Document":{
+        "type":"object",
+        "properties":{
+            "title": { "type": "string" },
+            "description": { "type": "string" },
+            "id": { "type": "integer" },
+            "collection_name": { "type": "string" },
+            "location": { "type": "string" },
+            "custom_ids": {
+              "type": "array",
+              "xml": { "wrapped": true },
+              "items": { "type": "string", "xml": { "name": "custom_ids" } }
+            }
+        }
     }
   }
+}
