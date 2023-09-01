@@ -50,7 +50,10 @@ def get_conversations():
 @oidc.accept_token(require_token=True)
 def get_conversation_by_id(conversation_id):
     user_email = get_current_user_email()
-    return chat_service.get_conversation_by_id(conversation_id, user_email)
+    result = chat_service.get_conversation_by_id(conversation_id, user_email)
+    if result is None:
+        return jsonify(error="Conversation not found"),404
+    return rename_id(result)
 
 
 @endpoints.route('/conversations/archive', methods=['DELETE'])
@@ -67,7 +70,9 @@ def archive_conversation(conversation_id):
     archived_param = request.args.get('flag')
     flag = archived_param.lower() == 'true' if archived_param else False
     user_email = get_current_user_email()
-    chat_service.archive_conversation(user_email, conversation_id, flag=flag)
+    result = chat_service.archive_conversation(user_email, conversation_id, flag=flag)
+    if result is None:
+        return jsonify(error="Conversation not found"), 404
     return {"result": "success"}
 
 
@@ -81,8 +86,10 @@ def update_conversation_properties(conversation_id):
         return validation_result
     
     user_email = get_current_user_email()
-    chat_service.update_conversation_properties(
+    result = chat_service.update_conversation_properties(
         conversation_id, data, user_email)
+    if result.matched_count == 0:
+        return jsonify(error="Conversation not found"), 404
     return {"result": "success"}
 
 

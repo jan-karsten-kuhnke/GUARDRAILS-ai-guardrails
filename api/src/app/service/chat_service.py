@@ -357,8 +357,9 @@ class chat_service:
         conversation_context.archive_all_conversations(user_email)
 
     def archive_conversation(user_email, conversation_id, flag=True):
-        conversation_context.archive_unarchive_conversation(
+        result = conversation_context.archive_unarchive_conversation(
             user_email, conversation_id, flag)
+        return result
 
     def get_history_for_bot(conversation_id, user_email):
         conversation = conversation_context.get_conversation_by_id(
@@ -373,8 +374,9 @@ class chat_service:
         return result
 
     def update_conversation_properties(conversation_id, data, user_email):
-        conversation_context.update_conversation_properties(
+       result =  conversation_context.update_conversation_properties(
             conversation_id, data, user_email)
+       return result
 
     def request_approval(conversation_id, user_email, user_groups):
         # needs to be updated for multiple groups

@@ -35,7 +35,7 @@ def validate_chat_fields(data, required_fields):
             print("data field",data[field])
             if not isinstance(data[field], dict):
                  return jsonify(error=f"Invalid data type for {field}"), 400
-       elif not isinstance(data[field], str):
+       elif not (isinstance(data[field], str) or type(data[field]) == type(None)):
             return jsonify(error=f"Invalid data type for {field}"), 400
             
     return False
