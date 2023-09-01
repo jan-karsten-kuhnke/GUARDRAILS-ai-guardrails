@@ -23,11 +23,11 @@ def log(class_name = None, msg_type= None, content=None):
 def validate_chat_fields(data, required_fields, required_params_fields=[]):
     if not data:
         return jsonify(error="Missing or invalid JSON data"), 400
-    
-    if data['task'] == 'qa-retrieval':
-        required_params_fields.append('qaDocumentId')
-    elif data['task'] == 'summarize-brief':
-         required_params_fields.append('documentId')
+    if hasattr(data, 'task'):
+         if data['task'] == 'qa-retrieval':
+             required_params_fields.append('qaDocumentId')
+         elif data['task'] == 'summarize-brief':
+             required_params_fields.append('documentId')
         
     missing_fields = [field for field in required_fields if field not in data]
     
