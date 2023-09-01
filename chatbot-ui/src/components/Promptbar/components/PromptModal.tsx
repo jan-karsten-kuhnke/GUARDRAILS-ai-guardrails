@@ -65,7 +65,7 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
             </div>
             <input
               ref={nameInputRef}
-              className={`${theme.chatTextAreaTheme} mt-2 w-full rounded-lg  px-4 py-2 text-neutral-900  `}
+              className={`${theme.chatTextAreaTheme} mt-2 w-full rounded-lg  px-4 py-2 text-[${theme.textColor}`}
               placeholder={"A name for your prompt." || ""}
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -75,7 +75,7 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
               {"Description"}
             </div>
             <textarea
-              className={`${theme.chatTextAreaTheme} mt-2 w-full rounded-lg  px-4 py-2 text-neutral-900  `}
+              className={`${theme.chatTextAreaTheme} mt-2 w-full rounded-lg  px-4 py-2 text-[${theme.textColor}`}
               style={{ resize: "none" }}
               placeholder={"A description for your prompt." || ""}
               value={description}
@@ -89,7 +89,7 @@ export const PromptModal: FC<Props> = ({ prompt, onClose, onUpdatePrompt }) => {
               {"Prompt"}
             </div>
             <textarea
-              className={`${theme.chatTextAreaTheme} mt-2 w-full rounded-lg  px-4 py-2 text-neutral-900  `}
+              className={`${theme.chatTextAreaTheme} mt-2 w-full rounded-lg  px-4 py-2 text-[${theme.textColor}`}
               style={{ resize: "none" }}
               placeholder={
                 "Prompt content. Use {{}} to denote a variable. Ex: {{name}} is a {{adjective}} {{noun}}"
