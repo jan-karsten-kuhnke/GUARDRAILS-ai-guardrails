@@ -273,7 +273,7 @@ class Persistence:
         finally:
             session.close()
 
-    def update_document(document_id, title, description, location, folder_id):
+    def update_document(document_id, title, description, location, collection_name):
         try:
             session=Session()
             document = session.query(DocumentEntity).filter(DocumentEntity.id == document_id).first()
@@ -285,8 +285,8 @@ class Persistence:
                 document.description = description
             if location:
                 document.location = location
-            if folder_id:
-                document.folder_id = folder_id
+            if collection_name:
+                document.collection_name = collection_name
             session.commit()
             return jsonify({"message": "success", "document": document.to_dict()}), 200
         except Exception as e:
@@ -332,13 +332,15 @@ class Persistence:
     def delete_document(document_id):
         try:
             session=Session()
+            connection = vector_store_engine.connect()
             document = session.query(DocumentEntity).filter(DocumentEntity.id == document_id).first()
+            if document is None:
+                return jsonify({"message": "document not found"}), 404
             row = document.to_dict()
 
             #deleting vector store embeddings for  document
             custom_ids = row['custom_ids']
             comma_separated_custom_ids = ', '.join([f"'{id}'" for id in custom_ids])
-            connection = vector_store_engine.connect()
             sql_query = f"DELETE FROM langchain_pg_embedding WHERE custom_id IN ({comma_separated_custom_ids})"
             result = connection.execute(text(sql_query))
             connection.commit()
@@ -471,7 +473,7 @@ class Persistence:
         try:
             collections = vector_session.query(CollectionEntity).all()
             result = []
-            for collection in collections:
+            for collection in collections:                    
                 result.append({
                     'id': str(collection.uuid),
                     'name': collection.name
