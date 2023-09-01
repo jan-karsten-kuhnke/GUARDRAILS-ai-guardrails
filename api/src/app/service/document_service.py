@@ -39,8 +39,8 @@ class DocumentService:
     def get_document(Entity,document_id):
         return Persistence.get_one_query(Entity, document_id)
     
-    def update_document(document_id, title, description, location, folder_id):
-        return Persistence.update_document(document_id, title, description, location, folder_id)
+    def update_document(document_id, title, description, location, collection_name):
+        return Persistence.update_document(document_id, title, description, location, collection_name)
     
     def delete_document(document_id):
         return Persistence.delete_document(document_id)

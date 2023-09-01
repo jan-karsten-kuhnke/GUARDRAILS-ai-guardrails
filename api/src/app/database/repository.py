@@ -273,7 +273,7 @@ class Persistence:
         finally:
             session.close()
 
-    def update_document(document_id, title, description, location, folder_id):
+    def update_document(document_id, title, description, location, collection_name):
         try:
             session=Session()
             document = session.query(DocumentEntity).filter(DocumentEntity.id == document_id).first()
@@ -285,8 +285,8 @@ class Persistence:
                 document.description = description
             if location:
                 document.location = location
-            if folder_id:
-                document.folder_id = folder_id
+            if collection_name:
+                document.collection_name = collection_name
             session.commit()
             return jsonify({"message": "success", "document": document.to_dict()}), 200
         except Exception as e:

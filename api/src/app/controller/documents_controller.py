@@ -67,14 +67,15 @@ def create_document():
 @documentsendpoints.route('/documents/<int:document_id>', methods=['PUT'])
 @oidc.accept_token(require_token=True)
 def update_document(document_id):
+    data= request.json
     title= request.json.get('title')
     description= request.json.get('description')
     location= request.json.get('location')
-    folder_id= request.json.get('folder_id')
-    validate=validate_document_fields(title,description,location,folder_id)
+    collection_name= request.json.get('collection_name')
+    validate=validate_document_fields(data)
     if validate != True:
         return validate
-    return DocumentService.update_document(document_id=document_id ,title=title, description=description, location=location, folder_id=folder_id)
+    return DocumentService.update_document(document_id=document_id ,title=title, description=description, location=location, collection_name=collection_name)
     
 
 # DELETE a document

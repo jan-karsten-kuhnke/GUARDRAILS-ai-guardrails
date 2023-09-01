@@ -26,17 +26,9 @@ def validate_collection_name(collection_name):
         return jsonify(error="Collection name is required."),400
     if type(collection_name) != str:
         return jsonify(error="Collection name should be a string"),400
-    collection_name=collection_name.strip()
-    if collection_name.isalpha() == False:
-        return jsonify(error="Collection name should contain only alphabetic characters"),400
     return True
-def validate_document_fields(title,description,location,folder_id):
-    if title and type(title) != str:
-        return jsonify(error="Invalid data type for title."),400 
-    if description and type(description) != str:
-        return jsonify(error="Invalid data type for description"),400
-    if location and type(location) != str:
-        return jsonify(error="Invalid data type for location"),400
-    if folder_id and type(folder_id) != int:
-        return jsonify(error="Invalid data type for folder_id"),400
+def validate_document_fields(required_fields):
+    for field in required_fields:
+        if field and not isinstance(required_fields[field],str):
+            return jsonify(error= f"Invalid data type for {field}"), 400
     return True
