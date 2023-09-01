@@ -21,7 +21,6 @@ def log(class_name = None, msg_type= None, content=None):
 
 
 def validate_chat_fields(data, required_fields):
-    print("data",data)
     if not data:
         return jsonify(error="Missing or invalid JSON data"), 400
         
@@ -38,4 +37,33 @@ def validate_chat_fields(data, required_fields):
        elif not (isinstance(data[field], str) or type(data[field]) == type(None)):
             return jsonify(error=f"Invalid data type for {field}"), 400
             
+    return False
+def validate_userdata_fields(data, required_fields):
+    if isinstance(data, list):
+        if not data or not isinstance(data, list):
+            return jsonify(error="Missing or invalid JSON data or data is not an array of objects"), 400
+
+        errors = []
+        for index, item in enumerate(data):
+            missing_fields = [field for field in required_fields if field not in item]
+            if missing_fields:
+                errors.append({"index": index, "error": f"Missing required fields: {', '.join(missing_fields)}"})
+            
+        if errors:
+            return jsonify(errors=errors), 400
+        
+        for index, data in enumerate(data):
+            for field in required_fields:
+                if field in data and not isinstance(data[field], str):
+                    return jsonify(error={"index": index, "error": f"Invalid data type for {field}"}), 400
+
+    else:
+        if not data:
+                return jsonify(error="Missing or invalid JSON data"), 400
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            return jsonify(error=f"Missing required fields: {', '.join(missing_fields)}"), 400
+        for field in required_fields:
+            if not (isinstance(data[field], str) or type(data[field]) == type(None)):
+                return jsonify(error= f"Invalid data type for {field}"), 400
     return False
