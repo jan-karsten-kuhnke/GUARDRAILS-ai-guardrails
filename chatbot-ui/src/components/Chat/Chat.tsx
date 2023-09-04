@@ -77,9 +77,15 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       formData: FormData = new FormData(),
       documentId: string | undefined = undefined
     ) => {
+      console.log("-----inside handleSend Method-----")
       if (containsOnlyWhitespacesOrNewlines(message.content)) return;
       message.content = message.content.trim();
       const selectedTask = selectedTile?.code;
+      
+      console.log("selectedTask-----",selectedTask)
+      console.log("documentId-----",documentId)
+      console.log("formData-----",formData)
+      console.log("message-----",message)
 
       if (selectedTask === "conversation") {
         await anonymizeMessage(message.content)
