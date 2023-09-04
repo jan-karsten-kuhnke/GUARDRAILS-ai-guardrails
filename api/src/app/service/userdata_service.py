@@ -58,6 +58,7 @@ class userdata_service:
     
     def get_tile_by_code(user_email,code):
         try:
+            session=Session()
             chain  = session.query(ChainEntity).filter(ChainEntity.code == code ).first()
             return chain.to_dict()
         except Exception as ex:
