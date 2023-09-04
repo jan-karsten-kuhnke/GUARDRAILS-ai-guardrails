@@ -18,7 +18,7 @@ def log(class_name = None, msg_type= None, content=None):
         }
         return result
 
-def create_filtered_chain(chain_dict, user_groups, previous_requests):
+def required_chain_fields(chain_dict, user_groups, previous_requests):
     group_code = chain_dict.get('group_code', '')
     return {
         'code': chain_dict.get('code', ''),
