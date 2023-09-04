@@ -1,6 +1,6 @@
 from oidc import get_current_user_email
 from database.models import ChainEntity
-from database.postgres import session
+from database.postgres import Session
 from oidc import get_current_user_groups
 from integration.flowable_wrapper import flowable_wrapper
 from database.repository import Persistence
@@ -23,35 +23,48 @@ class userdata_service:
 
 
     def get_tiles(user_email):
-        user_groups = get_current_user_groups()
-        all_chains  = session.query(ChainEntity).all()
-        previous_requests = []
-        if(Globals.applet_access_request_feature_flag == "Enabled"):
-            previous_requests = flowable_wrapper.get_submitted_requests_code(user_email)
-            
-        res = []
+        try:
+            user_groups = get_current_user_groups()
+            session=Session()
+            all_chains  = session.query(ChainEntity).all()
+            previous_requests = []
+            if(Globals.applet_access_request_feature_flag == "Enabled"):
+                previous_requests = flowable_wrapper.get_submitted_requests_code(user_email)
+                
+            res = []
 
-        for chain in all_chains:
-            chain_dict = chain.to_dict()
-            group_code = chain_dict['group_code']
-            chain_dict['dispalyOrder'] = int(chain.params['displayOrder'])
-            if group_code is None or group_code == "":
-                chain_dict['has_access'] = True
-            elif group_code in user_groups:
-                chain_dict['has_access'] = True
-            else:
-                chain_dict['has_access'] = False
-            
-            chain_dict['request_submitted'] = True if group_code in previous_requests else False
-            res.append(chain_dict)
-        res.sort(key=lambda x: x['dispalyOrder'])
-        return res
+            for chain in all_chains:
+                chain_dict = chain.to_dict()
+                group_code = chain_dict['group_code']
+                chain_dict['dispalyOrder'] = int(chain.params['displayOrder'])
+                if group_code is None or group_code == "":
+                    chain_dict['has_access'] = True
+                elif group_code in user_groups:
+                    chain_dict['has_access'] = True
+                else:
+                    chain_dict['has_access'] = False
+                
+                chain_dict['request_submitted'] = True if group_code in previous_requests else False
+                res.append(chain_dict)
+            res.sort(key=lambda x: x['dispalyOrder'])
+            return res
+        except Exception as ex:
+            logging.error(f"Exception getting all tiles: {ex}")
+            return {"data":{},"success":False,"message":"Error in retrieving the data"}
+        finally:
+            session.close()
 
 
     
     def get_tile_by_code(user_email,code):
-        chain  = session.query(ChainEntity).filter(ChainEntity.code == code ).first()
-        return chain.to_dict()
+        try:
+            chain  = session.query(ChainEntity).filter(ChainEntity.code == code ).first()
+            return chain.to_dict()
+        except Exception as ex:
+            logging.error(f"Exception getting tile by code: {ex}")
+            return {"data":{},"success":False,"message":"Error in retrieving the data"}
+        finally:
+            session.close()
     
     def request_tile_by_code(user_email,code,name):
         return flowable_wrapper.submit_request(user_email=user_email, tile_code=code,tile_name=name)

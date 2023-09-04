@@ -9,7 +9,6 @@ from controller.admin_controller import adminendpoints
 from controller.pii_controller import piiendpoints
 from controller.userdata_controller import userdataendpoints
 from controller.documents_controller import documentsendpoints
-# from flask_smorest import Api
 import secrets
 from flask_swagger_ui import get_swaggerui_blueprint
 from oidc import oidc
