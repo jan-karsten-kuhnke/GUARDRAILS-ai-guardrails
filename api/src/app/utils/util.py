@@ -20,10 +20,10 @@ def log(class_name = None, msg_type= None, content=None):
         return result
 
 
-def validate_fields(data, required_fields):
+def validate_fields(data, required_fields = None):
     if not data:
         return jsonify(error="Missing or invalid JSON data"), 400
-
+    
     if isinstance(data, list):
 
         errors = []
@@ -41,16 +41,22 @@ def validate_fields(data, required_fields):
                     return jsonify(error={"index": index, "error": f"Invalid data type for {field}"}), 400
 
     else:
-        missing_fields = [field for field in required_fields if field not in data]
-        
-        if missing_fields:
-            return jsonify(error=f"Missing required fields: {', '.join(missing_fields)}"), 400
-        nulls_allowed = ['folderId']
-        for field in required_fields:
-            if field == 'params':
-                if not isinstance(data[field], dict):
-                 return jsonify(error=f"Invalid data type for {field}"), 400
-            elif not (isinstance(data[field], str) or (field in nulls_allowed and type(data[field]) == type(None))):
-                return jsonify(error=f"Invalid data type for {field}"), 400
+        # if fields are optional, check the types only
+        if not required_fields:
+            for field in data:
+                if not isinstance(data[field], str):
+                    return jsonify(error=f"Invalid data type for {field}"), 400
+        else:
+            missing_fields = [field for field in required_fields if field not in data]
+            
+            if missing_fields:
+                return jsonify(error=f"Missing required fields: {', '.join(missing_fields)}"), 400
+            nulls_allowed = ['folderId']
+            for field in required_fields:
+                if field == 'params':
+                    if not isinstance(data[field], dict):
+                        return jsonify(error=f"Invalid data type for {field}"), 400
+                elif not (isinstance(data[field], str) or (field in nulls_allowed and type(data[field]) == type(None))):
+                    return jsonify(error=f"Invalid data type for {field}"), 400
     return False
     

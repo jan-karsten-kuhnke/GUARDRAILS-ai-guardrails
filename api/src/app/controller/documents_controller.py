@@ -44,9 +44,11 @@ def create_document():
     files = request.files.getlist('files')
     try:
         collection_name = request.form['collectionName']
+        if not collection_name or type(collection_name) != str:
+            return jsonify(Error="Invalid data type for collectionName"),400
     except:
         return jsonify(Error="Missing collectionName"),400
-    if not files:
+    if len(files) == 0 or files[0].filename == '':
         return jsonify(Error="Missing file"),400
     uploaded_by = get_current_user_email()
     uploaded_at = str(datetime.now())
@@ -71,8 +73,7 @@ def update_document(document_id):
     description= request.json.get('description')
     location= request.json.get('location')
     collection_name= request.json.get('collection_name')
-    required_fields = ['title', 'description', 'location', 'collection_name']
-    validation_result = validate_fields(data, required_fields)
+    validation_result = validate_fields(data)
     if validation_result:
         return validation_result
     return DocumentService.update_document(document_id=document_id ,title=title, description=description, location=location, collection_name=collection_name)

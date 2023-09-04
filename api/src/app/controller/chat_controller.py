@@ -33,7 +33,7 @@ def chat_completion():
 
     except Exception as e:
         # Handle general exceptions
-        return jsonify(error="An error occurred"), 500
+        return jsonify(error="An error occurred: " + str(e)), 500
 
 
 @endpoints.route('/conversations', methods=['GET'])
@@ -106,30 +106,35 @@ def request_approval(conversation_id):
 @endpoints.route('/executeondoc', methods=['POST'])
 @oidc.accept_token(require_token=True)
 def execute_on_document():
-    data = json.loads(request.form['data'])
-    data.setdefault('isOverride', False)
-    required_fields = ['conversation_id', 'task', 'params']
-    validation_result = validate_fields(data, required_fields)
-    if validation_result:
-        return validation_result
-    
-    user_email = get_current_user_email()
-    token = request.headers['authorization'].split(' ')[1]
-    files = request.files.getlist('files')
-    if len(files) == 0:
-        return jsonify(error="Missing file"), 400
-    file = files[0]
-    # save file to disk
-    temp_dir_name = "temp-" + str(time())
-    os.mkdir(temp_dir_name)
-    filename = file.filename
-    filepath = os.path.join(os.path.join(temp_dir_name, file.filename))
-    file.save(filepath)
-    file.close()
+    try:
+        data = json.loads(request.form['data'])
+        data.setdefault('isOverride', False)
+        required_fields = ['conversation_id', 'task', 'params']
+        validation_result = validate_fields(data, required_fields)
+        if validation_result:
+            return validation_result
 
-    def summarize_brief_stream(data, user_email, token, filename, filepath):
-        response = chat_service.chat_completion(
-            data, user_email, token, filename, filepath)
-        for chunk in response:
-            yield chunk
-    return Response(summarize_brief_stream(data, user_email, token, filename, filepath), mimetype='text/event-stream')
+        user_email = get_current_user_email()
+        token = request.headers['authorization'].split(' ')[1]
+        files = request.files.getlist('files')
+        if len(files) == 0 or files[0].filename == '':
+            return jsonify(error="Missing file"), 400
+        file = files[0]
+        # save file to disk
+        temp_dir_name = "temp-" + str(time())
+        os.mkdir(temp_dir_name)
+        filename = file.filename
+        filepath = os.path.join(os.path.join(temp_dir_name, file.filename))
+        file.save(filepath)
+        file.close()
+
+        def summarize_brief_stream(data, user_email, token, filename, filepath):
+            response = chat_service.chat_completion(
+                data, user_email, token, filename, filepath)
+            for chunk in response:
+                yield chunk
+        return Response(summarize_brief_stream(data, user_email, token, filename, filepath), mimetype='text/event-stream')
+
+    except Exception as e:
+        # Handle the exception here, you can log the error for debugging
+        return jsonify(error="An error occurred: " + str(e)), 500
