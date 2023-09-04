@@ -3,7 +3,7 @@ from repo.db import conversation_context
 from globals import *
 from service.chat_service import chat_service
 from integration.flowable_wrapper import flowable_wrapper
-from database.postgres import session
+from database.postgres import Session
 from database.models import ChainEntity
 from utils.encryption import Encryption
 
@@ -87,19 +87,26 @@ class admin_service:
 
 
     def get_all_access_request_list():
-        data =  flowable_wrapper.get_requests_for_admin()
-        all_chains = session.query(ChainEntity).all()
-        chains = [chain.to_dict() for chain in all_chains]
+        try:
+            data =  flowable_wrapper.get_requests_for_admin()
+            session = Session()
+            all_chains = session.query(ChainEntity).all()
+            chains = [chain.to_dict() for chain in all_chains]
 
-        for d in data:
-            for chain in chains:
-                if d['tile'] == chain['code']:
-                    d['tile_name'] = chain['title']
-                    break
-                
-        sorted_data = sorted(data, key=lambda item:(item["status"]), reverse=True)
-        formatted_data={"rows":sorted_data,"totalRows":len(data)}
-        return {"data":formatted_data,"success":True,"message":"Successfully retrieved the data"}
+            for d in data:
+                for chain in chains:
+                    if d['tile'] == chain['code']:
+                        d['tile_name'] = chain['title']
+                        break
+                    
+            sorted_data = sorted(data, key=lambda item:(item["status"]), reverse=True)
+            formatted_data={"rows":sorted_data,"totalRows":len(data)}
+            return {"data":formatted_data,"success":True,"message":"Successfully retrieved the data"}
+        except Exception as ex:
+            logging.error(f"Exception getting all access request list: {ex}")
+            return {"data":{},"success":False,"message":"Error in retrieving the data"}
+        finally: 
+            session.close()
     
     def complete_request(request_id, approved:bool):
         flowable_wrapper.complete_request(request_id, approved)

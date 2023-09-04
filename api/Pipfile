@@ -43,7 +43,7 @@ pdfminer = {six = "20221105"}
 pgvector = "0.2.1"
 cryptography = "41.0.3"
 pymssql = "2.2.8"
-
+flask-swagger-ui = "4.11.1"
 
 [dev-packages]
 black = "*"
