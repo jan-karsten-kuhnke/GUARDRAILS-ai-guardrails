@@ -1,169 +1,1482 @@
 {
-  "swagger": "2.0",
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "type": "object",
+            "description": "Errors"
+          },
+          "status": {
+            "type": "string",
+            "description": "Error name"
+          },
+          "code": {
+            "type": "integer",
+            "description": "Error code"
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          }
+        }
+      },
+      "PaginationMetadata": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer"
+          },
+          "total_pages": {
+            "type": "integer"
+          },
+          "first_page": {
+            "type": "integer"
+          },
+          "last_page": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "previous_page": {
+            "type": "integer"
+          },
+          "next_page": {
+            "type": "integer"
+          }
+        }
+      },
+      "Params": {
+        "type": "object",
+        "properties": {
+          "collectionName": {
+            "type": "string"
+          },
+          "documentId": {
+            "type": "string"
+          },
+          "qaDocumentId": {
+            "type": "string"
+          }
+        }
+      },
+      "Completions": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "isOverride": {
+            "type": "boolean"
+          },
+          "conversation_id": {
+            "type": "string"
+          },
+          "params": {
+            "$ref": "#/components/schemas/Params"
+          },
+          "task": {
+            "type": "string"
+          }
+        }
+      },
+      "Conversation": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "last_node": {
+            "type": "string"
+          },
+          "user_email": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "_id": {
+            "type": "string"
+          },
+          "assigned_to": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "updated": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "root_message": {
+            "type": "string"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "task": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "_id",
+          "last_node",
+          "root_message",
+          "title"
+        ]
+      },
+      "ConversationsArray": {
+        "type": "object",
+        "properties": {
+          "conversations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Conversation"
+            }
+          }
+        }
+      },
+      "ExecuteOnDoc": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object"
+          },
+          "file": {
+            "type": "file"
+          }
+        },
+        "required": [
+          "data",
+          "file"
+        ]
+      },
+      "Folder": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "FolderArrray": {
+        "type": "object",
+        "properties": {
+          "user_email": {
+            "type": "string"
+          },
+          "folders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Folder"
+            }
+          },
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "UpsertFolders": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Folder"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateConversationProperties": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "folderId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "PromptsScehma": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "folderId": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "PromptsArrray": {
+        "type": "object",
+        "properties": {
+          "user_email": {
+            "type": "string"
+          },
+          "prompts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PromptsScehma"
+            }
+          },
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "UpsertPrompts": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PromptsScehma"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "Input": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          }
+        }
+      },
+      "Params1": {
+        "type": "object",
+        "properties": {
+          "displayOrder": {
+            "type": "integer"
+          },
+          "inputs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Input"
+            }
+          },
+          "modelType": {
+            "type": "string"
+          },
+          "executor": {
+            "type": "string"
+          }
+        }
+      },
+      "Tiles": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "has_access": {
+            "type": "boolean"
+          },
+          "group_code": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "dispalyOrder": {
+            "type": "integer"
+          },
+          "params": {
+            "$ref": "#/components/schemas/Params1"
+          },
+          "is_active": {
+            "type": "boolean"
+          },
+          "request_submitted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TilesArray": {
+        "type": "object",
+        "properties": {
+          "tiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tiles"
+            }
+          }
+        }
+      },
+      "RequestAccess": {
+        "type": "object",
+        "properties": {
+          "tile_code": {
+            "type": "string"
+          },
+          "tile_name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "tile_code",
+          "tile_name"
+        ]
+      },
+      "Eula": {
+        "type": "object",
+        "properties": {
+          "eula": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "Document": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "custom_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "collection_name": {
+            "type": "string"
+          }
+        }
+      },
+      "DocumentArray": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Document"
+            }
+          }
+        }
+      },
+      "DocumentResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Document"
+          }
+        }
+      },
+      "DocumentPost": {
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "type": "object"
+          },
+          "files": {
+            "type": "file"
+          },
+          "collection_name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "collection_name",
+          "files"
+        ]
+      },
+      "DocumentUpdate": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "collection_name": {
+            "type": "string"
+          }
+        }
+      },
+      "DocumentGetCollection":{
+        "type": "object",
+        "properties": {
+          "collection_name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "collection_name"
+        ]
+      },
+      "CollectionAdd": {
+        "type": "object",
+        "properties": {
+          "collection_name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "collection_name"
+        ]
+      },
+      "Collection": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "collection_name": {
+            "type": "string"
+          }
+        }
+      },
+      "CollectionArray": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Document"
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "UNPROCESSABLE_ENTITY": {
+        "description": "Unprocessable Entity",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/chat/completions": {
+      "post": {
+        "responses": {
+          "400": {
+            "description": "Missing required fields or invalid json data"
+          },
+          "200": {
+            "description": "Successfully returns the readable stream"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Completions"
+              }
+            }
+          }
+        },
+        "summary": "Returns answer generated by AI.",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
+    "/api/chat/conversations": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Successfully returns all the conversations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationsArray"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Returns all the conversation user has done .",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
+    "/api/chat/conversations/{conversation_id}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Successfully returns the conversation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Conversation"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Returns the conversation of user by id.",
+        "tags": [
+          "chat"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "conversation_id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ]
+    },
+    "/api/chat/conversations/archive": {
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "Successfully archives all the conversations"
+          }
+        },
+        "summary": "Archieves all the conversation of user.",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
+    "/api/chat/conversations/archive/{conversation_id}": {
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "Successfully archive the conversation"
+          }
+        },
+        "summary": "Archive conversation of user by id.",
+        "tags": [
+          "chat"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "conversation_id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ]
+    },
+    "/api/chat/conversations/{conversation_id}/properties": {
+      "put": {
+        "responses": {
+          "200": {
+            "description": "Successfully updated the conversation "
+          }
+        },
+        "summary": "Updates the conversation of user by id.",
+        "tags": [
+          "chat"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateConversationProperties"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "conversation_id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ]
+    },
+    "/api/chat/requestapproval/{conversation_id}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Successfully requested for the approval"
+          }
+        },
+        "summary": "Requests for the approval of conversation by id.",
+        "tags": [
+          "chat"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "conversation_id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ]
+    },
+    "/api/chat/executeondoc": {
+      "post": {
+        "responses": {
+          "400": {
+            "description": "Missing required fields or invalid json data"
+          },
+          "200": {
+            "description": "Successfully returns the readable stream"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/ExecuteOnDoc"
+              }
+            }
+          }
+        },
+        "summary": "Takes a file from user",
+        "description": "Returns answer generated by AI.",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
+    "/api/pii/analyze": {
+      "post": {
+        "tags": [
+          "pii"
+        ]
+      }
+    },
+    "/api/pii/anonymize": {
+      "post": {
+        "tags": [
+          "pii"
+        ]
+      }
+    },
+    "/api/user/folders": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Successfully returns all the folders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderArrray"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error in returning the folders"
+          }
+        },
+        "summary": "Returns all the folders user has created.",
+        "tags": [
+          "user"
+        ]
+      },
+      "put": {
+        "responses": {
+          "400": {
+            "description": "Missing or invalid json data or data is not an array of object"
+          },
+          "200": {
+            "description": "Successfully updated the folders"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertFolders"
+              }
+            }
+          }
+        },
+        "summary": "Updates the folders of user",
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/api/user/prompts": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Successfully returns all the prompts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromptsArrray"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error in returning the prompts"
+          }
+        },
+        "summary": "Returns all the prompts user has created.",
+        "tags": [
+          "user"
+        ]
+      },
+      "put": {
+        "responses": {
+          "400": {
+            "description": "Missing or invalid json data or data is not an array of object"
+          },
+          "200": {
+            "description": "Successfully updated the prompts"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertPrompts"
+              }
+            }
+          }
+        },
+        "summary": "Updates the prompts of user",
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/api/user/tiles": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Successfully returns all the tiles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TilesArray"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error in returning the tiles"
+          }
+        },
+        "summary": "Returns all the tiles.",
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/api/user/tiles/{code}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Successfully returns the tile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tiles"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error in returning the tile"
+          }
+        },
+        "summary": "Returns the tile by code.",
+        "tags": [
+          "user"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "code",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ]
+    },
+    "/api/user/access_request": {
+      "post": {
+        "responses": {
+          "400": {
+            "description": "Missing or invalid json data or data is not an array of object"
+          },
+          "200": {
+            "description": "Successfully submitted the request"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestAccess"
+              }
+            }
+          }
+        },
+        "summary": "User requests for a tile.",
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/api/user/eula": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Successfully returns eula status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Eula"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Returns the status of end user license agreement.",
+        "tags": [
+          "user"
+        ]
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "description": "Successfully updates eula status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Eula"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Updates the status of end user license agreement.",
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/api/admin/fetchguesttoken": {
+      "get": {
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/predefined_rules": {
+      "get": {
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/predefined_rules/{id}": {
+      "get": {
+        "tags": [
+          "admin"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ],
+      "put": {
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/custom_rules": {
+      "get": {
+        "tags": [
+          "admin"
+        ]
+      },
+      "post": {
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/custom_rules/{id}": {
+      "put": {
+        "tags": [
+          "admin"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ],
+      "get": {
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/analysis_audit": {
+      "get": {
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/analysis_audit/{id}": {
+      "get": {
+        "tags": [
+          "admin"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ]
+    },
+    "/api/admin/anonymize_audit": {
+      "get": {
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/anonymize_audit/{id}": {
+      "get": {
+        "tags": [
+          "admin"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ]
+    },
+    "/api/admin/chat_log": {
+      "get": {
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/chat_log/{id}": {
+      "get": {
+        "tags": [
+          "admin"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ]
+    },
+    "/api/admin/conversation_log": {
+      "get": {
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/escalations": {
+      "get": {
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/approve_escalation/{conversation_id}": {
+      "put": {
+        "tags": [
+          "admin"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "conversation_id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ]
+    },
+    "/api/admin/reject_escalation/{conversation_id}": {
+      "put": {
+        "tags": [
+          "admin"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "conversation_id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ]
+    },
+    "/api/admin/approval_requests": {
+      "get": {
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/complete_request": {
+      "post": {
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/insert_chain": {
+      "post": {
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/update_chain/{id}": {
+      "post": {
+        "tags": [
+          "admin"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ]
+    },
+    "/api/admin/data_source": {
+      "post": {
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/data_source/{data_source_id}": {
+      "put": {
+        "tags": [
+          "admin"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "data_source_id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ]
+    },
+    "/api/docs/documents": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Successfully returns the documents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentArray"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error in returning the documents"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentGetCollection"
+              }
+            }
+          }
+        },
+        "summary": "Returns the documents in the collection.",
+        "tags": [
+          "docs"
+        ]
+      },
+      "post": {
+        "responses": {
+          "400": {
+            "description": "Missing required fields or invalid json data"
+          },
+          "200": {
+            "description": "Successfully created documents"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentPost"
+              }
+            }
+          }
+        },
+        "summary": "Creates the documents in the collection.",
+        "tags": [
+          "docs"
+        ]
+      }
+    },
+    "/api/docs/documents/{document_id}": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Successfully returns the document",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error in returning the document"
+          }
+        },
+        "summary": "Returns the document by id.",
+        "tags": [
+          "docs"
+        ]
+      },
+      "parameters": [
+        {
+          "in": "path",
+          "name": "document_id",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      ],
+      "put": {
+        "responses": {
+          "400": {
+            "description": "Error in creating documents"
+          },
+          "200": {
+            "description": "Successfully created documents"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentUpdate"
+              }
+            }
+          }
+        },
+        "summary": "Updates the document by id and returns the updated document.",
+        "tags": [
+          "docs"
+        ]
+      },
+      "delete": {
+        "responses": {
+          "200": {
+            "description": "Successfully deleted document"
+          },
+          "400": {
+            "description": "Error in deleting the document"
+          }
+        },
+        "summary": "Deletes the document by id.",
+        "tags": [
+          "docs"
+        ]
+      }
+    },
+    "/api/docs/documents/add-collection": {
+      "post": {
+        "responses": {
+          "400": {
+            "description": "Error in adding collection"
+          },
+          "200": {
+            "description": "Successfully added collection"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CollectionAdd"
+              }
+            }
+          }
+        },
+        "summary": "Creates a new collection.",
+        "tags": [
+          "docs"
+        ]
+      }
+    },
+    "/api/docs/documents/collections": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Successfully return all the collection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionArray"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error in returning the collections"
+          }
+        },
+        "summary": "Returns all the collection.",
+        "tags": [
+          "docs"
+        ]
+      }
+    },
+    "/api/docs/documents/getcollectiondocuments": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Successfully returns the documents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentArray"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error in returning the documents"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentGetCollection"
+              }
+            }
+          }
+        },
+        "summary": "Returns the documents in the collection.",
+        "tags": [
+          "docs"
+        ]
+      }
+    }
+  },
   "info": {
-    "description": "A documentation of the APIs that is being used in Ai-harness.",
-    "version": "1.0.6",
-    "title": "AI-Harness Api documentation"
+    "title": "AI-Guardrails Swagger",
+    "version": "v1"
   },
   "tags": [
     {
-      "name": "api/chat",
-      "description": "chat endpoints"
+      "name": "chat",
+      "description": ""
     },
-    { "name": "api/user", "description": "user endpoints" },
     {
-      "name": "api/docs",
-      "description": "document endpoints"
+      "name": "pii",
+      "description": ""
+    },
+    {
+      "name": "user",
+      "description": ""
+    },
+    {
+      "name": "admin",
+      "description": ""
+    },
+    {
+      "name": "docs",
+      "description": ""
     }
   ],
-  "schemes": ["https", "http"],
-  "paths": {
-    "/completions": {
-      "post": {
-        "tags": ["api/chat"],
-        "summary": "Returns response of users prompts from ai",
-        "description": "",
-        "consumes": ["application/json"],
-        "produces": ["text/event-stream"],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "description": "data object that are required to get the response from ai",
-            "required": true,
-            "schema": { "$ref": "#/definitions/Completion" }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully returns readable stream response."
-          },
-          "400": { "description": "Missing required fields." }
-        }
-      }
-    },
-    "/conversation": {
-      "get": {
-        "tags": ["api/chat"],
-        "summary": "Returns all the conversation of user",
-        "description": "",
-        "produces": ["application/json"],
-        "responses": {
-          "200": {
-            "description": "Successfully returns all the conversation",
-            "schema": {
-              "type": "array",
-              "items": { "$ref": "#/definitions/Conversation" }
-            }
-          },
-          "400": { "description": "Error in returning conversation" }
-        }
-      }
-    },
-    "/documents/{document_id}": {
-        "get": {
-            "tags": ["api/docs"],
-            "summary": "Returns the document by id",
-            "description": "",
-            "produces": ["application/json"],
-            "consumes": ["application/json"],
-            "parameters": [
-                {
-                  "name": "document_id",
-                  "in": "path",
-                  "description": "Document id to get",
-                  "required": true,
-                  "type": "string"
-                }
-              ],
-            "responses": {
-              "200": {
-                "description": "Successfully returns the document",
-                "schema": {"$ref": "#/definitions/Document" }
-              },
-              "400": { "description": "Error in returning the document" }
-            }
-          },
-        "delete": {
-          "tags": ["api/docs"],
-          "summary": "Deletes a document",
-          "description": "",
-          "produces": ["application/json"],
-          "parameters": [
-            {
-              "name": "document_id",
-              "in": "path",
-              "description": "Document id to delete",
-              "required": true,
-              "type": "string"
-            }
-          ],
-          "responses": {
-            "200":{"description": "Successfully deleted document"},
-            "400": { "description": "Invalid document Id" }
-          }
-        }
-      }
-  },
-  "definitions": {
-    "Completion": {
-      "type": "object",
-      "properties": {
-        "title": { "type": "string" },
-        "prompt": { "type": "string" },
-        "task": { "type": "string" },
-        "isOverride": { "type": "boolean" },
-        "conversation_id": { "type": "string" },
-        "params": { "$ref": "#/definitions/Params" }
-      }
-    },
-    "Params": {
-      "type": "object",
-      "properties": {
-        "collectionName": { "type": "string" },
-        "qaDocumentId": { "type": "string" },
-        "documentId": { "type": "string" }
-      }
-    },
-    "Conversation": {
-      "type": "object",
-      "properties": {
-        "_id": { "type": "string" },
-        "title": { "type": "string" },
-        "root_message": { "type": "string" },
-        "last_node": { "type": "string" },
-        "is_active": { "type": "boolean" },
-        "messages": {
-          "type": "array",
-          "xml": { "wrapped": true },
-          "items": { "type": "object", "xml": { "name": "messages" } }
-        },
-        "created": { "type": "string" },
-        "updated": { "type": "string" },
-        "user_email": { "type": "string" },
-        "state": { "type": "string" },
-        "assigned_to": {
-          "type": "array",
-          "xml": { "wrapped": true },
-          "items": { "type": "string", "xml": { "name": "messages" } }
-        },
-        "task": { "type": "string" }
-      }
-    },
-    "Document":{
-        "type":"object",
-        "properties":{
-            "title": { "type": "string" },
-            "description": { "type": "string" },
-            "id": { "type": "integer" },
-            "collection_name": { "type": "string" },
-            "location": { "type": "string" },
-            "custom_ids": {
-              "type": "array",
-              "xml": { "wrapped": true },
-              "items": { "type": "string", "xml": { "name": "custom_ids" } }
-            }
-        }
-    }
-  }
+  "openapi": "3.0.3"
 }

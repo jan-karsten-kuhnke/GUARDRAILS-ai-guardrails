@@ -27,7 +27,7 @@ def configure_logging():
 app.config["PROPAGATE_EXCEPTIONS"] = True
 
 logging.info('client_secret', Globals.oidc_client_id)
-SWAGGER_URL = '/documentation'
+SWAGGER_URL = '/api/documentation'
 API_URL = 'http://127.0.0.1:8080/swagger.json'
 swaggerui_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,
