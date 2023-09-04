@@ -1,6 +1,5 @@
 import datetime
 from flask import jsonify
-from flask import jsonify
 
 def rename_id(data):
         if isinstance(data, list):
@@ -21,28 +20,11 @@ def log(class_name = None, msg_type= None, content=None):
         return result
 
 
-def validate_chat_fields(data, required_fields):
+def validate_fields(data, required_fields):
     if not data:
         return jsonify(error="Missing or invalid JSON data"), 400
-        
-    missing_fields = [field for field in required_fields if field not in data]
-    
-    if missing_fields:
-        return jsonify(error=f"Missing required fields: {', '.join(missing_fields)}"), 400
-    
-    for field in required_fields:
-       if field == 'params':
-            print("data field",data[field])
-            if not isinstance(data[field], dict):
-                 return jsonify(error=f"Invalid data type for {field}"), 400
-       elif not (isinstance(data[field], str) or type(data[field]) == type(None)):
-            return jsonify(error=f"Invalid data type for {field}"), 400
-            
-    return False
-def validate_userdata_fields(data, required_fields):
+
     if isinstance(data, list):
-        if not data or not isinstance(data, list):
-            return jsonify(error="Missing or invalid JSON data or data is not an array of objects"), 400
 
         errors = []
         for index, item in enumerate(data):
@@ -59,25 +41,16 @@ def validate_userdata_fields(data, required_fields):
                     return jsonify(error={"index": index, "error": f"Invalid data type for {field}"}), 400
 
     else:
-        if not data:
-                return jsonify(error="Missing or invalid JSON data"), 400
         missing_fields = [field for field in required_fields if field not in data]
+        
         if missing_fields:
             return jsonify(error=f"Missing required fields: {', '.join(missing_fields)}"), 400
+        nulls_allowed = ['folderId']
         for field in required_fields:
-            if not (isinstance(data[field], str) or type(data[field]) == type(None)):
-                return jsonify(error= f"Invalid data type for {field}"), 400
+            if field == 'params':
+                if not isinstance(data[field], dict):
+                 return jsonify(error=f"Invalid data type for {field}"), 400
+            elif not (isinstance(data[field], str) or (field in nulls_allowed and type(data[field]) == type(None))):
+                return jsonify(error=f"Invalid data type for {field}"), 400
     return False
     
-#validate collectin name
-def validate_collection_name(collection_name):
-    if not collection_name:
-        return jsonify(error="Collection name is required."),400
-    if type(collection_name) != str:
-        return jsonify(error="Collection name should be a string"),400
-    return True
-def validate_document_fields(required_fields):
-    for field in required_fields:
-        if field and not isinstance(required_fields[field],str):
-            return jsonify(error= f"Invalid data type for {field}"), 400
-    return True

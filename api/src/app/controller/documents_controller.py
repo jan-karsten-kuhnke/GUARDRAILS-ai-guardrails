@@ -10,8 +10,7 @@ from oidc import oidc
 from oidc import get_current_user_email
 from datetime import datetime
 from time import time
-from utils.util import validate_collection_name
-from utils.util import validate_document_fields
+from utils.util import validate_fields
 import shutil
 
 
@@ -72,9 +71,10 @@ def update_document(document_id):
     description= request.json.get('description')
     location= request.json.get('location')
     collection_name= request.json.get('collection_name')
-    validate=validate_document_fields(data)
-    if validate != True:
-        return validate
+    required_fields = ['title', 'description', 'location', 'collection_name']
+    validation_result = validate_fields(data, required_fields)
+    if validation_result:
+        return validation_result
     return DocumentService.update_document(document_id=document_id ,title=title, description=description, location=location, collection_name=collection_name)
     
 
@@ -89,9 +89,10 @@ def delete_document(document_id):
 @oidc.accept_token(require_token=True)
 def add_collection():
     collection_name = request.json.get('collection_name')
-    validate=validate_collection_name(collection_name)
-    if validate != True:
-        return validate
+    if not collection_name:
+        return jsonify(error="Missing required fields: collection_name"),400
+    elif type(collection_name) != str:
+        return jsonify(error="Invalid data type for collection_name"),400
     collection_name=collection_name.strip()
     return DocumentService.add_collection_for_doc(collection_name=collection_name)
 

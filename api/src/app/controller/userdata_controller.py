@@ -4,7 +4,7 @@ from service.userdata_service import userdata_service
 from flask_smorest import Blueprint as SmorestBlueprint
 from oidc import oidc
 from oidc import get_current_user_email
-from utils.util import validate_userdata_fields
+from utils.util import validate_fields
 
 userdataendpoints = SmorestBlueprint('user', __name__)
 
@@ -24,7 +24,7 @@ def get_folder_data():
 def upsert_folders():
     try:
         data = request.get_json(silent=True)
-        validation_result = validate_userdata_fields(data, ['id', 'name', 'type'])
+        validation_result = validate_fields(data, ['id', 'name', 'type'])
         if validation_result:
             return validation_result
 
@@ -53,7 +53,7 @@ def get_prompts_data():
 def upsert_prompts():
     try:
         data = request.get_json(silent=True)
-        validation_result = validate_userdata_fields(data, ['id','name'])
+        validation_result = validate_fields(data, ['id','name'])
         if validation_result:
             return validation_result
         
@@ -85,7 +85,7 @@ def get_tile_by_code(code):
 def request_access():
     try:
         data = request.get_json()
-        validation_result = validate_userdata_fields(data, ['tile_code', 'tile_name'])
+        validation_result = validate_fields(data, ['tile_code', 'tile_name'])
         if validation_result:
             return validation_result
         
