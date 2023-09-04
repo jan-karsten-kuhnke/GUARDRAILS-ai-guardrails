@@ -5,6 +5,7 @@ from oidc import get_current_user_groups
 from integration.flowable_wrapper import flowable_wrapper
 from database.repository import Persistence
 from globals import Globals
+from utils.util import create_filtered_chain
 
 class userdata_service:
     def get_all_folders(user_email):
@@ -35,19 +36,12 @@ class userdata_service:
 
             for chain in all_chains:
                 chain_dict = chain.to_dict()
-                group_code = chain_dict['group_code']
-                chain_dict['dispalyOrder'] = int(chain.params['displayOrder'])
-                if group_code is None or group_code == "":
-                    chain_dict['has_access'] = True
-                elif group_code in user_groups:
-                    chain_dict['has_access'] = True
-                else:
-                    chain_dict['has_access'] = False
-                
-                chain_dict['request_submitted'] = True if group_code in previous_requests else False
-                res.append(chain_dict)
-            res.sort(key=lambda x: x['dispalyOrder'])
+                print(chain_dict,"chain_dict")
+                filtered_chain = create_filtered_chain(chain_dict, user_groups, previous_requests)
+                res.append(filtered_chain)
+            res.sort(key=lambda x: x['displayOrder'])
             return res
+        
         except Exception as ex:
             logging.error(f"Exception getting all tiles: {ex}")
             return {"data":{},"success":False,"message":"Error in retrieving the data"}
