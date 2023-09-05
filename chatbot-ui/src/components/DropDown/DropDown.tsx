@@ -13,10 +13,10 @@ interface Props {
     label: string;
     onChange: (e: any) => void;
     style?: Object;
-
+    defaultSelectable?: boolean;
 }
 
-const DropDown: FC<Props> = ({ data, value, label, onChange, style }) => {
+const DropDown: FC<Props> = ({ data, value, label, onChange, style, defaultSelectable }) => {
     const {
         state: { theme },
     } = useContext(HomeContext);
@@ -39,9 +39,9 @@ const DropDown: FC<Props> = ({ data, value, label, onChange, style }) => {
             }}
             onChange={(e) => onChange(e.target.value)}
         >
-            <MenuItem value={"None"} disabled={true}>{label}</MenuItem>
+            <MenuItem value={"None"} disabled={defaultSelectable ? false : true}>{label}</MenuItem>
             {
-                data.length && data.map((item: any, index: number) => (
+                data.length > 0 && data.map((item: any, index: number) => (
                     <MenuItem value={item?.value} key={index} >{item?.title}</MenuItem>
                 ))
             }

@@ -80,7 +80,8 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
     });
   };
 
-  console.log(documentData,selectedDocument)
+  console.log(documentData, selectedDocument)
+  // console.log(collectionData, selectedCollection)
 
   useEffect(() => {
     handleGetCollections();
@@ -172,10 +173,11 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
                   </div>
                   <FormControl sx={{ minWidth: 120, width: "100%" }} size="small">
                     <DropDown data={documentData}
-                      value={selectedDocument}
-                      label={"Select Document"}
+                      value={selectedDocument ? selectedDocument : "None"}
+                      label={"All"}
+                      defaultSelectable={true}
                       onChange={(document) => {
-                        handleDocumentSelect(document)
+                        handleDocumentSelect(document === "None" ? undefined : document)
                       }} />
                   </FormControl>
                 </div>
