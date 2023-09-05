@@ -6,7 +6,6 @@ from database.repository import Persistence
 from integration.openai_wrapper import openai_wrapper
 from integration.presidio_wrapper import presidio_wrapper
 from presidio_anonymizer.entities import RecognizerResult
-from integration.nsfw_model_wrapper import NSFWModelWrapper
 from integration.keycloak_wrapper import keycloak_wrapper
 from service.pii_service import pii_service
 from service.document_service import DocumentService
@@ -22,9 +21,6 @@ from executors.applet.QaRetrieval import QaRetrieval
 from executors.applet.Sql import Sql
 from executors.applet.Visualization import Visualization
 
-override_message = "You chose to Override the warning, proceeding to Open AI."
-nsfw_warning = "Warning From Guardrails: We've detected that your message contains NSFW content. Please refrain from posting such content in a work environment, You can choose to override this warning if you wish to continue the conversation, or you can get your manager's approval before continuing."
-
 
 class conversation_obj(TypedDict):
     _id: str
@@ -39,6 +35,7 @@ class conversation_obj(TypedDict):
     state: str
     assigned_to: list
     task: str
+    metadata: dict
 
 
 class message_obj(TypedDict):
@@ -56,19 +53,16 @@ class chat_service:
 
     def chat_completion(data, current_user_email, token, filename=None, filepath=None):
         try:
+            print("chat completion data",data)
             task = str(data["task"]) if "task" in data else None
             task_params=data["params"] if "params" in data else None
             document_id =task_params["documentId"] if "documentId" in task_params else None
             collection_name = task_params["collectionName"] if "collectionName" in task_params else None
             qa_document_id=task_params["qaDocumentId"] if "qaDocumentId" in task_params else None
+            metadata = data["metadata"] if "metadata" in data else None
             
             uploaded_by = current_user_email
             uploaded_at = str(datetime.now())
-
-            is_private = bool(
-                data["isPrivate"]) if "isPrivate" in data else False
-            pii_scan = True
-            nsfw_scan = True
             
             if task is None:
                 yield (json.dumps({"error": "Invalid task"}))
@@ -111,9 +105,9 @@ class chat_service:
                 manage_conversation_context = True
 
             stop_conversation, stop_response, updated_prompt, role = chat_service.validate_prompt(
-                prompt, is_override, pii_scan, nsfw_scan, current_user_email, conversation_id)
+                prompt, is_override)
             chat_service.update_conversation(
-                conversation_id, updated_prompt, 'user', current_user_email, task, title)
+                conversation_id, updated_prompt, 'user', current_user_email, task,metadata, title)
 
             current_completion = ''
             user_action_required = False
@@ -237,7 +231,7 @@ class chat_service:
 
             chat_service.save_chat_log(current_user_email, updated_prompt)
             chat_service.update_conversation(
-                conversation_id, current_completion, role, current_user_email, task, None, msg_info, user_action_required)
+                conversation_id, current_completion, role, current_user_email, task, metadata,None, msg_info, user_action_required)
         except Exception as e:
             yield (json.dumps({"error": "error"}))
             logging.error("Error in chat completion: "+str(e))
@@ -246,34 +240,15 @@ class chat_service:
             if filepath:
                 os.remove(filepath)
 
-    def validate_prompt(prompt, is_override, pii_scan, nsfw_scan, current_user_email, conversation_id):
-        logging.info("pii_scan: ", pii_scan)
-        logging.info("nsfw_scan: ", nsfw_scan)
+    def validate_prompt(prompt, is_override):
         stop_conversation = False
         stop_response = ""
         role = "guardrails"
-        nsfw_threshold = 0.94
 
         if (is_override):
             return stop_conversation, stop_response, prompt, role
 
-        if (nsfw_scan):
-            nsfw_score = NSFWModelWrapper.analyze(prompt)
-            if nsfw_score > nsfw_threshold:
-                stop_response = nsfw_warning
-                stop_conversation = True
-                logging.info("returning from nsfw")
-                return stop_conversation, stop_response, prompt, role
-
-        if (pii_scan):
-            updated_prompt = pii_service.anonymize(
-                prompt, current_user_email, conversation_id)
-            stop_conversation = False
-
-            logging.info("returning from pii")
-            return stop_conversation, stop_response, updated_prompt, role
-
-    def create_Conversation(prompt, email, model, msg_info, title=None, id=None,):
+    def create_Conversation(prompt, email, model, msg_info,metadata, title=None, id=None,):
         task = model
         message = message_obj(
             id=str(uuid.uuid4()),
@@ -296,18 +271,20 @@ class chat_service:
             model_name=model,
             state='active',
             assigned_to=[],
-            task=task
+            task=task,
+            metadata=metadata
         )
+        print("conversation to be saved",conversation)
         new_conversation_id = conversation_context.insert_conversation(
             conversation)
         return new_conversation_id
 
-    def update_conversation(conversation_id, content, role, user_email, model, title=None, msg_info=None, user_action_required=False):
+    def update_conversation(conversation_id, content, role, user_email, model,metadata, title=None, msg_info=None, user_action_required=False):
         conversation = conversation_context.get_conversation_by_id(
             conversation_id, user_email)
         if (conversation == None):
             chat_service.create_Conversation(
-                content, user_email, model, msg_info, title, conversation_id)
+                content, user_email, model, msg_info,metadata, title, conversation_id)
             return
         if (model is None or not model):
             model = conversation['model']
@@ -334,6 +311,10 @@ class chat_service:
         conversation['last_node'] = message['id']
         conversation['updated'] = datetime.now()
         conversation['model'] = model
+        if metadata is not None:
+            conversation['metadata'] = metadata
+        # conversation['metadata'] = metadata if metadata else {}
+        print("conversation to be updated",conversation)
 
         messages.append(message)
         conversation_context.update_conversation(conversation_id, conversation)
