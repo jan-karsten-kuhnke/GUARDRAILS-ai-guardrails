@@ -80,9 +80,6 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
     });
   };
 
-  console.log(documentData, selectedDocument)
-  // console.log(collectionData, selectedCollection)
-
   useEffect(() => {
     handleGetCollections();
   }, []);

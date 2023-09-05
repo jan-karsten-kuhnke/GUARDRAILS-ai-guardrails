@@ -91,7 +91,7 @@ export const PrivateDocuments = () => {
 
   const handleExecuteOnUploadedDoc = (id: any, documentTitle: string, code: string) => {
     const params: any = tiles.find((tile) => tile.code === code)?.params;
-    executeOnUploadedDocRef.current = { id: id, title: `${params?.promptTitle}  ${documentTitle}`, code: code };
+    executeOnUploadedDocRef.current = { id: id, title: `${params?.prompt}  ${documentTitle}`, code: code };
     homeDispatch({ field: "isDocumentDialogOpen", value: false });
     homeDispatch({
       field: "selectedTile",

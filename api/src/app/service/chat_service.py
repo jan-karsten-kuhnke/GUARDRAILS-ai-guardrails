@@ -71,14 +71,17 @@ class chat_service:
             pii_scan = True
             nsfw_scan = True
             
-            if task is None:
-                yield (json.dumps({"error": "Invalid task"}))
-                return
-                
+
+            
             #getting chain from db
             chain = Persistence.get_chain_by_code(task)
             params = chain['params']
-        
+            
+            executor = params['executor'] if "executor" in params else None
+            
+            if task is None or executor is None:
+                yield (json.dumps({"error": "Invalid task"}))
+                return
            
             #Summarize/Extraction on already uploaded document
             is_document_uploaded=False
@@ -97,12 +100,9 @@ class chat_service:
             # if(task == "conversation" or task == "qa-retreival"):
             is_override = True
 
-            if task == "summarize-brief":
-                prompt = f"Summarize {filename}"
-                title = f"Summmary of {filename}."
-            elif task == "extraction":
-                prompt = f"Extract Key Metrics from {filename}"
-                title = f"Key Metrics of {filename}."
+            if executor == "summarize" or executor == "extraction":
+                prompt = f"{params['prompt']} {filename}"
+                title = f"{params['title']} {filename}."
             else:
                 prompt = str(data["message"]) if "message" in data else "Task."
                 title = None
@@ -148,7 +148,6 @@ class chat_service:
                                 (messages[i]['content'], messages[i+1]['content']))
 
                 res = None
-                executor = params['executor']
                 
                 if (executor == "summarize"):
                     try:
