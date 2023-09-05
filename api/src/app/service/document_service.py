@@ -1,5 +1,6 @@
 from flask import jsonify
 from database.models import DocumentEntity
+from database.postgres import session
 from service.ingestion_service import IngestionService
 from database.repository import Persistence
 from sqlalchemy import func ,or_,and_

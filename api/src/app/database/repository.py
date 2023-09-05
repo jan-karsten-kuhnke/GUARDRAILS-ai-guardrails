@@ -603,4 +603,3 @@ class Persistence:
         finally:
             session.close()
         
-

@@ -19,7 +19,7 @@ import PublicPrivateSwitch from "../PublicPrivateSwitch";
 import AdditionalInputs from "../AdditionalInputs/AdditionalInputs";
 import Tiles from "../Tiles/Tiles";
 import RequestAccessComponent from "../Tiles/RequestAccess";
-import { EXTRACTION_CODE, SUMMARIZATION_CODE, QA_RETRIEVAL_CODE } from "@/utils/constants";
+import { EXTRACTION_CODE, SUMMARIZATION_CODE } from "@/utils/constants";
 import {
   anonymizeMessage,
   fetchPrompt,
@@ -54,10 +54,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       selectedCollection,
       selectedDocument
     },
-    handleSelectedTile,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
-  
+
   executeOnUploadedDocRef = useRef<Object | null>(null);
 
   const [currentMessage, setCurrentMessage] = useState<Message>();
@@ -126,23 +125,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         let response: any;
 
         //params for selected tiles
-        let sendCollectionName = false
-        let sendQaDocumentId = false
-
-        selectedTile?.params?.inputs?.forEach((item:any) => {
-          const { type } = item;
-          if (type === 'collectionPicker') {
-            sendCollectionName = true
-          }
-          else if (type === 'documentPicker') {
-            sendQaDocumentId = true
-          }
-        })
 
         let params: any = {
           ...documentId ? { documentId } : {},
-          ...( selectedCollection && sendCollectionName ) ? { collectionName: selectedCollection } : {},
-          ...( selectedDocument && sendQaDocumentId ) ? { qaDocumentId: selectedDocument } : {},
+          ...selectedCollection ? { collectionName: selectedCollection } : {},
+          ...selectedDocument ? { qaDocumentId: selectedDocument } : {},
         };
         if (
           selectedTile.params?.useExecuteOnDoc
@@ -441,24 +428,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         selectedConversation.messages[selectedConversation.messages.length - 2]
       );
   }, [selectedConversation, throttledScrollDown]);
-
-  useEffect(() => {
-    const foundTile = tiles.find((tile) => tile.code === selectedConversation?.task);
-    if (foundTile) {
-      handleSelectedTile(foundTile);
-    }
-
-    if(selectedConversation?.task_params && selectedConversation?.task_params?.collectionName){
-      homeDispatch({field: "selectedCollection", value: selectedConversation?.task_params?.collectionName})
-    }
-
-    if(selectedConversation?.task_params && selectedConversation?.task_params?.qaDocumentId){
-      homeDispatch({field: "selectedDocument", value: selectedConversation?.task_params?.qaDocumentId})
-    }
-    else{
-      homeDispatch({field: "selectedDocument", value: undefined})
-    }
-  },[selectedConversation])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
