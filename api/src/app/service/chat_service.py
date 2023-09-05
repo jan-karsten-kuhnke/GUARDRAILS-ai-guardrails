@@ -27,15 +27,14 @@ class conversation_obj(TypedDict):
     title: str
     root_message: str
     last_node: str
-    is_active: bool
     messages: list
     created: datetime
     updated: datetime
     user_email: str
     state: str
-    assigned_to: list
     task: str
     metadata: dict
+    task_params: dict
 
 
 class message_obj(TypedDict):
@@ -53,13 +52,13 @@ class chat_service:
 
     def chat_completion(data, current_user_email, token, filename=None, filepath=None):
         try:
-            print("chat completion data",data)
             task = str(data["task"]) if "task" in data else None
-            task_params=data["params"] if "params" in data else None
-            document_id =task_params["documentId"] if "documentId" in task_params else None
+            task_params = data["params"] if "params" in data else None
+            document_id = task_params["documentId"] if "documentId" in task_params else None
             collection_name = task_params["collectionName"] if "collectionName" in task_params else None
             qa_document_id=task_params["qaDocumentId"] if "qaDocumentId" in task_params else None
             metadata = data["metadata"] if "metadata" in data else None
+            qa_document_id = task_params["qaDocumentId"] if "qaDocumentId" in task_params else None
             
             uploaded_by = current_user_email
             uploaded_at = str(datetime.now())
@@ -72,7 +71,6 @@ class chat_service:
             chain = Persistence.get_chain_by_code(task)
             params = chain['params']
         
-           
             #Summarize/Extraction on already uploaded document
             is_document_uploaded=False
             document_array=[]
@@ -107,7 +105,7 @@ class chat_service:
             stop_conversation, stop_response, updated_prompt, role = chat_service.validate_prompt(
                 prompt, is_override)
             chat_service.update_conversation(
-                conversation_id, updated_prompt, 'user', current_user_email, task,metadata, title)
+                conversation_id, updated_prompt, 'user', current_user_email, task, title, task_params,metadata)
 
             current_completion = ''
             user_action_required = False
@@ -231,7 +229,7 @@ class chat_service:
 
             chat_service.save_chat_log(current_user_email, updated_prompt)
             chat_service.update_conversation(
-                conversation_id, current_completion, role, current_user_email, task, metadata,None, msg_info, user_action_required)
+                conversation_id, current_completion, role, current_user_email, task, None, task_params,metadata, msg_info, user_action_required)
         except Exception as e:
             yield (json.dumps({"error": "error"}))
             logging.error("Error in chat completion: "+str(e))
@@ -248,8 +246,7 @@ class chat_service:
         if (is_override):
             return stop_conversation, stop_response, prompt, role
 
-    def create_Conversation(prompt, email, model, msg_info,metadata, title=None, id=None,):
-        task = model
+    def create_Conversation(prompt, email, task, msg_info, title=None, id=None,task_params=None,metadata=None):
         message = message_obj(
             id=str(uuid.uuid4()),
             role="user",
@@ -267,27 +264,25 @@ class chat_service:
             created=datetime.now(),
             messages=messages,
             user_email=email,
-            title=title if title else openai_wrapper.gen_title(prompt, model),
-            model_name=model,
+            title=title if title else openai_wrapper.gen_title(prompt, task),
             state='active',
-            assigned_to=[],
             task=task,
+            task_params=task_params,
             metadata=metadata
         )
-        print("conversation to be saved",conversation)
         new_conversation_id = conversation_context.insert_conversation(
             conversation)
         return new_conversation_id
 
-    def update_conversation(conversation_id, content, role, user_email, model,metadata, title=None, msg_info=None, user_action_required=False):
+    def update_conversation(conversation_id, content, role, user_email, task, title=None, task_params=None,metadata=None, msg_info=None, user_action_required=False):
         conversation = conversation_context.get_conversation_by_id(
             conversation_id, user_email)
         if (conversation == None):
             chat_service.create_Conversation(
-                content, user_email, model, msg_info,metadata, title, conversation_id)
+                content, user_email, task, msg_info, title, conversation_id, task_params,metadata)
             return
-        if (model is None or not model):
-            model = conversation['model']
+        if (task is None or not task):
+            task = conversation['task']
         messages = conversation['messages']
         message = message_obj(
             id=str(uuid.uuid4()),
@@ -297,7 +292,7 @@ class chat_service:
             children=[],
             user_action_required=user_action_required,
             msg_info=msg_info,
-            task=model
+            task=task
         )
 
        # find message with last node id
@@ -310,11 +305,9 @@ class chat_service:
 
         conversation['last_node'] = message['id']
         conversation['updated'] = datetime.now()
-        conversation['model'] = model
+        conversation['task_params'] = task_params
         if metadata is not None:
             conversation['metadata'] = metadata
-        # conversation['metadata'] = metadata if metadata else {}
-        print("conversation to be updated",conversation)
 
         messages.append(message)
         conversation_context.update_conversation(conversation_id, conversation)
@@ -358,18 +351,3 @@ class chat_service:
        result =  conversation_context.update_conversation_properties(
             conversation_id, data, user_email)
        return result
-
-    def request_approval(conversation_id, user_email, user_groups):
-        # needs to be updated for multiple groups
-        current_group = user_groups[0]
-        group_managers = keycloak_wrapper.get_users_by_role_and_group(
-            "manager", current_group)
-        group_managers_emails = [user['email'] for user in group_managers]
-        conversation_context.request_approval(
-            conversation_id, group_managers_emails)
-
-        csv_email = ','.join(group_managers_emails)
-        message = f"Request sent for approval to: {csv_email}"
-        chat_service.update_conversation(conversation_id, message, 'guardrails',
-                                         user_email, model=None, msg_info=None, user_action_required=False)
-        return message

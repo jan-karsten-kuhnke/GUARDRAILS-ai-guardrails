@@ -93,16 +93,6 @@ def update_conversation_properties(conversation_id):
     return {"result": "success"}
 
 
-@endpoints.route('/requestapproval/<conversation_id>', methods=['GET'])
-@oidc.accept_token(require_token=True)
-def request_approval(conversation_id):
-    user_email = get_current_user_email()
-    user_groups = get_current_user_groups()
-    message = chat_service.request_approval(
-        conversation_id, user_email, user_groups)
-    return {"message": message}
-
-
 @endpoints.route('/executeondoc', methods=['POST'])
 @oidc.accept_token(require_token=True)
 def execute_on_document():
@@ -136,5 +126,4 @@ def execute_on_document():
         return Response(summarize_brief_stream(data, user_email, token, filename, filepath), mimetype='text/event-stream')
 
     except Exception as e:
-        # Handle the exception here, you can log the error for debugging
         return jsonify(error="An error occurred: " + str(e)), 500
