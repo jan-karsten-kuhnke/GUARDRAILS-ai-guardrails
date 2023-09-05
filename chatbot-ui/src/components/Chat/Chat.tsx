@@ -64,6 +64,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showScrollDownButton, setShowScrollDownButton] =
     useState<boolean>(false);
+  const [chatTitle, setChatTitle] = useState<string>('');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -484,7 +485,19 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     };
   }, [messagesEndRef]);
 
-
+  useEffect(() => {
+    // Checking for new chat
+    if(selectedConversation?.messages.length === 0){
+      setChatTitle(selectedTile.title);
+    }
+    // for an existing chat
+    else{
+      const selectedTask = tiles.find(tile => tile.code === selectedConversation?.task);
+      if(selectedTask){
+        setChatTitle(selectedTask.title);
+      }
+    }
+  },[selectedConversation,selectedTile]);
 
   return (
     <div className={`relative flex-1 overflow-hidden ${theme.chatBackground}`}>
@@ -559,7 +572,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               <div
                 className={`sticky top-0 z-10 flex justify-center py-4 ${theme.chatTitleTheme}`}
               >
-                New Conversation
+                {chatTitle}
               </div>
               {selectedConversation?.messages.map((message, index) => (
                 <MemoizedChatMessage
