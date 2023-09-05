@@ -6,7 +6,7 @@ from integration.flowable_wrapper import flowable_wrapper
 from database.repository import Persistence
 from globals import Globals
 from utils.util import required_chain_fields
-
+import logging
 class userdata_service:
     def get_all_folders(user_email):
         return Persistence.get_folder_data(user_email)
