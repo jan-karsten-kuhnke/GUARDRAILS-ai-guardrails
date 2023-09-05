@@ -1,19 +1,13 @@
 import os
 import logging
-from oidc import get_current_user_email
 from repo.db import conversation_context
 from database.repository import Persistence
 from integration.openai_wrapper import openai_wrapper
-from integration.presidio_wrapper import presidio_wrapper
-from presidio_anonymizer.entities import RecognizerResult
-from integration.keycloak_wrapper import keycloak_wrapper
-from service.pii_service import pii_service
 from service.document_service import DocumentService
 import uuid
 from typing import TypedDict, Optional
 from datetime import datetime
 import json
-import requests
 from executors.applet.Summarize import Summarize
 from executors.applet.Extraction import Extraction
 from executors.applet.Conversation import Conversation

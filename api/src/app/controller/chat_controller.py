@@ -6,7 +6,6 @@ from time import time
 import os
 from oidc import oidc
 from oidc import get_current_user_email
-from oidc import get_current_user_groups
 from utils.util import rename_id
 import json
 from utils.util import validate_fields
