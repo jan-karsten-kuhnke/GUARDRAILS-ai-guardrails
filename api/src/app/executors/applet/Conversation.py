@@ -23,7 +23,8 @@ class Conversation:
         start_time = time.time()
         model_type = params['modelType']
         curr_date = datetime.today()
-        
+        current_date = curr_date.strftime("%Y-%m-%d %H:%M:%S")
+                
         memory = ConversationBufferMemory(memory_key="chat_history",return_messages=True)
         
         for history in chat_history:
@@ -31,24 +32,23 @@ class Conversation:
         
         llm=LlmProvider.get_llm(class_name= __class__.__name__,model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
         
-        _DEFAULT_TEMPLATE = f"""You are ChatGPT, a large language model trained by OpenAI, based on the GPT-3.5 architecture , and you like explaining in detail , so answer in detail as possible.\nCurrent date: {curr_date}.
-
-        {{chat_history}}
-        Human: {{input}}
-        Assistant:"""
-
+        _DEFAULT_TEMPLATE = params['promptTemplate']
+        _DEFAULT_TEMPLATE = _DEFAULT_TEMPLATE.replace("currDate", current_date)
+                
         PROMPT = PromptTemplate(
-        input_variables=["chat_history","input"], template=_DEFAULT_TEMPLATE
+        input_variables=params['inputVariables'], template= _DEFAULT_TEMPLATE
         )
-            
+        
         chain = LLMChain(
-            llm=llm,verbose=True,memory=memory,
+            llm=llm,
+            verbose=True,
+            memory=memory,
             prompt=PROMPT
         )
        
         # Prepare the chain
 
-        answer = chain.predict(input= query)
+        answer = chain.predict(input=query)
         answer = answer.replace("\\n", "\n")
         
         response=AppletResponse(answer, [])
