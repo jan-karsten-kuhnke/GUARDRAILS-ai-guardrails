@@ -20,8 +20,11 @@ export const lightTheme = {
   itemDropColor: "#d8f5ff",
   taskSelectTheme: "bg-[#1c96a3] text-white",
   selectTheme:{
-    backgroundColor: "#70738d",
-    color: "#fff",
+    backgroundColor: "##FFF",
+    color: "#75777A",
+    optionBgColor:"#1c96a3",
+    optionColor: "#fff",
+    hoverBorderColor:"#1c96a3"
   },
   chatBackground: "bg-white",
   chatItemsBorder: "border border-neutral-200",

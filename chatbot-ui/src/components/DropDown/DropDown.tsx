@@ -12,11 +12,10 @@ interface Props {
     value: any;
     label: string;
     onChange: (e: any) => void;
-    style?: Object;
     defaultSelectable?: boolean;
 }
 
-const DropDown: FC<Props> = ({ data, value, label, onChange, style, defaultSelectable }) => {
+const DropDown: FC<Props> = ({ data, value, label, onChange, defaultSelectable }) => {
     const {
         state: { theme },
     } = useContext(HomeContext);
@@ -27,14 +26,17 @@ const DropDown: FC<Props> = ({ data, value, label, onChange, style, defaultSelec
             value={value}
             sx={{
                 backgroundColor: theme.selectTheme.backgroundColor,
-                color: theme.selectTheme.color,
+                color: "theme.selectTheme.color",
                 "& .MuiSvgIcon-root": {
                     color: theme.selectTheme.color,
-                }
+                },
+                "&.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: theme.selectTheme.hoverBorderColor,
+                },
             }}
             MenuProps={{
                 PaperProps: {
-                    style: { backgroundColor: "#202123", color: "white" },
+                    style: { backgroundColor:  theme.selectTheme.optionBgColor, color: theme.selectTheme.optionColor },
                 },
             }}
             onChange={(e) => onChange(e.target.value)}

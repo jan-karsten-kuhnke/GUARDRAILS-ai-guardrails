@@ -21,6 +21,10 @@ export const darkTheme = {
   selectTheme:{
     backgroundColor: "#70738d",
     color: "#fff",
+    optionBgColor:"#202123",
+    optionColor: "#fff",
+    hoverBorderColor:"#343541"
+
   },
   chatBackground: "bg-[#343541]",
   chatItemsBorder: "border border-neutral-600",
