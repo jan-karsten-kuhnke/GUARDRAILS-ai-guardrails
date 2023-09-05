@@ -90,13 +90,11 @@ class chat_service:
                 filename=document_obj['metadata']['title']
                 document_array=document_obj['docs']
 
-            is_override = bool(data["isOverride"])
             conversation_id = None
             manage_conversation_context = False
 
             # if(task == "conversation" or task == "qa-retreival"):
-            is_override = True
-
+            
             if task == "summarize-brief":
                 prompt = f"Summarize {filename}"
                 title = f"Summary of {filename}."
@@ -112,7 +110,7 @@ class chat_service:
                 manage_conversation_context = True
 
             stop_conversation, stop_response, updated_prompt, role = chat_service.validate_prompt(
-                prompt, is_override, pii_scan, nsfw_scan, current_user_email, conversation_id)
+                prompt, pii_scan, nsfw_scan, current_user_email, conversation_id)
             chat_service.update_conversation(
                 conversation_id, updated_prompt, 'user', current_user_email, task, title, task_params)
 
@@ -247,16 +245,13 @@ class chat_service:
             if filepath:
                 os.remove(filepath)
 
-    def validate_prompt(prompt, is_override, pii_scan, nsfw_scan, current_user_email, conversation_id):
+    def validate_prompt(prompt, pii_scan, nsfw_scan, current_user_email, conversation_id):
         logging.info("pii_scan: ", pii_scan)
         logging.info("nsfw_scan: ", nsfw_scan)
         stop_conversation = False
         stop_response = ""
         role = "guardrails"
         nsfw_threshold = 0.94
-
-        if (is_override):
-            return stop_conversation, stop_response, prompt, role
 
         if (nsfw_scan):
             nsfw_score = NSFWModelWrapper.analyze(prompt)

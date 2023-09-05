@@ -49,7 +49,7 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
       userActionRequired: false,
       msg_info: null,
     };
-    handleSend(message, 0, false, formData);
+    handleSend(message, 0, formData);
   };
 
   // collection selection
