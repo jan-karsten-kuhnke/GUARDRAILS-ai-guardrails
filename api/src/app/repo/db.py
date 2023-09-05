@@ -57,11 +57,12 @@ class conversation_context:
         conversations_collection.update_many({"user_email":user_email}, {"$set":{"archived":True}})
     
     def archive_unarchive_conversation(user_email,conversation_id,flag = True):
-        conversations_collection.find_one_and_update({"user_email":user_email, "_id" : conversation_id}, {"$set":{"archived":flag}})
+        result = conversations_collection.find_one_and_update({"user_email":user_email, "_id" : conversation_id}, {"$set":{"archived":flag}})
+        return result
     
     def update_conversation_properties(conversation_id,data,user_email):
-        conversations_collection.update_one({"_id":conversation_id, "user_email":user_email}, {"$set":{"folderId":data['folderId'], "title":data['title']}})
-
+       result =  conversations_collection.update_one({"_id":conversation_id, "user_email":user_email}, {"$set":{"folderId":data['folderId'], "title":data['title']}})
+       return result
     def request_approval(conversation_id,group_managers_emails):
         conversations_collection.update_one({"_id":conversation_id}, {"$set":{"state":"waiting for approval","assigned_to":group_managers_emails}})
 
