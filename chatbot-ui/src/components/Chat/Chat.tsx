@@ -19,13 +19,14 @@ import PublicPrivateSwitch from "../PublicPrivateSwitch";
 import AdditionalInputs from "../AdditionalInputs/AdditionalInputs";
 import Tiles from "../Tiles/Tiles";
 import RequestAccessComponent from "../Tiles/RequestAccess";
-import { EXTRACTION_CODE, SUMMARIZATION_CODE, QA_RETRIEVAL_CODE } from "@/utils/constants";
+import { EXTRACTION_CODE, SUMMARIZATION_CODE, QA_RETRIEVAL_CODE, COLLECTION_PICKER, DOCUMENT_PICKER } from "@/utils/constants";
 import {
   anonymizeMessage,
   fetchPrompt,
   requestApproval,
   executeOnDoc,
 } from "@/services";
+import { parseChunk, updateMessagesAndConversation} from "@/utils/app/conversation";
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -57,6 +58,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     handleSelectedTile,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
+
+  console.log("selectedTile Chat.tsx---- ", selectedTile)
+  console.log("selectedConversation Chat.tsx---- ", selectedConversation)
+  console.log("selectedCollection Chat.tsx---- ", selectedCollection)
+  console.log("selectedDocument Chat.tsx---- ", selectedDocument)
   
   executeOnUploadedDocRef = useRef<Object | null>(null);
 
@@ -77,15 +83,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       formData: FormData = new FormData(),
       documentId: string | undefined = undefined
     ) => {
-      console.log("-----inside handleSend Method-----")
       if (containsOnlyWhitespacesOrNewlines(message.content)) return;
       message.content = message.content.trim();
       const selectedTask = selectedTile?.code;
-      
-      console.log("selectedTask-----",selectedTask)
-      console.log("documentId-----",documentId)
-      console.log("formData-----",formData)
-      console.log("message-----",message)
 
       if (selectedTask === "conversation") {
         await anonymizeMessage(message.content)
@@ -130,31 +130,29 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
         const controller = new AbortController();
         let response: any;
-
         //params for selected tiles
         let sendCollectionName = false
         let sendQaDocumentId = false
 
         selectedTile?.params?.inputs?.forEach((item:any) => {
           const { type } = item;
-          if (type === 'collectionPicker') {
+          if (type === COLLECTION_PICKER) {
             sendCollectionName = true
           }
-          else if (type === 'documentPicker') {
+          else if (type === DOCUMENT_PICKER) {
             sendQaDocumentId = true
           }
         })
 
+        //renamed qaDocumentId to documentId
         let params: any = {
           ...documentId ? { documentId } : {},
-          ...( selectedCollection && sendCollectionName ) ? { collectionName: selectedCollection } : {},
-          ...( selectedDocument && sendQaDocumentId ) ? { qaDocumentId: selectedDocument } : {},
+          ...(selectedCollection && sendCollectionName) ? { collectionName: selectedCollection } : {},
+          ...(selectedDocument && sendQaDocumentId) ? { documentId: selectedDocument } : {},
         };
-        if (
-          selectedTile.params?.useExecuteOnDoc
-        ) {
 
-          try {
+        try {
+          if (selectedTile.params?.useExecuteOnDoc) {
             toast.loading(
               "Summarization might be a time taking process depending on the size of your document",
               {
@@ -162,7 +160,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 duration: 5000,
               }
             );
-            if (documentId) {
+        
+            if (documentId) { //if selectedTile.params?.useExecuteOnDoc is true
               response = await fetchPrompt(
                 chatBody.message,
                 selectedConversation.id,
@@ -171,62 +170,38 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 isPrivate,
                 params
               );
-            }
-            else {
+            } else {
               const payload = {
                 conversation_id: selectedConversation.id,
                 isOverride: isOverRide,
                 task: selectedTask,
-                params
+                params,
               };
               formData.append("data", JSON.stringify(payload));
               response = await executeOnDoc(formData);
             }
-
-          } catch (err: any) {
-            toast.error(err.message, {
-              position: "bottom-right",
-              duration: 3000,
-            });
-            console.log(err);
+          } else { //if selectedTile.params?.useExecuteOnDoc is false
+            const messageContent = isOverRide
+              ? updatedConversation.messages[updatedConversation.messages.length - 2].content
+              : chatBody.message;
+        
+            response = await fetchPrompt(
+              messageContent,
+              selectedConversation.id,
+              isOverRide,
+              selectedTask,
+              isPrivate,
+              params
+            );
           }
-        } else {
-          if (isOverRide) {
-            try {
-              response = await fetchPrompt(
-                updatedConversation.messages[
-                  updatedConversation.messages.length - 2
-                ].content,
-                selectedConversation.id,
-                isOverRide,
-                selectedTask,
-                isPrivate,
-                params,
-              );
-            } catch (err: any) {
-              toast.error(err.message, {
-                position: "bottom-right",
-                duration: 3000,
-              });
-            }
-          } else {
-            try {
-              response = await fetchPrompt(
-                chatBody.message,
-                selectedConversation.id,
-                isOverRide,
-                selectedTask,
-                isPrivate,
-                params,
-              );
-            } catch (err: any) {
-              toast.error(err.message, {
-                position: "bottom-right",
-                duration: 3000,
-              });
-            }
-          }
+        } catch (err:any) {
+          toast.error(err.message, {
+            position: "bottom-right",
+            duration: 3000,
+          });
+          console.log(err);
         }
+        
 
         if (!response.ok) {
           homeDispatch({ field: "loading", value: false });
@@ -257,109 +232,18 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           }
           const { value, done: doneReading } = await reader.read();
           done = doneReading;
-          const chunkValue = decoder.decode(value);
-          let parsed;
+          const chunkValue = decoder.decode(value); // stores role, content, msg_info (JSON String)
           if (!chunkValue || chunkValue === "") continue;
-          if (chunkValue.includes("}{")) {
-            var split = chunkValue.split("}{");
-            for (var i = 0; i < split.length; i++) {
-              if (i === 0) {
-                parsed = JSON.parse(split[i] + "}");
-              } else if (i === split.length - 1) {
-                parsed = JSON.parse("{" + split[i]);
-              } else {
-                parsed = JSON.parse("{" + split[i] + "}");
-              }
-
-              if (parsed.content == undefined) {
-                text =
-                  "Sorry currently your request could not be fullfiled. Please try again.!";
-              } else {
-                text += parsed.content;
-              }
-              msg_info = parsed.msg_info;
-              role = parsed.role;
-            }
-          } else {
-            parsed = JSON.parse(chunkValue);
-            if (parsed.content == undefined) {
-              text =
-                "Sorry currently your request could not be fullfiled. Please try again.!";
-            } else {
-              text += parsed.content;
-            }
-            msg_info = parsed.msg_info;
-            role = parsed.role;
-          }
-          if (isFirst) {
-            isFirst = false;
-            homeDispatch({ field: "refreshConversations", value: true });
-            const updatedMessages: Message[] = updatedConversation.messages.map(
-              (message, index) => {
-                return {
-                  ...message,
-                  userActionRequired: false,
-                };
-              }
-            );
-            if (isOverRide) {
-              updatedMessages.push({
-                role: "guardrails",
-                content:
-                  "You chose to Override the warning, proceeding to Open AI.",
-                msg_info: msg_info,
-                userActionRequired: false,
-              });
-            }
-            updatedMessages.push({
-              role: role,
-              content: text,
-              msg_info: msg_info,
-              userActionRequired: parsed.user_action_required,
-            });
-            updatedConversation = {
-              ...updatedConversation,
-              messages: updatedMessages,
-            };
-            homeDispatch({
-              field: "selectedConversation",
-              value: updatedConversation,
-            });
-          } else {
-            const updatedMessages: Message[] = updatedConversation.messages.map(
-              (message, index) => {
-                if (index === updatedConversation.messages.length - 1) {
-                  return {
-                    ...message,
-                    content: text,
-                  };
-                }
-                return message;
-              }
-            );
-            updatedConversation = {
-              ...updatedConversation,
-              messages: updatedMessages,
-            };
-            homeDispatch({
-              field: "selectedConversation",
-              value: updatedConversation,
-            });
-          }
+          let parsed = parseChunk(chunkValue, text, msg_info, role);
+          role = parsed.role;
+          msg_info = parsed.msg_info;
+          text += parsed.content;
+          updateMessagesAndConversation(isFirst, homeDispatch, updatedConversation, text, role, msg_info, parsed, isOverRide)
         }
-
         homeDispatch({ field: "messageIsStreaming", value: false });
       }
     },
-    [
-      conversations,
-      selectedConversation,
-      stopConversationRef,
-      isPrivate,
-      selectedTile,
-      selectedCollection,
-      selectedDocument
-    ]
+    [conversations, selectedConversation, stopConversationRef, isPrivate, selectedTile, selectedCollection, selectedDocument]
   );
 
   const handleRequestApproval = async (conversationId: string) => {
