@@ -106,7 +106,7 @@
           "last_node": {
             "type": "string"
           },
-          "user_email": {
+          "user_id": {
             "type": "string"
           },
           "state": {
@@ -195,7 +195,7 @@
       "FolderArrray": {
         "type": "object",
         "properties": {
-          "user_email": {
+          "user_id": {
             "type": "string"
           },
           "folders": {
@@ -260,7 +260,7 @@
       "PromptsArrray": {
         "type": "object",
         "properties": {
-          "user_email": {
+          "user_id": {
             "type": "string"
           },
           "prompts": {
