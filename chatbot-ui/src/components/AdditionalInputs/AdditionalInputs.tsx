@@ -117,7 +117,7 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
                     Choose file
                   </div>
                   <label
-                    className={`flex gap-1 items-center  p-2.5 rounded-md ${selectedTile.has_access && theme.secondaryButtonTheme
+                    className={`flex gap-1 items-center  p-[7px] rounded-md ${selectedTile.has_access && theme.secondaryButtonTheme
                       } 
             ${selectedTile.has_access
                         ? "cursor-pointer"

@@ -128,6 +128,8 @@ export const PrivateDocuments = () => {
             <DropDown data={taskData}
               value={"None"}
               label={"Select a task"}
+              color={theme.documentSectionSelectTheme.color}
+              backgroundColor={theme.documentSectionSelectTheme.backgroundColor}
               onChange={(code) => {
                 handleExecuteOnUploadedDoc(params.row.id, params.row.title, code)
               }} />
@@ -135,11 +137,10 @@ export const PrivateDocuments = () => {
 
           <Button
             variant="outlined"
-            size="small"
             color="error"
             sx={{
               fontSize: "12px",
-              padding: "3px",
+              padding: "8px",
               textTransform: "Capitalize",
               margin: "0px 5px",
             }}
@@ -183,6 +184,8 @@ export const PrivateDocuments = () => {
           <DropDown data={collectionData}
             value={selectedCollection}
             label={"Select a collection"}
+            color={theme.documentSectionSelectTheme.color}
+            backgroundColor={theme.documentSectionSelectTheme.backgroundColor}
             onChange={(collection) => {
               handleSelection(collection)
             }} />
