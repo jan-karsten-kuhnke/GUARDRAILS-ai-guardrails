@@ -25,7 +25,6 @@ export const parseChunk = (chunkValue : any, text: any, msg_info : any, role : a
   if (chunkValue.includes("}{")) {
     const split = chunkValue.split("}{");
     split.forEach((chunk : string, index : number) => {
-      console.log("chunk in conversation.ts", chunk)
       const jsonChunk = (index === 0 ? chunk + "}" : index === split.length - 1 ? "{" + chunk : "{" + chunk + "}");
       parsed = parseSingleJSON(jsonChunk, text, msg_info, role);
     });
@@ -98,10 +97,6 @@ export const updateMessagesAndConversation = (
       messages: updatedMessages,
     };
   }
-
-  console.log("updatedMessages conversation.tsx end-----", updatedMessages)
-  console.log("updatedConversation conversation.tsx end-----", updatedConversation)
-
   homeDispatch({
     field: "selectedConversation",
     value: updatedConversation,

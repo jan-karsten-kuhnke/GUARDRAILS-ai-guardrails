@@ -145,9 +145,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           ...(selectedDocument && sendQaDocumentId) ? { documentId: selectedDocument } : {},
         };
 
-        if (selectedTile.params?.useExecuteOnDoc) {
-
-          try {
+        try {
+          if (selectedTile.params?.useExecuteOnDoc) {
             toast.loading(
               "Summarization might be a time taking process depending on the size of your document",
               {
@@ -155,7 +154,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 duration: 5000,
               }
             );
-            if (documentId) {
+        
+            if (documentId) { //if selectedTile.params?.useExecuteOnDoc is true
               response = await fetchPrompt(
                 chatBody.message,
                 selectedConversation.id,
@@ -163,43 +163,32 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 isPrivate,
                 params
               );
-            }
-            else {
+            } else {
               const payload = {
                 conversation_id: selectedConversation.id,
                 task: selectedTask,
-                params
+                params,
               };
               formData.append("data", JSON.stringify(payload));
               response = await executeOnDoc(formData);
             }
-
-          } catch (err: any) {
-            toast.error(err.message, {
-              position: "bottom-right",
-              duration: 3000,
-            });
-            console.log(err);
+          } else { //if selectedTile.params?.useExecuteOnDoc is false
+            response = await fetchPrompt(
+              chatBody.message,
+              selectedConversation.id,
+              selectedTask,
+              isPrivate,
+              params
+            );
           }
-        } else {
-            try {
-              response = await fetchPrompt(
-                chatBody.message,
-                selectedConversation.id,
-                // isOverRide,
-                selectedTask,
-                isPrivate,
-                params,
-              );
-            } catch (err: any) {
-              toast.error(err.message, {
-                position: "bottom-right",
-                duration: 3000,
-              });
-            }
+        } catch (err:any) {
+          toast.error(err.message, {
+            position: "bottom-right",
+            duration: 3000,
+          });
+          console.log(err);
         }
-        
-
+      
         if (!response.ok) {
           homeDispatch({ field: "loading", value: false });
           homeDispatch({ field: "messageIsStreaming", value: false });
@@ -230,18 +219,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           const { value, done: doneReading } = await reader.read();
           done = doneReading;
           const chunkValue = decoder.decode(value); // stores role, content, msg_info (JSON String)
-          console.log("chunkValue Chat.tsx end-----", chunkValue)
           if (!chunkValue || chunkValue === "") continue;
           let parsed = parseChunk(chunkValue, text, msg_info, role);
           role = parsed.role;
           msg_info = parsed.msg_info;
           text += parsed.content;
-          
-          console.log("parsed Chat.tsx end-----", parsed)
-          console.log("role Chat.tsx end-----", role)
-          console.log("msg_info Chat.tsx end-----", msg_info)
-          console.log("text Chat.tsx end-----", text)
-
+        
           updateMessagesAndConversation(isFirst, homeDispatch, updatedConversation, text, role, msg_info, parsed)
         }
         homeDispatch({ field: "messageIsStreaming", value: false });
@@ -277,12 +260,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     homeDispatch({ field: "messageIsStreaming", value: false });
   };
 
-  const scrollToBottom = useCallback(() => {
-    if (autoScrollEnabled) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      textareaRef.current?.focus();
-    }
-  }, [autoScrollEnabled]);
+  // const scrollToBottom = useCallback(() => {
+  //   if (autoScrollEnabled) {
+  //     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  //     textareaRef.current?.focus();
+  //   }
+  // }, [autoScrollEnabled]);
 
   const handleScroll = () => {
     if (chatContainerRef.current) {
