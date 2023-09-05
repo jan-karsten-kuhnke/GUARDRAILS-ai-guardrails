@@ -7,6 +7,8 @@ import {
   getCollections,
   getDocumentsByCollectionName,
 } from "@/services/DocsService";
+import DropDown from "../DropDown/DropDown";
+import { FormControl } from "@mui/material";
 
 interface Props {
   inputs: [
@@ -52,6 +54,16 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
     handleSend(message, 0, false, formData);
   };
 
+  const collectionData = collections?.map((collection: any) => ({
+    value: collection?.name,
+    title: collection?.name
+  })) || [];
+
+  const documentData = documents?.map((document: any) => ({
+    value: document?.id,
+    title: document?.title
+  })) || [];
+
   // collection selection
   const handleGetCollections = () => {
     getCollections().then((res) => {
@@ -67,6 +79,8 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
       }
     });
   };
+
+  console.log(documentData,selectedDocument)
 
   useEffect(() => {
     handleGetCollections();
@@ -102,14 +116,12 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
                     Choose file
                   </div>
                   <label
-                    className={`flex gap-1 items-center  p-2.5 rounded-md ${
-                      selectedTile.has_access && theme.secondaryButtonTheme
-                    } 
-            ${
-              selectedTile.has_access
-                ? "cursor-pointer"
-                : "cursor-not-allowed text-gray-400"
-            }`}
+                    className={`flex gap-1 items-center  p-2.5 rounded-md ${selectedTile.has_access && theme.secondaryButtonTheme
+                      } 
+            ${selectedTile.has_access
+                        ? "cursor-pointer"
+                        : "cursor-not-allowed text-gray-400"
+                      }`}
                   >
                     <IconUpload />
                     Upload File
@@ -138,26 +150,16 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
                   <div className={`text-[${theme.textColor}] pb-2`}>
                     Choose Collection
                   </div>
-                  <select
-                    id="collectionlist"
-                    value={selectedCollection}
-                    className={`${theme.taskSelectTheme} text-sm rounded-lg block p-3 w-full outline-none`}
-                    onChange={(ev) => handleCollectionSelect(ev.target.value)}
-                    placeholder="Choose Collection"
-                  >
-                    {collections?.length
-                      ? collections.map((collection: any, index) => (
-                          <option
-                            value={collection?.name}
-                            key={index}
-                            className="py-2"
-                          >
-                            {collection?.name}
-                          </option>
-                        ))
-                      : ""}
-                  </select>
+                  <FormControl sx={{ minWidth: 120, width: "100%" }} size="small">
+                    <DropDown data={collectionData}
+                      value={selectedCollection}
+                      label={"Select Collection"}
+                      onChange={(collection) => {
+                        handleCollectionSelect(collection)
+                      }} />
+                  </FormControl>
                 </div>
+
               );
             } else if (
               input.key === "document" &&
@@ -168,28 +170,14 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
                   <div className={`text-[${theme.textColor}] pb-2`}>
                     Choose Document
                   </div>
-                  <select
-                    id="documentlist"
-                    value={selectedDocument}
-                    className={`${theme.taskSelectTheme} text-sm rounded-lg block p-3 w-full outline-none`}
-                    onChange={(ev) => handleDocumentSelect(ev.target.value)}
-                    placeholder="Choose Document"
-                  >
-                    <option value={undefined} className="py-2">
-                      All
-                    </option>
-                    {documents?.length
-                      ? documents.map((documents: any, index) => (
-                          <option
-                            value={documents?.id}
-                            key={index}
-                            className="py-2"
-                          >
-                            {documents?.title}
-                          </option>
-                        ))
-                      : ""}
-                  </select>
+                  <FormControl sx={{ minWidth: 120, width: "100%" }} size="small">
+                    <DropDown data={documentData}
+                      value={selectedDocument}
+                      label={"Select Document"}
+                      onChange={(document) => {
+                        handleDocumentSelect(document)
+                      }} />
+                  </FormControl>
                 </div>
               );
             }

@@ -19,6 +19,10 @@ export const lightTheme = {
   sidebarActionButtonTheme: "text-neutral-400 hover:text-neutral-500",
   itemDropColor: "#d8f5ff",
   taskSelectTheme: "bg-[#1c96a3] text-white",
+  selectTheme:{
+    backgroundColor: "#70738d",
+    color: "#fff",
+  },
   chatBackground: "bg-white",
   chatItemsBorder: "border border-neutral-200",
   chatTitleTheme:

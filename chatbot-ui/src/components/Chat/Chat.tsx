@@ -19,7 +19,6 @@ import PublicPrivateSwitch from "../PublicPrivateSwitch";
 import AdditionalInputs from "../AdditionalInputs/AdditionalInputs";
 import Tiles from "../Tiles/Tiles";
 import RequestAccessComponent from "../Tiles/RequestAccess";
-import { EXTRACTION_CODE, SUMMARIZATION_CODE, QA_RETRIEVAL_CODE } from "@/utils/constants";
 import {
   anonymizeMessage,
   fetchPrompt,
@@ -424,7 +423,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     if (executeOnUploadedDocRef.current) {
       let message: Message = {
         role: "user",
-        content: `${executeOnUploadedDocRef.current.code === SUMMARIZATION_CODE ? "Summarize" : "Extract key metrics from"} ${executeOnUploadedDocRef.current.title}`,
+        content: executeOnUploadedDocRef.current.title,
         userActionRequired: false,
         msg_info: null,
       };
