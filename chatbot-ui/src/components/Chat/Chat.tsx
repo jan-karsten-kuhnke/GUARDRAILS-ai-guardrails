@@ -59,11 +59,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
-  console.log("selectedTile Chat.tsx---- ", selectedTile)
-  console.log("selectedConversation Chat.tsx---- ", selectedConversation)
-  console.log("selectedCollection Chat.tsx---- ", selectedCollection)
-  console.log("selectedDocument Chat.tsx---- ", selectedDocument)
-  
   executeOnUploadedDocRef = useRef<Object | null>(null);
 
   const [currentMessage, setCurrentMessage] = useState<Message>();
@@ -79,7 +74,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     async (
       message: Message,
       deleteCount = 0,
-      isOverRide: boolean = false,
+      // isOverRide: boolean = false,
       formData: FormData = new FormData(),
       documentId: string | undefined = undefined
     ) => {
@@ -151,8 +146,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           ...(selectedDocument && sendQaDocumentId) ? { documentId: selectedDocument } : {},
         };
 
-        try {
-          if (selectedTile.params?.useExecuteOnDoc) {
+        if (selectedTile.params?.useExecuteOnDoc) {
+
+          try {
             toast.loading(
               "Summarization might be a time taking process depending on the size of your document",
               {
@@ -160,46 +156,71 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 duration: 5000,
               }
             );
-        
-            if (documentId) { //if selectedTile.params?.useExecuteOnDoc is true
+            if (documentId) {
               response = await fetchPrompt(
                 chatBody.message,
                 selectedConversation.id,
-                isOverRide,
+                // isOverRide,
                 selectedTask,
                 isPrivate,
                 params
               );
-            } else {
+            }
+            else {
               const payload = {
                 conversation_id: selectedConversation.id,
-                isOverride: isOverRide,
+                // isOverride: isOverRide,
                 task: selectedTask,
-                params,
+                params
               };
               formData.append("data", JSON.stringify(payload));
               response = await executeOnDoc(formData);
             }
-          } else { //if selectedTile.params?.useExecuteOnDoc is false
-            const messageContent = isOverRide
-              ? updatedConversation.messages[updatedConversation.messages.length - 2].content
-              : chatBody.message;
-        
-            response = await fetchPrompt(
-              messageContent,
-              selectedConversation.id,
-              isOverRide,
-              selectedTask,
-              isPrivate,
-              params
-            );
+
+          } catch (err: any) {
+            toast.error(err.message, {
+              position: "bottom-right",
+              duration: 3000,
+            });
+            console.log(err);
           }
-        } catch (err:any) {
-          toast.error(err.message, {
-            position: "bottom-right",
-            duration: 3000,
-          });
-          console.log(err);
+        } else {
+          // if (isOverRide) {
+          //   try {
+          //     response = await fetchPrompt(
+          //       updatedConversation.messages[
+          //         updatedConversation.messages.length - 2
+          //       ].content,
+          //       selectedConversation.id,
+          //       isOverRide,
+          //       selectedTask,
+          //       isPrivate,
+          //       params,
+          //     );
+          //   } catch (err: any) {
+          //     toast.error(err.message, {
+          //       position: "bottom-right",
+          //       duration: 3000,
+          //     });
+          //   }
+          // } 
+          // else {
+            try {
+              response = await fetchPrompt(
+                chatBody.message,
+                selectedConversation.id,
+                // isOverRide,
+                selectedTask,
+                isPrivate,
+                params,
+              );
+            } catch (err: any) {
+              toast.error(err.message, {
+                position: "bottom-right",
+                duration: 3000,
+              });
+            }
+          // }
         }
         
 
@@ -233,12 +254,20 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           const { value, done: doneReading } = await reader.read();
           done = doneReading;
           const chunkValue = decoder.decode(value); // stores role, content, msg_info (JSON String)
+          console.log("chunkValue Chat.tsx end-----", chunkValue)
           if (!chunkValue || chunkValue === "") continue;
           let parsed = parseChunk(chunkValue, text, msg_info, role);
           role = parsed.role;
           msg_info = parsed.msg_info;
           text += parsed.content;
-          updateMessagesAndConversation(isFirst, homeDispatch, updatedConversation, text, role, msg_info, parsed, isOverRide)
+          
+          console.log("parsed Chat.tsx end-----", parsed)
+          console.log("role Chat.tsx end-----", role)
+          console.log("msg_info Chat.tsx end-----", msg_info)
+          console.log("text Chat.tsx end-----", text)
+
+          // updateMessagesAndConversation(isFirst, homeDispatch, updatedConversation, text, role, msg_info, parsed, isOverRide)
+          updateMessagesAndConversation(isFirst, homeDispatch, updatedConversation, text, role, msg_info, parsed)
         }
         homeDispatch({ field: "messageIsStreaming", value: false });
       }
@@ -318,7 +347,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         userActionRequired: false,
         msg_info: null,
       };
-      handleSend(message, 0, false, undefined, executeOnUploadedDocRef.current.id);
+      // handleSend(message, 0, false, undefined, executeOnUploadedDocRef.current.id);
+      handleSend(message, 0, undefined, executeOnUploadedDocRef.current.id)
       executeOnUploadedDocRef.current = null;
     }
 
@@ -470,7 +500,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     handleSend(
                       selectedMessage,
                       selectedConversation?.messages.length - index,
-                      true
+                      // true
                     );
                   }}
                   onRequestApproval={(conversationId) => {
