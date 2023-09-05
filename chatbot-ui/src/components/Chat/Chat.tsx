@@ -74,7 +74,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     async (
       message: Message,
       deleteCount = 0,
-      // isOverRide: boolean = false,
       formData: FormData = new FormData(),
       documentId: string | undefined = undefined
     ) => {
@@ -160,7 +159,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               response = await fetchPrompt(
                 chatBody.message,
                 selectedConversation.id,
-                // isOverRide,
                 selectedTask,
                 isPrivate,
                 params
@@ -169,7 +167,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             else {
               const payload = {
                 conversation_id: selectedConversation.id,
-                // isOverride: isOverRide,
                 task: selectedTask,
                 params
               };
@@ -185,26 +182,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             console.log(err);
           }
         } else {
-          // if (isOverRide) {
-          //   try {
-          //     response = await fetchPrompt(
-          //       updatedConversation.messages[
-          //         updatedConversation.messages.length - 2
-          //       ].content,
-          //       selectedConversation.id,
-          //       isOverRide,
-          //       selectedTask,
-          //       isPrivate,
-          //       params,
-          //     );
-          //   } catch (err: any) {
-          //     toast.error(err.message, {
-          //       position: "bottom-right",
-          //       duration: 3000,
-          //     });
-          //   }
-          // } 
-          // else {
             try {
               response = await fetchPrompt(
                 chatBody.message,
@@ -220,7 +197,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 duration: 3000,
               });
             }
-          // }
         }
         
 
@@ -266,7 +242,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           console.log("msg_info Chat.tsx end-----", msg_info)
           console.log("text Chat.tsx end-----", text)
 
-          // updateMessagesAndConversation(isFirst, homeDispatch, updatedConversation, text, role, msg_info, parsed, isOverRide)
           updateMessagesAndConversation(isFirst, homeDispatch, updatedConversation, text, role, msg_info, parsed)
         }
         homeDispatch({ field: "messageIsStreaming", value: false });
@@ -347,7 +322,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         userActionRequired: false,
         msg_info: null,
       };
-      // handleSend(message, 0, false, undefined, executeOnUploadedDocRef.current.id);
       handleSend(message, 0, undefined, executeOnUploadedDocRef.current.id)
       executeOnUploadedDocRef.current = null;
     }
@@ -499,8 +473,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     // discard edited message and the ones that come after then resend
                     handleSend(
                       selectedMessage,
-                      selectedConversation?.messages.length - index,
-                      // true
+                      selectedConversation?.messages.length - index
                     );
                   }}
                   onRequestApproval={(conversationId) => {

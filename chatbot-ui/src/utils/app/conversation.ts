@@ -60,7 +60,6 @@ export const updateMessagesAndConversation = (
   role: any, 
   msg_info : any, 
   parsed: any
-  // isOverRide : boolean
   ) => {
 
   let updatedMessages;
@@ -74,14 +73,6 @@ export const updateMessagesAndConversation = (
       userActionRequired: false,
     }));
 
-    // if (isOverRide) {
-    //   updatedMessages.push({
-    //     role: "guardrails",
-    //     content: "You chose to Override the warning, proceeding to Open AI.",
-    //     msg_info: msg_info,
-    //     userActionRequired: false,
-    //   });
-    // }
     updatedMessages.push({
       role: role,
       content: text,
