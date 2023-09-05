@@ -25,7 +25,7 @@ class flowable_wrapper:
                 return str(i['id'])
     
 
-    def submit_request(user_email, tile_code, tile_name):
+    def submit_request(user_id, tile_code, tile_name):
         url = f"{Globals.FLOWABLE_BASE_URL}/runtime/process-instances"
 
         payload = json.dumps({
@@ -34,7 +34,7 @@ class flowable_wrapper:
         "variables": [
             {
             "name": "owner",
-            "value": user_email
+            "value": user_id
             },
             {
             "name": "assignee",
@@ -59,7 +59,7 @@ class flowable_wrapper:
 
         return response.json()
 
-    def get_submitted_requests_code(user_email):
+    def get_submitted_requests_code(user_id):
         url = f"{Globals.FLOWABLE_BASE_URL}/query/historic-process-instances"
 
         payload = json.dumps({
@@ -68,7 +68,7 @@ class flowable_wrapper:
         "variables": [
             {
             "name": "owner",
-            "value": user_email,
+            "value": user_id,
             "operation": "equals",
             "type": "string"
             }
@@ -92,11 +92,11 @@ class flowable_wrapper:
 
         return all_codes
     
-    def get_requests_for_admin(user_email = Globals.FlOWABLE_ADMIN_USERNAME):
+    def get_requests_for_admin(user_id = Globals.FlOWABLE_ADMIN_USERNAME):
         url = f"{Globals.FLOWABLE_BASE_URL}/query/historic-task-instances?size=1000"
 
         payload = json.dumps({
-        "taskAssignee": user_email,
+        "taskAssignee": user_id,
         "processDefinitionId": flowable_wrapper.get_process_id(),
         "includeProcessVariables": True,
         "processVariables": []

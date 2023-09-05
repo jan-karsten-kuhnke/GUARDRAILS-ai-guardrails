@@ -5,7 +5,7 @@ from flask_smorest import Blueprint as SmorestBlueprint
 from time import time
 import os
 from oidc import oidc
-from oidc import get_current_user_email
+from oidc import get_current_user_id
 from oidc import get_current_user_groups
 from utils.util import rename_id
 import json
@@ -22,14 +22,14 @@ def chat_completion():
         validation_result = validate_fields(data, required_fields)
         if validation_result:
             return validation_result
-        user_email = get_current_user_email()
+        user_id = get_current_user_id()
         token = request.headers.get('authorization', '').split(' ')[1]
 
-        def chat_completion_stream(data, user_email):
-            response = chat_service.chat_completion(data, user_email, token)
+        def chat_completion_stream(data, user_id):
+            response = chat_service.chat_completion(data, user_id, token)
             for chunk in response:
                 yield chunk
-        return Response(chat_completion_stream(data, user_email), mimetype='text/event-stream')
+        return Response(chat_completion_stream(data, user_id), mimetype='text/event-stream')
 
     except Exception as e:
         # Handle general exceptions
@@ -41,16 +41,16 @@ def chat_completion():
 def get_conversations():
     archived_param = request.args.get('archived')
     flag = archived_param.lower() == 'true' if archived_param else False
-    user_email = get_current_user_email()
-    conversations = chat_service.get_conversations(user_email, flag)
+    user_id = get_current_user_id()
+    conversations = chat_service.get_conversations(user_id, flag)
     return rename_id(conversations)
 
 
 @endpoints.route('/conversations/<conversation_id>', methods=['GET'])
 @oidc.accept_token(require_token=True)
 def get_conversation_by_id(conversation_id):
-    user_email = get_current_user_email()
-    result = chat_service.get_conversation_by_id(conversation_id, user_email)
+    user_id = get_current_user_id()
+    result = chat_service.get_conversation_by_id(conversation_id, user_id)
     if result is None:
         return jsonify(error="Conversation not found"),404
     return rename_id(result)
@@ -59,8 +59,8 @@ def get_conversation_by_id(conversation_id):
 @endpoints.route('/conversations/archive', methods=['DELETE'])
 @oidc.accept_token(require_token=True)
 def archive_all_conversations():
-    user_email = get_current_user_email()
-    chat_service.archive_all_conversations(user_email)
+    user_id = get_current_user_id()
+    chat_service.archive_all_conversations(user_id)
     return {"result": "success"}
 
 
@@ -69,8 +69,8 @@ def archive_all_conversations():
 def archive_conversation(conversation_id):
     archived_param = request.args.get('flag')
     flag = archived_param.lower() == 'true' if archived_param else False
-    user_email = get_current_user_email()
-    result = chat_service.archive_conversation(user_email, conversation_id, flag=flag)
+    user_id = get_current_user_id()
+    result = chat_service.archive_conversation(user_id, conversation_id, flag=flag)
     if result is None:
         return jsonify(error="Conversation not found"), 404
     return {"result": "success"}
@@ -85,9 +85,9 @@ def update_conversation_properties(conversation_id):
     if validation_result:
         return validation_result
     
-    user_email = get_current_user_email()
+    user_id = get_current_user_id()
     result = chat_service.update_conversation_properties(
-        conversation_id, data, user_email)
+        conversation_id, data, user_id)
     if result.matched_count == 0:
         return jsonify(error="Conversation not found"), 404
     return {"result": "success"}
@@ -96,10 +96,10 @@ def update_conversation_properties(conversation_id):
 @endpoints.route('/requestapproval/<conversation_id>', methods=['GET'])
 @oidc.accept_token(require_token=True)
 def request_approval(conversation_id):
-    user_email = get_current_user_email()
+    user_id = get_current_user_id()
     user_groups = get_current_user_groups()
     message = chat_service.request_approval(
-        conversation_id, user_email, user_groups)
+        conversation_id, user_id, user_groups)
     return {"message": message}
 
 
@@ -114,7 +114,7 @@ def execute_on_document():
         if validation_result:
             return validation_result
 
-        user_email = get_current_user_email()
+        user_id = get_current_user_id()
         token = request.headers['authorization'].split(' ')[1]
         files = request.files.getlist('files')
         if len(files) == 0 or files[0].filename == '':
@@ -128,12 +128,12 @@ def execute_on_document():
         file.save(filepath)
         file.close()
 
-        def summarize_brief_stream(data, user_email, token, filename, filepath):
+        def summarize_brief_stream(data, user_id, token, filename, filepath):
             response = chat_service.chat_completion(
-                data, user_email, token, filename, filepath)
+                data, user_id, token, filename, filepath)
             for chunk in response:
                 yield chunk
-        return Response(summarize_brief_stream(data, user_email, token, filename, filepath), mimetype='text/event-stream')
+        return Response(summarize_brief_stream(data, user_id, token, filename, filepath), mimetype='text/event-stream')
 
     except Exception as e:
         # Handle the exception here, you can log the error for debugging

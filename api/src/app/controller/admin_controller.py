@@ -6,7 +6,7 @@ from integration.superset_wrapper import superset
 from service.admin_service import admin_service
 from flask_smorest import Blueprint as SmorestBlueprint
 from marshmallow import Schema, fields,validate
-from oidc import get_current_user_email
+from oidc import get_current_user_id
 from oidc import get_current_user_roles
 from oidc import oidc
 from database.models import  AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, CustomRuleEntity, PredefinedRuleEntity
@@ -154,9 +154,9 @@ def approvalrequests_get_list():
     sort = request.args.get('sort', default=None, type=str)
     range_ = request.args.get('range', default=None, type=str)
     filter_ = request.args.get('filter', default=None, type=str)
-    user_email = get_current_user_email()
+    user_id = get_current_user_id()
 
-    data=admin_service.get_conversation_approval_requests_list( user_email, sort, range_, filter_)
+    data=admin_service.get_conversation_approval_requests_list( user_id, sort, range_, filter_)
     return data,200
 
 @adminendpoints.route('/approve_escalation/<conversation_id>', methods=['PUT'])
@@ -164,8 +164,8 @@ def approvalrequests_get_list():
 @require_role('manager')
 def approve_escalation(conversation_id):
     #email of user whose conversation is escalated recieving from admin-ui
-    user_email = request.json
-    data=admin_service.approve_escalation( conversation_id, user_email )
+    user_id = request.json
+    data=admin_service.approve_escalation( conversation_id, user_id )
     return data,200
 
 @adminendpoints.route('/reject_escalation/<conversation_id>', methods=['PUT'])
@@ -173,8 +173,8 @@ def approve_escalation(conversation_id):
 @require_role('manager')
 def reject_escalation(conversation_id):
     #email of user whose conversation is escalated recieving from admin-ui
-    user_email = request.json
-    data=admin_service.reject_escalation( conversation_id, user_email )
+    user_id = request.json
+    data=admin_service.reject_escalation( conversation_id, user_id )
     return data,200
 
 
@@ -184,7 +184,7 @@ def get_all_access_request_list():
     # sort = request.args.get('sort', default=None, type=str)
     # range_ = request.args.get('range', default=None, type=str)
     # filter_ = request.args.get('filter', default=None, type=str)
-    # user_email = get_current_user_email()
+    # user_id = get_current_user_id()
 
     data=admin_service.get_all_access_request_list()
     return data,200

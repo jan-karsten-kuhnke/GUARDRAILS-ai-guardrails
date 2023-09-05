@@ -1,6 +1,6 @@
 import os
 import logging
-from oidc import get_current_user_email
+from oidc import get_current_user_id
 from repo.db import conversation_context
 from database.repository import Persistence
 from integration.openai_wrapper import openai_wrapper
@@ -35,7 +35,7 @@ class conversation_obj(TypedDict):
     messages: list
     created: datetime
     updated: datetime
-    user_email: str
+    user_id: str
     state: str
     assigned_to: list
     task: str
@@ -55,7 +55,7 @@ class message_obj(TypedDict):
 
 class chat_service:
 
-    def chat_completion(data, current_user_email, token, filename=None, filepath=None):
+    def chat_completion(data, current_user_id, token, filename=None, filepath=None):
         try:
             task = str(data["task"]) if "task" in data else None
             task_params = data["params"] if "params" in data else None
@@ -63,7 +63,7 @@ class chat_service:
             collection_name = task_params["collectionName"] if "collectionName" in task_params else None
             qa_document_id = task_params["qaDocumentId"] if "qaDocumentId" in task_params else None
             
-            uploaded_by = current_user_email
+            uploaded_by = current_user_id
             uploaded_at = str(datetime.now())
 
             is_private = bool(
@@ -112,9 +112,9 @@ class chat_service:
                 manage_conversation_context = True
 
             stop_conversation, stop_response, updated_prompt, role = chat_service.validate_prompt(
-                prompt, is_override, pii_scan, nsfw_scan, current_user_email, conversation_id)
+                prompt, is_override, pii_scan, nsfw_scan, current_user_id, conversation_id)
             chat_service.update_conversation(
-                conversation_id, updated_prompt, 'user', current_user_email, task, title, task_params)
+                conversation_id, updated_prompt, 'user', current_user_id, task, title, task_params)
 
             current_completion = ''
             user_action_required = False
@@ -137,7 +137,7 @@ class chat_service:
                 role = "assistant"
                 if (manage_conversation_context):
                     messages = chat_service.get_history_for_bot(
-                        conversation_id, current_user_email)
+                        conversation_id, current_user_id)
 
                 is_private = False
                 history = []
@@ -236,9 +236,9 @@ class chat_service:
                 yield (chunk)
                 current_completion += answer
 
-            chat_service.save_chat_log(current_user_email, updated_prompt)
+            chat_service.save_chat_log(current_user_id, updated_prompt)
             chat_service.update_conversation(
-                conversation_id, current_completion, role, current_user_email, task, None, task_params, msg_info, user_action_required)
+                conversation_id, current_completion, role, current_user_id, task, None, task_params, msg_info, user_action_required)
         except Exception as e:
             yield (json.dumps({"error": "error"}))
             logging.error("Error in chat completion: "+str(e))
@@ -247,7 +247,7 @@ class chat_service:
             if filepath:
                 os.remove(filepath)
 
-    def validate_prompt(prompt, is_override, pii_scan, nsfw_scan, current_user_email, conversation_id):
+    def validate_prompt(prompt, is_override, pii_scan, nsfw_scan, current_user_id, conversation_id):
         logging.info("pii_scan: ", pii_scan)
         logging.info("nsfw_scan: ", nsfw_scan)
         stop_conversation = False
@@ -268,7 +268,7 @@ class chat_service:
 
         if (pii_scan):
             updated_prompt = pii_service.anonymize(
-                prompt, current_user_email, conversation_id)
+                prompt, current_user_id, conversation_id)
             stop_conversation = False
 
             logging.info("returning from pii")
@@ -291,7 +291,7 @@ class chat_service:
             last_node=message['id'],
             created=datetime.now(),
             messages=messages,
-            user_email=email,
+            user_id=email,
             title=title if title else openai_wrapper.gen_title(prompt, task),
             state='active',
             assigned_to=[],
@@ -302,12 +302,12 @@ class chat_service:
             conversation)
         return new_conversation_id
 
-    def update_conversation(conversation_id, content, role, user_email, task, title=None, task_params=None, msg_info=None, user_action_required=False):
+    def update_conversation(conversation_id, content, role, user_id, task, title=None, task_params=None, msg_info=None, user_action_required=False):
         conversation = conversation_context.get_conversation_by_id(
-            conversation_id, user_email)
+            conversation_id, user_id)
         if (conversation == None):
             chat_service.create_Conversation(
-                content, user_email, task, msg_info, title, conversation_id, task_params)
+                content, user_id, task, msg_info, title, conversation_id, task_params)
             return
         if (task is None or not task):
             task = conversation['task']
@@ -338,32 +338,32 @@ class chat_service:
         messages.append(message)
         conversation_context.update_conversation(conversation_id, conversation)
 
-    def save_chat_log(user_email, text):
-        Persistence.insert_chat_log(user_email, text)
+    def save_chat_log(user_id, text):
+        Persistence.insert_chat_log(user_id, text)
 
-    def get_conversations(user_email, flag=False):
+    def get_conversations(user_id, flag=False):
         cursor = conversation_context.get_conversations_by_user_email(
-            user_email, flag)
+            user_id, flag)
         conversations = []
         for conversation in cursor:
             conversations.append(conversation)
         conversations.sort(key=lambda x: x.get('created'), reverse=True)
         return conversations
 
-    def get_conversation_by_id(conversation_id, user_email):
-        return conversation_context.get_conversation_by_id(conversation_id, user_email)
+    def get_conversation_by_id(conversation_id, user_id):
+        return conversation_context.get_conversation_by_id(conversation_id, user_id)
 
-    def archive_all_conversations(user_email):
-        conversation_context.archive_all_conversations(user_email)
+    def archive_all_conversations(user_id):
+        conversation_context.archive_all_conversations(user_id)
 
-    def archive_conversation(user_email, conversation_id, flag=True):
+    def archive_conversation(user_id, conversation_id, flag=True):
         result = conversation_context.archive_unarchive_conversation(
-            user_email, conversation_id, flag)
+            user_id, conversation_id, flag)
         return result
 
-    def get_history_for_bot(conversation_id, user_email):
+    def get_history_for_bot(conversation_id, user_id):
         conversation = conversation_context.get_conversation_by_id(
-            conversation_id, user_email)
+            conversation_id, user_id)
         messages = conversation['messages']
         result = []
         for m in messages:
@@ -373,12 +373,12 @@ class chat_service:
                 result.append({"role": "user", "content": m['content']})
         return result
 
-    def update_conversation_properties(conversation_id, data, user_email):
+    def update_conversation_properties(conversation_id, data, user_id):
        result =  conversation_context.update_conversation_properties(
-            conversation_id, data, user_email)
+            conversation_id, data, user_id)
        return result
 
-    def request_approval(conversation_id, user_email, user_groups):
+    def request_approval(conversation_id, user_id, user_groups):
         # needs to be updated for multiple groups
         current_group = user_groups[0]
         group_managers = keycloak_wrapper.get_users_by_role_and_group(
@@ -390,5 +390,5 @@ class chat_service:
         csv_email = ','.join(group_managers_emails)
         message = f"Request sent for approval to: {csv_email}"
         chat_service.update_conversation(conversation_id, message, 'guardrails',
-                                         user_email, task=None, msg_info=None, user_action_required=False)
+                                         user_id, task=None, msg_info=None, user_action_required=False)
         return message
