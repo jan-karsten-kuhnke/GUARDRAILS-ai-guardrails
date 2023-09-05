@@ -99,7 +99,7 @@ class chat_service:
 
             if task == "summarize-brief":
                 prompt = f"Summarize {filename}"
-                title = f"Summmary of {filename}."
+                title = f"Summary of {filename}."
             elif task == "extraction":
                 prompt = f"Extract Key Metrics from {filename}"
                 title = f"Key Metrics of {filename}."
