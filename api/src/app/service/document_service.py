@@ -5,7 +5,7 @@ from service.ingestion_service import IngestionService
 from database.repository import Persistence
 from sqlalchemy import func ,or_,and_
 import logging
-from oidc import get_current_user_email
+from oidc import get_current_user_id
 
 class DocumentService:
     def create_document(filename, filepath,task_params,uploaded_by,uploaded_at,description=""):
@@ -39,8 +39,8 @@ class DocumentService:
     def get_document(Entity,document_id):
         return Persistence.get_one_query(Entity, document_id)
     
-    def update_document(document_id, title, description, location, folder_id):
-        return Persistence.update_document(document_id, title, description, location, folder_id)
+    def update_document(document_id, title, description, location, collection_name):
+        return Persistence.update_document(document_id, title, description, location, collection_name)
     
     def delete_document(document_id):
         return Persistence.delete_document(document_id)

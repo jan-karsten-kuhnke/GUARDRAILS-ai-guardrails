@@ -3,7 +3,7 @@ from flask_restful import Resource, Api, reqparse, request
 from service.pii_service import pii_service
 from flask_smorest import Blueprint as SmorestBlueprint
 from oidc import oidc
-from oidc import get_current_user_email
+from oidc import get_current_user_id
 
 piiendpoints = SmorestBlueprint('pii', __name__)
 

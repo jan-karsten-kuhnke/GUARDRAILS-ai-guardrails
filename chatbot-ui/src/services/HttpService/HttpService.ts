@@ -33,7 +33,6 @@ _axios.interceptors.response.use(handleSuccess, handleError);
 export const fetchPrompt = (
   message: string,
   conversationId: string | null,
-  isOverride: boolean,
   task: string | undefined,
   isPrivate: boolean | undefined,
   params:object ,
@@ -49,7 +48,6 @@ export const fetchPrompt = (
         ? {
           message: message,
           conversation_id: conversationId,
-          isOverride: isOverride,
           task: task,
           params: params,
         }

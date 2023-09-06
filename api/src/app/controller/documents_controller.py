@@ -7,10 +7,12 @@ from database.models import DocumentEntity
 from globals import Globals
 import os
 from oidc import oidc
-from oidc import get_current_user_email
+from oidc import get_current_user_id
 from datetime import datetime
 from time import time
+from utils.util import validate_fields
 import shutil
+
 
 import json
 
@@ -40,8 +42,15 @@ def get_document(document_id):
 @oidc.accept_token(require_token=True)
 def create_document():
     files = request.files.getlist('files')
-    collection_name = request.form['collectionName']
-    uploaded_by = get_current_user_email()
+    try:
+        collection_name = request.form['collectionName']
+        if not collection_name or type(collection_name) != str:
+            return jsonify(Error="Invalid data type for collectionName"),400
+    except:
+        return jsonify(Error="Missing collectionName"),400
+    if len(files) == 0 or files[0].filename == '':
+        return jsonify(Error="Missing file"),400
+    uploaded_by = get_current_user_id()
     uploaded_at = str(datetime.now())
     metadata = json.loads(request.form['metaData']) if 'metaData' in request.form else {}
     temp_dir_name = "temp-" + str(time())
@@ -59,11 +68,15 @@ def create_document():
 @documentsendpoints.route('/documents/<int:document_id>', methods=['PUT'])
 @oidc.accept_token(require_token=True)
 def update_document(document_id):
-    title= request.json.get('title'),
-    description= request.json.get('description'),
+    data= request.json
+    title= request.json.get('title')
+    description= request.json.get('description')
     location= request.json.get('location')
-    folder_id= request.json.get('folder_id')
-    return DocumentService.update_document(document_id=document_id ,title=title, description=description, location=location, folder_id=folder_id)
+    collection_name= request.json.get('collection_name')
+    validation_result = validate_fields(data)
+    if validation_result:
+        return validation_result
+    return DocumentService.update_document(document_id=document_id ,title=title, description=description, location=location, collection_name=collection_name)
     
 
 # DELETE a document
@@ -72,11 +85,16 @@ def update_document(document_id):
 def delete_document(document_id):
     return DocumentService.delete_document(document_id)
 
-
+#add collection
 @documentsendpoints.route('/documents/add-collection', methods=['POST'])
 @oidc.accept_token(require_token=True)
 def add_collection():
     collection_name = request.json.get('collection_name')
+    if not collection_name:
+        return jsonify(error="Missing required fields: collection_name"),400
+    elif type(collection_name) != str:
+        return jsonify(error="Invalid data type for collection_name"),400
+    collection_name=collection_name.strip()
     return DocumentService.add_collection_for_doc(collection_name=collection_name)
 
 # GET collections
@@ -89,5 +107,4 @@ def get_collections():
 @oidc.accept_token(require_token=True)
 def get_documents_by_collection_name():
     collection_name = request.args.get('collection_name', type=str)
-    
     return DocumentService.get_documents_by_collection_name(collection_name)    

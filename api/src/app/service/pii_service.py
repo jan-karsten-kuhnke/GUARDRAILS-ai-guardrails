@@ -1,5 +1,5 @@
 import logging
-from oidc import get_current_user_email
+from oidc import get_current_user_id
 from repo.db import anonymize_audit_context,analysis_audit_context
 from database.repository import Persistence
 from integration.presidio_wrapper import presidio_wrapper
@@ -14,14 +14,14 @@ class analysis_audit_obj(TypedDict):
     message: str
     analysis: list
     created: datetime
-    user_email: str
+    user_id: str
 
 class anonymize_audit_obj(TypedDict):
     _id: str
     original_message: str
     anonymized_message: list
     created: datetime
-    user_email: str
+    user_id: str
     conversation_id: str
     analysis: list
 
@@ -48,13 +48,13 @@ class pii_service:
             )
 
         if len(result):
-            pii_service.save_analysis_audit(message, result,get_current_user_email())
+            pii_service.save_analysis_audit(message, result,get_current_user_id())
         return result
 
     
     def anonymize(message,email = None, conversaton_id = None):
         if not email:
-            email = get_current_user_email()
+            email = get_current_user_id()
         analysis = presidio_wrapper.analyze_message(message)
         anonymized_message = presidio_wrapper.anonymyze_message(message, analysis)
         if message != anonymized_message:
@@ -79,31 +79,31 @@ class pii_service:
         return response
 
 
-    def save_analysis_audit(message,analysis,user_email):
+    def save_analysis_audit(message,analysis,user_id):
         analysis_audit = analysis_audit_obj(
             _id=str(uuid.uuid4()),
             message=message,
             analysis=analysis,
             created=datetime.now(),
-            user_email=user_email,
+            user_id=user_id,
         )
         analysis_audit_context.insert_analysis_audit(analysis_audit)
         for flag in analysis:   
-            Persistence.insert_analysis_audits(text = message, user_email = user_email, flagged_text = flag['flagged_text'],  analysed_entity = flag['entity_type'], criticality = 'SEVERE')
+            Persistence.insert_analysis_audits(text = message, user_id = user_id, flagged_text = flag['flagged_text'],  analysed_entity = flag['entity_type'], criticality = 'SEVERE')
         
 
 
-    def save_anonymize_audit(message,analysis,anonymized_message,user_email,conversation_id = None):
+    def save_anonymize_audit(message,analysis,anonymized_message,user_id,conversation_id = None):
         anonymize_audit =  anonymize_audit_obj(
             _id=str(uuid.uuid4()),
             original_message=message,
             anonymized_message=anonymized_message,
             analysis=analysis,
             created=datetime.now(),
-            user_email=user_email,
+            user_id=user_id,
             conversation_id= conversation_id
         )    
         anonymize_audit_context.insert_anonymize_audit(anonymize_audit)
         for flag in analysis:   
-            Persistence.insert_anonymize_audits(original_text = message, anonymized_text  = anonymized_message, flagged_text = flag['flagged_text'] , user_email= user_email, analysed_entity = flag['entity_type'], criticality = 'SEVERE')
+            Persistence.insert_anonymize_audits(original_text = message, anonymized_text  = anonymized_message, flagged_text = flag['flagged_text'] , user_id= user_id, analysed_entity = flag['entity_type'], criticality = 'SEVERE')
   

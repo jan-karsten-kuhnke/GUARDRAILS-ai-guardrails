@@ -15,17 +15,19 @@ import HomeContext from "@/pages/home/home.context";
 import { ChatInput } from "./ChatInput";
 import { ChatLoader } from "./ChatLoader";
 import { MemoizedChatMessage } from "./MemoizedChatMessage";
-import PublicPrivateSwitch from "../PublicPrivateSwitch";
 import AdditionalInputs from "../AdditionalInputs/AdditionalInputs";
 import Tiles from "../Tiles/Tiles";
 import RequestAccessComponent from "../Tiles/RequestAccess";
-import { EXTRACTION_CODE, SUMMARIZATION_CODE } from "@/utils/constants";
+
+import { COLLECTION_PICKER, DOCUMENT_PICKER } from "@/utils/constants";
+
 import {
   anonymizeMessage,
   fetchPrompt,
   requestApproval,
   executeOnDoc,
 } from "@/services";
+import { parseChunk, updateMessagesAndConversation} from "@/utils/app/conversation";
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -63,6 +65,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showScrollDownButton, setShowScrollDownButton] =
     useState<boolean>(false);
+  const [chatTitle, setChatTitle] = useState<string>('');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -72,7 +75,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     async (
       message: Message,
       deleteCount = 0,
-      isOverRide: boolean = false,
       formData: FormData = new FormData(),
       documentId: string | undefined = undefined
     ) => {
@@ -123,19 +125,29 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
 
         const controller = new AbortController();
         let response: any;
-
         //params for selected tiles
+        let sendCollectionName = false
+        let sendQaDocumentId = false
 
+        selectedTile?.params?.inputs?.forEach((item:any) => {
+          const { type } = item;
+          if (type === COLLECTION_PICKER) {
+            sendCollectionName = true
+          }
+          else if (type === DOCUMENT_PICKER) {
+            sendQaDocumentId = true
+          }
+        })
+
+        //renamed qaDocumentId to documentId
         let params: any = {
           ...documentId ? { documentId } : {},
-          ...selectedCollection ? { collectionName: selectedCollection } : {},
-          ...selectedDocument ? { qaDocumentId: selectedDocument } : {},
+          ...(selectedCollection && sendCollectionName) ? { collectionName: selectedCollection } : {},
+          ...(selectedDocument && sendQaDocumentId) ? { documentId: selectedDocument } : {},
         };
-        if (
-          selectedTile.params?.useExecuteOnDoc
-        ) {
 
-          try {
+        try {
+          if (selectedTile.params?.useExecuteOnDoc) {
             toast.loading(
               "Summarization might be a time taking process depending on the size of your document",
               {
@@ -143,72 +155,41 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 duration: 5000,
               }
             );
-            if (documentId) {
+        
+            if (documentId) { //if selectedTile.params?.useExecuteOnDoc is true
               response = await fetchPrompt(
                 chatBody.message,
                 selectedConversation.id,
-                isOverRide,
                 selectedTask,
                 isPrivate,
                 params
               );
-            }
-            else {
+            } else {
               const payload = {
                 conversation_id: selectedConversation.id,
-                isOverride: isOverRide,
                 task: selectedTask,
-                params
+                params,
               };
               formData.append("data", JSON.stringify(payload));
               response = await executeOnDoc(formData);
             }
-
-          } catch (err: any) {
-            toast.error(err.message, {
-              position: "bottom-right",
-              duration: 3000,
-            });
-            console.log(err);
+          } else { //if selectedTile.params?.useExecuteOnDoc is false
+            response = await fetchPrompt(
+              chatBody.message,
+              selectedConversation.id,
+              selectedTask,
+              isPrivate,
+              params
+            );
           }
-        } else {
-          if (isOverRide) {
-            try {
-              response = await fetchPrompt(
-                updatedConversation.messages[
-                  updatedConversation.messages.length - 2
-                ].content,
-                selectedConversation.id,
-                isOverRide,
-                selectedTask,
-                isPrivate,
-                params,
-              );
-            } catch (err: any) {
-              toast.error(err.message, {
-                position: "bottom-right",
-                duration: 3000,
-              });
-            }
-          } else {
-            try {
-              response = await fetchPrompt(
-                chatBody.message,
-                selectedConversation.id,
-                isOverRide,
-                selectedTask,
-                isPrivate,
-                params,
-              );
-            } catch (err: any) {
-              toast.error(err.message, {
-                position: "bottom-right",
-                duration: 3000,
-              });
-            }
-          }
+        } catch (err:any) {
+          toast.error(err.message, {
+            position: "bottom-right",
+            duration: 3000,
+          });
+          console.log(err);
         }
-
+      
         if (!response.ok) {
           homeDispatch({ field: "loading", value: false });
           homeDispatch({ field: "messageIsStreaming", value: false });
@@ -238,109 +219,19 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           }
           const { value, done: doneReading } = await reader.read();
           done = doneReading;
-          const chunkValue = decoder.decode(value);
-          let parsed;
+          const chunkValue = decoder.decode(value); // stores role, content, msg_info (JSON String)
           if (!chunkValue || chunkValue === "") continue;
-          if (chunkValue.includes("}{")) {
-            var split = chunkValue.split("}{");
-            for (var i = 0; i < split.length; i++) {
-              if (i === 0) {
-                parsed = JSON.parse(split[i] + "}");
-              } else if (i === split.length - 1) {
-                parsed = JSON.parse("{" + split[i]);
-              } else {
-                parsed = JSON.parse("{" + split[i] + "}");
-              }
-
-              if (parsed.content == undefined) {
-                text =
-                  "Sorry currently your request could not be fullfiled. Please try again.!";
-              } else {
-                text += parsed.content;
-              }
-              msg_info = parsed.msg_info;
-              role = parsed.role;
-            }
-          } else {
-            parsed = JSON.parse(chunkValue);
-            if (parsed.content == undefined) {
-              text =
-                "Sorry currently your request could not be fullfiled. Please try again.!";
-            } else {
-              text += parsed.content;
-            }
-            msg_info = parsed.msg_info;
-            role = parsed.role;
-          }
-          if (isFirst) {
-            isFirst = false;
-            homeDispatch({ field: "refreshConversations", value: true });
-            const updatedMessages: Message[] = updatedConversation.messages.map(
-              (message, index) => {
-                return {
-                  ...message,
-                  userActionRequired: false,
-                };
-              }
-            );
-            if (isOverRide) {
-              updatedMessages.push({
-                role: "guardrails",
-                content:
-                  "You chose to Override the warning, proceeding to Open AI.",
-                msg_info: msg_info,
-                userActionRequired: false,
-              });
-            }
-            updatedMessages.push({
-              role: role,
-              content: text,
-              msg_info: msg_info,
-              userActionRequired: parsed.user_action_required,
-            });
-            updatedConversation = {
-              ...updatedConversation,
-              messages: updatedMessages,
-            };
-            homeDispatch({
-              field: "selectedConversation",
-              value: updatedConversation,
-            });
-          } else {
-            const updatedMessages: Message[] = updatedConversation.messages.map(
-              (message, index) => {
-                if (index === updatedConversation.messages.length - 1) {
-                  return {
-                    ...message,
-                    content: text,
-                  };
-                }
-                return message;
-              }
-            );
-            updatedConversation = {
-              ...updatedConversation,
-              messages: updatedMessages,
-            };
-            homeDispatch({
-              field: "selectedConversation",
-              value: updatedConversation,
-            });
-          }
+          let parsed = parseChunk(chunkValue, text, msg_info, role);
+          role = parsed.role;
+          msg_info = parsed.msg_info;
+          text += parsed.content;
+        
+          updateMessagesAndConversation(isFirst, homeDispatch, updatedConversation, text, role, msg_info, parsed)
         }
-
         homeDispatch({ field: "messageIsStreaming", value: false });
       }
     },
-    [
-      conversations,
-      selectedConversation,
-      stopConversationRef,
-      isPrivate,
-      selectedTile,
-      selectedCollection,
-      selectedDocument
-    ]
+    [conversations, selectedConversation, stopConversationRef, isPrivate, selectedTile, selectedCollection, selectedDocument]
   );
 
   const handleRequestApproval = async (conversationId: string) => {
@@ -370,12 +261,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     homeDispatch({ field: "messageIsStreaming", value: false });
   };
 
-  const scrollToBottom = useCallback(() => {
-    if (autoScrollEnabled) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      textareaRef.current?.focus();
-    }
-  }, [autoScrollEnabled]);
+  // const scrollToBottom = useCallback(() => {
+  //   if (autoScrollEnabled) {
+  //     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  //     textareaRef.current?.focus();
+  //   }
+  // }, [autoScrollEnabled]);
 
   const handleScroll = () => {
     if (chatContainerRef.current) {
@@ -411,11 +302,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     if (executeOnUploadedDocRef.current) {
       let message: Message = {
         role: "user",
-        content: `${executeOnUploadedDocRef.current.code === SUMMARIZATION_CODE ? "Summarize" : "Extract key metrics from"} ${executeOnUploadedDocRef.current.title}`,
+        content: executeOnUploadedDocRef.current.title,
         userActionRequired: false,
         msg_info: null,
       };
-      handleSend(message, 0, false, undefined, executeOnUploadedDocRef.current.id);
+      handleSend(message, 0, undefined, executeOnUploadedDocRef.current.id)
       executeOnUploadedDocRef.current = null;
     }
 
@@ -453,7 +344,19 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     };
   }, [messagesEndRef]);
 
-
+  useEffect(() => {
+    // Checking for new chat
+    if(selectedConversation?.messages.length === 0){
+      setChatTitle(selectedTile.title);
+    }
+    // for an existing chat
+    else{
+      const selectedTask = tiles.find(tile => tile.code === selectedConversation?.task);
+      if(selectedTask){
+        setChatTitle(selectedTask.title);
+      }
+    }
+  },[selectedConversation,selectedTile]);
 
   return (
     <div className={`relative flex-1 overflow-hidden ${theme.chatBackground}`}>
@@ -528,7 +431,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               <div
                 className={`sticky top-0 z-10 flex justify-center py-4 ${theme.chatTitleTheme}`}
               >
-                New Conversation
+                {chatTitle}
               </div>
               {selectedConversation?.messages.map((message, index) => (
                 <MemoizedChatMessage
@@ -548,8 +451,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                     // discard edited message and the ones that come after then resend
                     handleSend(
                       selectedMessage,
-                      selectedConversation?.messages.length - index,
-                      true
+                      selectedConversation?.messages.length - index
                     );
                   }}
                   onRequestApproval={(conversationId) => {
@@ -567,7 +469,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             </>
           )}
         </div>
-        {selectedTile?.code != "summarize-brief" && (
+        {selectedTile.params?.executor != "summarize"  && selectedTile.params?.executor != "extraction" && (
           <ChatInput
             stopConversationRef={stopConversationRef}
             textareaRef={textareaRef}

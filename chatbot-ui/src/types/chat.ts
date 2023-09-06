@@ -16,4 +16,5 @@ export interface Conversation {
   temperature: number;
   folderId: string | null;
   archived: boolean;
+  task: string;
 }

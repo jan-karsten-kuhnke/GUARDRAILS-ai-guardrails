@@ -5,7 +5,7 @@ CREATE table if not exists ai_guardrails.analysis_audit (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     text TEXT,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    user_email TEXT,
+    user_id TEXT,
     flagged_text TEXT,
     analysed_entity TEXT,
     criticality TEXT
@@ -18,7 +18,7 @@ CREATE table if not exists ai_guardrails.anonymize_audit (
     anonymized_text TEXT,
     flagged_text TEXT,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    user_email TEXT,
+    user_id TEXT,
     analysed_entity TEXT,
     criticality TEXT
 );
@@ -27,7 +27,7 @@ CREATE table if not exists ai_guardrails.anonymize_audit (
 CREATE table if not exists ai_guardrails.chat_log (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    user_email TEXT,
+    user_id TEXT,
     text TEXT
 );
 

@@ -1,13 +1,12 @@
 import { ChangeEvent, useState, useContext } from "react";
-import { Button, Tooltip } from "@mui/material";
+import { Button, FormControl, MenuItem, Select, Tooltip } from "@mui/material";
 import { CustomDataGrid } from "./CustomDataGrid";
 import { IconUpload } from "@tabler/icons-react";
-import { uploadDocuments, deleteDocsGridData , getDocumentsByCollectionName} from "@/services/DocsService";
+import { uploadDocuments, deleteDocsGridData, getDocumentsByCollectionName } from "@/services/DocsService";
 import toast from "react-hot-toast";
 import HomeContext from "@/pages/home/home.context";
 import { executeOnUploadedDocRef } from "../Chat/Chat";
-
-import { EXTRACTION_CODE, SUMMARIZATION_CODE } from "@/utils/constants";
+import DropDown from "../DropDown/DropDown";
 
 export const PrivateDocuments = () => {
   const {
@@ -55,8 +54,7 @@ export const PrivateDocuments = () => {
           if (res?.data?.success && res?.data?.data?.length) {
             homeDispatch({ field: "documents", value: res?.data?.data });
           }
-          else
-          {
+          else {
             homeDispatch({ field: "documents", value: [] });
           }
         });
@@ -83,8 +81,7 @@ export const PrivateDocuments = () => {
           if (res?.data?.success && res?.data?.data?.length) {
             homeDispatch({ field: "documents", value: res?.data?.data });
           }
-          else
-          {
+          else {
             homeDispatch({ field: "documents", value: [] });
           }
         });
@@ -92,8 +89,9 @@ export const PrivateDocuments = () => {
       });
   };
 
-  const handleExecuteOnUploadedDoc = (id: any, title: string, code: string) => {
-    executeOnUploadedDocRef.current = { id: id, title: title, code: code };
+  const handleExecuteOnUploadedDoc = (id: any, documentTitle: string, code: string) => {
+    const params: any = tiles.find((tile) => tile.code === code)?.params;
+    executeOnUploadedDocRef.current = { id: id, title: `${params?.prompt}  ${documentTitle}`, code: code };
     homeDispatch({ field: "isDocumentDialogOpen", value: false });
     homeDispatch({
       field: "selectedTile",
@@ -104,63 +102,45 @@ export const PrivateDocuments = () => {
     //In the next step useRef in chat component will call the handleSend function
   };
 
+  const collectionData = collections.map((collection: any) => ({
+    value: collection?.name,
+    title: collection?.name
+  }));
+
+  const taskData = tiles
+    .filter((tile: any) => tile?.params?.executor === "summarize" || tile?.params?.executor === "extraction")
+    .map((tile: any) => ({
+      value: tile?.code,
+      title: tile?.title
+    }));
+
   const columns = [
     { field: "title", headerName: "Title", flex: 5 },
     {
       field: "actions",
       headerName: "Actions",
-      width: 270,
+      width: 280,
       sortable: false,
       filterable: false,
       renderCell: (params: any) => (
         <>
+          <FormControl sx={{ m: 1, minWidth: 150 }} size="small">
+            <DropDown data={taskData}
+              value={"None"}
+              label={"Select a task"}
+              color={theme.documentSectionSelectTheme.color}
+              backgroundColor={theme.documentSectionSelectTheme.backgroundColor}
+              onChange={(code) => {
+                handleExecuteOnUploadedDoc(params.row.id, params.row.title, code)
+              }} />
+          </FormControl>
+
           <Button
             variant="outlined"
-            size="small"
-            color="primary"
-            sx={{
-              fontSize: "12px",
-              padding: "3px",
-              margin: "0px 5px",
-              textTransform: "Capitalize",
-            }}
-            onClick={() =>
-              handleExecuteOnUploadedDoc(
-                params.row.id,
-                params.row.title,
-                SUMMARIZATION_CODE
-              )
-            }
-          >
-            Summarize
-          </Button>
-          <Button
-            variant="outlined"
-            size="small"
-            color="primary"
-            sx={{
-              fontSize: "12px",
-              padding: "3px",
-              textTransform: "Capitalize",
-              margin: "0px 5px",
-            }}
-            onClick={() =>
-              handleExecuteOnUploadedDoc(
-                params.row.id,
-                params.row.title,
-                EXTRACTION_CODE
-              )
-            }
-          >
-            Extract
-          </Button>
-          <Button
-            variant="outlined"
-            size="small"
             color="error"
             sx={{
               fontSize: "12px",
-              padding: "3px",
+              padding: "8px",
               textTransform: "Capitalize",
               margin: "0px 5px",
             }}
@@ -190,7 +170,7 @@ export const PrivateDocuments = () => {
       if (res?.data?.success && res?.data?.data?.length) {
         homeDispatch({ field: "documents", value: res?.data?.data });
       }
-      else{
+      else {
         homeDispatch({ field: "documents", value: [] });
       }
     });
@@ -200,20 +180,16 @@ export const PrivateDocuments = () => {
     <>
       <div className="flex items-center justify-end gap-5 px-4">
         <span className="font-bold text-base">Select collection:</span>
-        <select
-          id="collectionlist"
-          value={selectedCollection}
-          className={`${theme.taskSelectTheme} outline-none text-sm rounded-lg block p-3 w-48`}
-          onChange={(ev) => handleSelection(ev.target.value)}
-        >
-          {collections?.length
-            ? collections.map((collection: any, index) => (
-                <option value={collection?.name} key={index} className="py-2">
-                  {collection?.name}
-                </option>
-              ))
-            : ""}
-        </select>
+        <FormControl sx={{ m: 1, minWidth: 180 }} size="small">
+          <DropDown data={collectionData}
+            value={selectedCollection}
+            label={"Select a collection"}
+            color={theme.documentSectionSelectTheme.color}
+            backgroundColor={theme.documentSectionSelectTheme.backgroundColor}
+            onChange={(collection) => {
+              handleSelection(collection)
+            }} />
+        </FormControl>
 
         <Tooltip
           title="Upload documents in the selected collection"

@@ -1,10 +1,10 @@
 import { FC, useContext, ChangeEvent } from "react";
 import HomeContext from "@/pages/home/home.context";
 
-import PublicPrivateSwitch from "@/components/PublicPrivateSwitch";
+// import PublicPrivateSwitch from "@/components/PublicPrivateSwitch";
 import { Tile } from "@/types/tiles";
 
-interface Props {}
+interface Props { }
 
 export const PromptbarSettings: FC<Props> = () => {
   const {
@@ -20,32 +20,12 @@ export const PromptbarSettings: FC<Props> = () => {
 
   return (
     <>
-      {selectedConversation?.messages.length != 0 ? (
-        <div className={`pt-6 ${theme.dividerTopTheme}`}>
-          <label
-            htmlFor="tilelist"
-            className={`block mb-2 text-sm font-medium text-[${theme.textColor}]`}
-          >
-            Select Task
-          </label>
-          <select
-            id="tilelist"
-            value={selectedTile?.code}
-            className={`${theme.taskSelectTheme} outline-none text-sm rounded-lg block w-full p-2.5`}
-            onChange={handleChange}
-          >
-            {tiles.map((tile, index) => (
-                <option value={tile.code} key={index} className="py-2">{tile.title}
-                </option>
-              ))}
-          </select>
-          {/* Disable PublicPrivateSwitch component
-              Note:Don't uncomment the bellow commected code
-          */}
-          {/* <PublicPrivateSwitch size={25} /> */}
-        </div>
-      ) : (
-        <></>
+      {selectedConversation?.messages.length != 0 && (
+        <>
+          {/* <div className={`pt-6 ${theme.dividerTopTheme}`}>
+            <PublicPrivateSwitch size={25} />
+          </div> */}
+        </>
       )}
     </>
   );

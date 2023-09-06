@@ -44,24 +44,25 @@ class conversation_context:
         result = conversations_collection.insert_one(conversation) 
         return result.inserted_id
 
-    def get_conversation_by_id(conversation_id, user_email):
-        return conversations_collection.find_one({"_id":conversation_id , "user_email":user_email})
+    def get_conversation_by_id(conversation_id, user_id):
+        return conversations_collection.find_one({"_id":conversation_id , "user_id":user_id})
     
-    def get_conversations_by_user_email(user_email,flag):
-        return conversations_collection.find({"user_email":user_email, "archived":flag}, {"messages":0, "last_node":0, "updated":0,"user_email":0,"root_message":0})
+    def get_conversations_by_user_email(user_id,flag):
+        return conversations_collection.find({"user_id":user_id, "archived":flag}, {"messages":0, "last_node":0, "updated":0,"user_id":0,"root_message":0})
     
     def update_conversation(conversation_id, conversation):
         conversations_collection.update_one({"_id":conversation_id}, {"$set":conversation})
 
-    def archive_all_conversations(user_email):
-        conversations_collection.update_many({"user_email":user_email}, {"$set":{"archived":True}})
+    def archive_all_conversations(user_id):
+        conversations_collection.update_many({"user_id":user_id}, {"$set":{"archived":True}})
     
-    def archive_unarchive_conversation(user_email,conversation_id,flag = True):
-        conversations_collection.find_one_and_update({"user_email":user_email, "_id" : conversation_id}, {"$set":{"archived":flag}})
+    def archive_unarchive_conversation(user_id,conversation_id,flag = True):
+        result = conversations_collection.find_one_and_update({"user_id":user_id, "_id" : conversation_id}, {"$set":{"archived":flag}})
+        return result
     
-    def update_conversation_properties(conversation_id,data,user_email):
-        conversations_collection.update_one({"_id":conversation_id, "user_email":user_email}, {"$set":{"folderId":data['folderId'], "title":data['title']}})
-
+    def update_conversation_properties(conversation_id,data,user_id):
+       result =  conversations_collection.update_one({"_id":conversation_id, "user_id":user_id}, {"$set":{"folderId":data['folderId'], "title":data['title']}})
+       return result
     def request_approval(conversation_id,group_managers_emails):
         conversations_collection.update_one({"_id":conversation_id}, {"$set":{"state":"waiting for approval","assigned_to":group_managers_emails}})
 
@@ -121,7 +122,7 @@ class conversation_context:
             response.update(False,"Error in retrieving the data",None)
         return response.json()
         
-    def get_conversation_approval_requests(user_email, sort, range_, filter_):
+    def get_conversation_approval_requests(user_id, sort, range_, filter_):
         response=ApiResponse()
         try:
                 
@@ -143,7 +144,7 @@ class conversation_context:
 
             conditions = {
                 "$and": [
-                    { "state":"waiting for approval", 'assigned_to': { "$in": [user_email] } },
+                    { "state":"waiting for approval", 'assigned_to': { "$in": [user_id] } },
                     filter_parameter
                 ]
             }
@@ -163,7 +164,7 @@ class conversation_context:
             response.update(False,"Error in retrieving the data",None)
         return response.json()
 
-    def get_conversation_approval_requests_count(user_email, filter_):
+    def get_conversation_approval_requests_count(user_id, filter_):
         response=ApiResponse()
         try:
             filter_list = eval(filter_)
@@ -173,7 +174,7 @@ class conversation_context:
 
             conditions = {
                 "$and": [
-                    { "state":"waiting for approval", 'assigned_to': { "$in": [user_email] } },
+                    { "state":"waiting for approval", 'assigned_to': { "$in": [user_id] } },
                     filter_parameter
                 ]
             }

@@ -14,14 +14,14 @@ import logging
 from sqlalchemy.sql import exists
 
 
-from database.postgres import session , engine, vector_store_engine, Session , Vector_Session ,vector_session
+from database.postgres import engine, vector_store_engine, Session , Vector_Session 
 
 class Persistence:
     
-    def insert_analysis_audits(text, user_email, flagged_text, analysed_entity, criticality):
+    def insert_analysis_audits(text, user_id, flagged_text, analysed_entity, criticality):
         try:
             session=Session()
-            audit = AnalysisAuditEntity(text=text, user_email=user_email, flagged_text=flagged_text, analysed_entity=analysed_entity, criticality=criticality)
+            audit = AnalysisAuditEntity(text=text, user_id=user_id, flagged_text=flagged_text, analysed_entity=analysed_entity, criticality=criticality)
             session.add(audit)
             session.commit()
         except Exception as ex:
@@ -30,10 +30,10 @@ class Persistence:
         finally:
             session.close()
 
-    def insert_anonymize_audits(original_text, anonymized_text, flagged_text, user_email, analysed_entity, criticality):
+    def insert_anonymize_audits(original_text, anonymized_text, flagged_text, user_id, analysed_entity, criticality):
         try:
             session=Session()
-            audit = AnonymizeAuditEntity(original_text=original_text, anonymized_text=anonymized_text, flagged_text=flagged_text, user_email=user_email, analysed_entity=analysed_entity, criticality=criticality)
+            audit = AnonymizeAuditEntity(original_text=original_text, anonymized_text=anonymized_text, flagged_text=flagged_text, user_id=user_id, analysed_entity=analysed_entity, criticality=criticality)
             session.add(audit)
             session.commit()
         except Exception as ex:
@@ -42,10 +42,10 @@ class Persistence:
         finally:
             session.close()
 
-    def insert_chat_log(user_email, text):
+    def insert_chat_log(user_id, text):
         try:
             session=Session()
-            log = ChatLogEntity(user_email=user_email, text=text)
+            log = ChatLogEntity(user_id=user_id, text=text)
             session.add(log)
             session.commit()
         except Exception as ex:
@@ -117,13 +117,14 @@ class Persistence:
     
     def get_chat_log():
         try:
+            session = Session()
             logs = session.query(ChatLogEntity).all()
             result = []
             for log in logs:
                 result.append({
                     'id': str   (log.id),
                     'created_at': log.created_at.isoformat(),
-                    'user_email': log.user_email,
+                    'user_id': log.user_id,
                     'text': log.text
                 })
             return json.dumps(result)
@@ -134,6 +135,7 @@ class Persistence:
 
     def get_org(name):
         try:
+            session = Session()
             org = session.query(OrganisationEntity).filter(OrganisationEntity.name == name).first()
             if org:
                 return {
@@ -153,6 +155,7 @@ class Persistence:
 
     def save_org(data):
         try:
+            session = Session()
             org = OrganisationEntity(name=data['name'], email=data['email'], details=data['details'], openai_key=data['openai_key'])
             session.add(org)
             session.commit()
@@ -164,6 +167,7 @@ class Persistence:
 
     def get_list_query(Entity, sort, range_, filter_, collection=None):
         try:
+            session = Session()
             query = session.query(Entity)
             if(collection):
                 query = query.filter(Entity.collection_name == eval(collection))
@@ -233,6 +237,7 @@ class Persistence:
     
     def get_one_query(Entity, id):     
         try:
+            session = Session()
             document = session.query(Entity).filter(Entity.id == id).first()
             
             if not document:
@@ -251,6 +256,7 @@ class Persistence:
         enabled_entities = []
         
         try:
+            session = Session()
             enabled_entities = session.query(Entity).filter(and_(Entity.provider == provider_name,Entity.is_active==True)).all()
             if not enabled_entities:
                 enabled_entities = []
@@ -275,7 +281,7 @@ class Persistence:
         finally:
             session.close()
 
-    def update_document(document_id, title, description, location, folder_id):
+    def update_document(document_id, title, description, location, collection_name):
         try:
             session=Session()
             document = session.query(DocumentEntity).filter(DocumentEntity.id == document_id).first()
@@ -287,8 +293,8 @@ class Persistence:
                 document.description = description
             if location:
                 document.location = location
-            if folder_id:
-                document.folder_id = folder_id
+            if collection_name:
+                document.collection_name = collection_name
             session.commit()
             return jsonify({"message": "success", "document": document.to_dict()}), 200
         except Exception as e:
@@ -323,6 +329,7 @@ class Persistence:
     
     def get_document_by_id(id):
         try:
+            session=Session()
             document = session.query(DocumentEntity).filter(DocumentEntity.id == id).first()
             res = document.to_dict()
             return res
@@ -334,13 +341,15 @@ class Persistence:
     def delete_document(document_id):
         try:
             session=Session()
+            connection = vector_store_engine.connect()
             document = session.query(DocumentEntity).filter(DocumentEntity.id == document_id).first()
+            if document is None:
+                return jsonify({"message": "document not found"}), 404
             row = document.to_dict()
 
             #deleting vector store embeddings for  document
             custom_ids = row['custom_ids']
             comma_separated_custom_ids = ', '.join([f"'{id}'" for id in custom_ids])
-            connection = vector_store_engine.connect()
             sql_query = f"DELETE FROM langchain_pg_embedding WHERE custom_id IN ({comma_separated_custom_ids})"
             result = connection.execute(text(sql_query))
             connection.commit()
@@ -376,10 +385,11 @@ class Persistence:
         except Exception as ex:
             logging.error(f"Exception while getting document: {ex}")
         finally:
-            session.close()
+            connection.close()
     
     def get_chain_by_code(chain_code):
         try:
+            session=Session()
             chain = session.query(ChainEntity).filter(ChainEntity.code == chain_code).first()
             serialized_chain = chain.to_dict()
             return serialized_chain
@@ -390,6 +400,7 @@ class Persistence:
 
     def get_data_source_by_id(id):
         try:
+            session=Session()
             data_source = session.query(DataSourceEntity).filter(DataSourceEntity.id == id).first()
             serialized_data_source = data_source.to_dict()
             return serialized_data_source
@@ -418,24 +429,27 @@ class Persistence:
         finally:
             session.close()
 
-    def get_folder_data(user_email):
+    def get_folder_data(user_id):
         try:
-            folders = session.query(FolderEntity).filter(FolderEntity.user_email == user_email).first()
+            session=Session()
+            folders = session.query(FolderEntity).filter(FolderEntity.user_id == user_id).first()
             serialized_folders={}
             if folders:
                 serialized_folders = folders.to_dict()
             return serialized_folders
         except Exception as ex:
             logging.error(f"Exception while getting folders: {ex}")
+        finally:
+            session.close()
     
-    def upsert_folders_by_user_email(folders,user_email):
+    def upsert_folders_by_user_email(folders,user_id):
         try:
             session=Session()
-            folders_data= session.query(FolderEntity).filter(FolderEntity.user_email == user_email).first()
+            folders_data= session.query(FolderEntity).filter(FolderEntity.user_id == user_id).first()
             if folders_data:
                 folders_data.folders = folders
             else:
-                folders_data = FolderEntity(user_email=user_email,folders=folders)
+                folders_data = FolderEntity(user_id=user_id,folders=folders)
                 session.add(folders_data)
             session.commit()
         except Exception as ex:
@@ -444,24 +458,27 @@ class Persistence:
         finally:
             session.close()
             
-    def get_prompts_data(user_email):
+    def get_prompts_data(user_id):
         try:
-            prompts = session.query(PromptEntity).filter(PromptEntity.user_email == user_email).first()
+            session=Session()
+            prompts = session.query(PromptEntity).filter(PromptEntity.user_id == user_id).first()
             serialized_prompts={}
             if prompts:
                 serialized_prompts = prompts.to_dict()
             return serialized_prompts
         except Exception as ex:
             logging.error(f"Exception while getting prompts: {ex}")
+        finally:
+            session.close()
 
-    def upsert_prompts_by_user_email(prompts,user_email):
+    def upsert_prompts_by_user_email(prompts,user_id):
         try:
             session=Session()
-            prompts_data= session.query(PromptEntity).filter(PromptEntity.user_email == user_email).first()
+            prompts_data= session.query(PromptEntity).filter(PromptEntity.user_id == user_id).first()
             if prompts_data:
                 prompts_data.prompts = prompts
             else:
-                prompts_data = PromptEntity(user_email=user_email,prompts=prompts)
+                prompts_data = PromptEntity(user_id=user_id,prompts=prompts)
                 session.add(prompts_data)
             session.commit()
         except Exception as ex:
@@ -491,9 +508,10 @@ class Persistence:
 
     def get_collections():
         try:
+            vector_session=Vector_Session()
             collections = vector_session.query(CollectionEntity).all()
             result = []
-            for collection in collections:
+            for collection in collections:                    
                 result.append({
                     'id': str(collection.uuid),
                     'name': collection.name
@@ -502,10 +520,11 @@ class Persistence:
         except Exception as ex:
             logging.error(f"Exception while getting chat logs: {ex}")
         finally:
-            session.close()   
+            vector_session.close()   
             
     def get_documents_by_collection_name(collection_name):
         try:
+            session=Session()
             documents = session.query(DocumentEntity).filter(DocumentEntity.collection_name == collection_name).all()
             result = []
             for document in documents:
@@ -520,9 +539,10 @@ class Persistence:
         finally:
             session.close()         
         
-    def get_eula_status(user_email):
+    def get_eula_status(user_id):
         try:
-            eula = session.query(EulaEntity).filter(EulaEntity.user_email == user_email).first()
+            session=Session()
+            eula = session.query(EulaEntity).filter(EulaEntity.user_id == user_id).first()
             
             eula_status=False
             if eula:
@@ -533,14 +553,17 @@ class Persistence:
         except Exception as ex:
             return jsonify({"data":"","success":False,"message": "Error in retrieving eula"}), 500      
             logging.error(f"Exception while getting eula status: {ex}")
+        finally:
+            session.close()
             
-    def set_eula_status(user_email):
+    def set_eula_status(user_id):
         try:
-            eula = session.query(EulaEntity).filter(EulaEntity.user_email == user_email).first()
+            session=Session()
+            eula = session.query(EulaEntity).filter(EulaEntity.user_id == user_id).first()
             if eula:
                 eula.eula = True
             else:
-                eula = EulaEntity(user_email=user_email,eula=True)
+                eula = EulaEntity(user_id=user_id,eula=True)
                 session.add(eula)
             session.commit()
             return jsonify({"message": "Successfully updated eula","success":True}), 200
@@ -602,4 +625,3 @@ class Persistence:
         finally:
             session.close()
         
-
