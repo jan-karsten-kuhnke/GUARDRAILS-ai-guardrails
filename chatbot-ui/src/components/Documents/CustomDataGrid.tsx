@@ -188,7 +188,7 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
 
   return (
     <ThemeProvider theme={datagridTheme}>
-      <div style={{ width: "100%", padding: "0% 2%" }}>
+      <div style={{ width: "100%", padding: "0% 2%",height:400}} >
         <DataGrid
           rows={rows}
           columns={props.columns}
@@ -200,6 +200,7 @@ export const CustomDataGrid = (props: CustomDataGridProps) => {
           loading={loading}
           slots={{ toolbar: GridToolbar, pagination: CustomPagination }}
           paginationModel={paginationModel}
+          localeText={{ noRowsLabel: "No Documents" }}
           sx={{
             backgroundColor: theme.dataGridTheme.bGcolor,
             borderRadius: "2px",
