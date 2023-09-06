@@ -25,6 +25,7 @@ import { KeyValuePair } from "@/types/data";
 import { Prompt } from "@/types/prompt";
 import { Tile } from "@/types/tiles";
 import { EulaDialog } from "@/components/EulaDialog/EulaDialog";
+import { ThemeProvider, createTheme } from "@mui/material";
 
 export const Home = () => {
   const contextValue = useCreateReducer<HomeInitialState>({
@@ -47,6 +48,14 @@ export const Home = () => {
     },
     dispatch,
   } = contextValue;
+
+  const muiComponentTheme = createTheme({
+    palette: {
+      primary: {
+        main: theme.dataGridTheme.primaryColor, // Change this to your desired primary color
+      },
+    },
+  });
 
   // on load
   useEffect(() => {
@@ -260,6 +269,7 @@ export const Home = () => {
         handleSelectedTile,
       }}
     >
+      <ThemeProvider theme={muiComponentTheme}>
       <main className={`flex h-screen w-screen flex-col text-sm text-white`}>
         {showOnboardingGuide && <OnboardingGuide />}
         <div className="fixed top-0 w-full sm:hidden">
@@ -280,6 +290,7 @@ export const Home = () => {
           <Promptbar />
         </div>
       </main>
+      </ThemeProvider>
     </HomeContext.Provider>
   );
 };

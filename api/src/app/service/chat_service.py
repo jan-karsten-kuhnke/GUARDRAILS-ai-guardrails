@@ -57,14 +57,18 @@ class chat_service:
             uploaded_by = current_user_id
             uploaded_at = str(datetime.now())
             
-            if task is None:
-                yield (json.dumps({"error": "Invalid task"}))
-                return
-                
+
+            
             #getting chain from db
             chain = Persistence.get_chain_by_code(task)
             params = chain['params']
-        
+            
+            executor = params['executor'] if "executor" in params else None
+            
+            if task is None or executor is None:
+                yield (json.dumps({"error": "Invalid task"}))
+                return
+            
             #Summarize/Extraction on already uploaded document
             is_document_uploaded=False
             document_array=[]
@@ -75,19 +79,12 @@ class chat_service:
                 filename=document_obj['metadata']['title']
                 document_array=document_obj['docs']
 
-            is_override = bool(data["isOverride"])
             conversation_id = None
             manage_conversation_context = False
-
-            # if(task == "conversation" or task == "qa-retreival"):
-            is_override = True
-
-            if task == "summarize-brief":
-                prompt = f"Summarize {filename}"
-                title = f"Summmary of {filename}."
-            elif task == "extraction":
-                prompt = f"Extract Key Metrics from {filename}"
-                title = f"Key Metrics of {filename}."
+            
+            if executor == "summarize" or executor == "extraction":
+                prompt = f"{params['prompt']} {filename}"
+                title = f"{params['title']} {filename}."
             else:
                 prompt = str(data["message"]) if "message" in data else "Task."
                 title = None
@@ -96,8 +93,7 @@ class chat_service:
                 conversation_id = data['conversation_id']
                 manage_conversation_context = True
 
-            stop_conversation, stop_response, updated_prompt, role = chat_service.validate_prompt(
-                prompt, is_override)
+            stop_conversation, stop_response, updated_prompt, role = chat_service.validate_prompt(prompt)
             chat_service.update_conversation(
                 conversation_id, updated_prompt, 'user', current_user_id, task, title, task_params,metadata)
 
@@ -133,7 +129,6 @@ class chat_service:
                                 (messages[i]['content'], messages[i+1]['content']))
 
                 res = None
-                executor = params['executor']
                 
                 if (executor == "summarize"):
                     try:
@@ -232,13 +227,14 @@ class chat_service:
             if filepath:
                 os.remove(filepath)
 
-    def validate_prompt(prompt, is_override):
+    def validate_prompt(prompt):
+        logging.info("pii_scan: ", pii_scan)
+        logging.info("nsfw_scan: ", nsfw_scan)
         stop_conversation = False
         stop_response = ""
         role = "guardrails"
-
-        if (is_override):
-            return stop_conversation, stop_response, prompt, role
+        
+        return stop_conversation, stop_response, prompt, role
 
     def create_Conversation(prompt, email, task, msg_info, title=None, id=None,task_params=None,metadata=None):
         message = message_obj(
