@@ -1,5 +1,6 @@
 import json
-from sqlalchemy import create_engine, text, func ,or_,and_
+
+from sqlalchemy import create_engine, text, func ,or_,and_, select
 from sqlalchemy.orm import sessionmaker
 
 from database.models import Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, DocumentEntity, FolderEntity , PromptEntity , OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity, ChainEntity,  EulaEntity, DataSourceEntity
@@ -10,6 +11,7 @@ from utils.apiResponse import ApiResponse
 from flask import jsonify
 from service.ingestion_service import IngestionService
 import logging
+from sqlalchemy.sql import exists
 
 
 from database.postgres import session , engine, vector_store_engine, Session , Vector_Session ,vector_session
@@ -391,6 +393,26 @@ class Persistence:
             data_source = session.query(DataSourceEntity).filter(DataSourceEntity.id == id).first()
             serialized_data_source = data_source.to_dict()
             return serialized_data_source
+        except Exception as ex:
+            logging.error(f"Exception while getting data source: {ex}")
+        finally:
+            session.close()
+ 
+
+    def get_all_data_source(userName, userGroups, userRoles):
+        try:
+            query = text(
+                f"SELECT * FROM aiguardrails.data_source "
+                f"WHERE '{json.dumps(userRoles)}' @> (acl->'rid') "
+                f"OR '{json.dumps(userGroups)}' @> (acl->'gid') "
+                f"OR '{json.dumps([userName])}' @> (acl->'uid')"
+                )
+            connection = engine.connect()
+            result = connection.execute(query)
+            res = []
+            for r in result:
+                res.append(DataSourceEntity.to_dict(r))
+            return res
         except Exception as ex:
             logging.error(f"Exception while getting data source: {ex}")
         finally:

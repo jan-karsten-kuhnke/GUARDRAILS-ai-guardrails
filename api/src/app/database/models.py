@@ -226,6 +226,7 @@ class DataSourceEntity(Base):
     schemas = Column(ARRAY(String))
     tables_to_include = Column(ARRAY(String))
     custom_schema_description = Column(Text)
+    acl = Column(JSONB)
     
     def to_dict(self):
         return {
@@ -235,4 +236,5 @@ class DataSourceEntity(Base):
             'schemas': self.schemas,
             'tables_to_include': self.tables_to_include,
             'custom_schema_description': self.custom_schema_description,
+            'acl': self.acl
         }

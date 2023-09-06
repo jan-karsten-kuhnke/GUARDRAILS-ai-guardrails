@@ -233,5 +233,9 @@ def reject_escalation(data_source_id):
     data = request.json
     return admin_service.update_data_source(data_source_id, data)
 
-
+#datasource get_list, get, put endpoints
+@adminendpoints.route('/data_source', methods=['GET'])
+@oidc.accept_token(require_token=True)
+def get_all_data_source():
+    return admin_service.get_all_data_source()
 
