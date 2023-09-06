@@ -162,14 +162,14 @@ const Sidebar = <T,>({
               <div className="pt-1 border-t border-white/20"></div>
               {selectedConversation && selectedConversation.messages.length > 0 && (
                 <>
-                              <div className="text-[14px] font-semibold">Current Conversation</div>
-              <div className={`text-[12px] flex w-full item-center gap-2 py-1 ${theme.botMsgTextColorTheme}`}>
-                <IconListDetails size={20} />
-                <span className="font-semibold">Applet: </span>
-                <div className="w-full">
-                  {taskTitle}
-                </div>
-              </div>
+                  <div className="text-[14px] font-semibold">Current Conversation</div>
+                  <div className={`text-[12px] flex w-full item-center gap-2 py-1 ${theme.botMsgTextColorTheme}`}>
+                    <IconListDetails size={20} />
+                    <span className="font-semibold">Applet: </span>
+                    <div className="w-full">
+                      {taskTitle}
+                    </div>
+                  </div>
                   {collectionName &&
                     <div className={`text-[12px] flex w-full item-center gap-2 py-1 ${theme.botMsgTextColorTheme}`}>
                       <IconBoxMultiple size={20} />
