@@ -83,7 +83,7 @@ const Sidebar = <T,>({
     }
     if (selectedConversation && selectedConversation.task_params) {
       setCollectionName(selectedConversation?.task_params.collectionName);
-      setQaDocumentTitle(selectedConversation.task_params.qaDocumentTitle);
+      setQaDocumentTitle(selectedConversation.task_params.documentName);
     }
   },[selectedConversation,selectedTile]);
 

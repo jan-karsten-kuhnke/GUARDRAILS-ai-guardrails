@@ -5,10 +5,10 @@ oidc = OpenIDConnect()
 
 
 
-def get_current_user_email():
+def get_current_user_id():
     token = request.headers['authorization'].split(' ')[1]
     user_info = oidc._get_token_info(token)
-    return user_info['email']
+    return user_info['preferred_username']
 
 def get_current_user_groups():
     user_groups = []
