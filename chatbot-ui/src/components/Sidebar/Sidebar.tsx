@@ -9,6 +9,7 @@ import {
 } from "./components/OpenCloseButton";
 
 import Search from "../Search";
+import { IconFileDescription,IconBoxMultiple,IconListDetails   } from '@tabler/icons-react';
 
 interface Props<T> {
   isOpen: boolean;
@@ -157,17 +158,26 @@ const Sidebar = <T,>({
         <div>
           {side === 'right' && (
             <>
-            <div>Current Coversation:</div>
-            <div className="flex items-center mt-2">Applet: {taskTitle}</div>      
-        {selectedConversation && selectedConversation.messages.length > 0 && (
-            <>
-            {collectionName && <h3>Collection: {collectionName}</h3>}
-          {qaDocumentTitle && <h3>Document: {qaDocumentTitle}</h3>}
+              <div className="text-[16px] font-bold">Current Coversation:</div>
+              <div className="flex w-full item-center gap-1 py-2">
+                <IconListDetails size={20}/>
+                <span className="font-bold">Applet: </span>{taskTitle}</div>
+              {selectedConversation && selectedConversation.messages.length > 0 && (
+                <>
+                  {collectionName && 
+                  <div className="flex w-full item-center gap-1 py-2">
+                    <IconBoxMultiple size={20}/>
+                    <span className="font-bold">Collection: </span>{collectionName}
+                    </div>}
+                  {qaDocumentTitle && 
+                  <div className="flex w-full item-center gap-1 py-2">
+                    <IconFileDescription size={20} />
+                    <span className="font-bold">Document:</span> {qaDocumentTitle}
+                    </div>}
+                </>
+              )}
             </>
           )}
-          </>
-          )}
-        
         </div>
         {footerComponent}
       </div>
