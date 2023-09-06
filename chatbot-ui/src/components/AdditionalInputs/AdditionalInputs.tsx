@@ -38,16 +38,12 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
     if (!files || files.length === 0) {
       return;
     }
-
     const formData = new FormData();
     formData.append("files", files[0]);
 
     let message: Message = {
       role: "user",
-      content:
-        selectedTile.code === "summarize-brief"
-          ? `Summarize ${files[0].name}`
-          : `Extract key metrics from ${files[0].name}`,
+      content: `${selectedTile?.params?.prompt} ${files[0].name}`,
       userActionRequired: false,
       msg_info: null,
     };

@@ -37,7 +37,6 @@ class message_obj(TypedDict):
     content: str
     created: datetime
     children: list
-    user_action_required: bool
     msg_info: Optional[dict]
     task: str
 
@@ -56,8 +55,6 @@ class chat_service:
             
             uploaded_by = current_user_id
             uploaded_at = str(datetime.now())
-            
-
             
             #getting chain from db
             chain = Persistence.get_chain_by_code(task)
@@ -93,132 +90,116 @@ class chat_service:
                 conversation_id = data['conversation_id']
                 manage_conversation_context = True
 
-            stop_conversation, stop_response, updated_prompt, role = chat_service.validate_prompt(prompt)
             chat_service.update_conversation(
-                conversation_id, updated_prompt, 'user', current_user_id, task, title, task_params,metadata)
+                conversation_id, prompt, 'user', current_user_id, task, title, task_params, metadata)
 
             current_completion = ''
-            user_action_required = False
             msg_info = None
+            res = None
 
-            if stop_conversation:
+            messages = []
+            role = "assistant"
+            if (manage_conversation_context):
+                messages = chat_service.get_history_for_bot(
+                    conversation_id, current_user_id)
 
-                chunk = json.dumps({
-                    "role": "guardrails",
-                    "content": stop_response,
-                    "user_action_required": True
-                })
-                yield (chunk)
+            is_private = False
+            history = []
+            if len(messages) > 1:
+                for i in range(len(messages)-1):
+                    if (messages[i]['role'] == 'user'):
+                        history.append(
+                            (messages[i]['content'], messages[i+1]['content']))
 
-                current_completion = stop_response
-                role = "guardrails"
-                user_action_required = True
+            if (executor == "summarize"):
+                try:
+                    logging.info("calling summarize brief executor")
+                    if(not is_document_uploaded):
+                        DocumentService.create_document(filename,filepath,task_params,uploaded_by,uploaded_at)
+                    executor_instance = Summarize()
+                    res = executor_instance.execute(filepath=filepath,document_array=document_array,is_document_uploaded=is_document_uploaded, params=params)
+
+                except Exception as e:
+                    yield ("Sorry. Some error occured. Please try again.")
+                    logging.error("error: "+str(e))
+
+            elif (executor == "extraction"):
+                try:
+                    if(not is_document_uploaded):
+                        DocumentService.create_document(filename,filepath,task_params,uploaded_by,uploaded_at)
+                    executor_instance = Extraction()
+                    res= executor_instance.execute(filepath=filepath,document_array=document_array,is_document_uploaded=is_document_uploaded, params=params)
+
+                except Exception as e:
+                    yield ("Sorry. Some error occured. Please try again.")
+                    logging.error("error: "+str(e))
+            elif (executor == "conversation"):
+                try:
+                    logging.info("calling conversation executor")
+                    executor_instance = Conversation()
+                    res = executor_instance.execute(query=prompt, is_private=is_private, chat_history=history, params=params)
+
+                except Exception as e:
+                    yield ("Sorry. Some error occured. Please try again.")
+                    logging.error("error: "+str(e))
+            elif (executor == "qaRetrieval"):
+                try:
+                    is_document_selected=False
+                    if qa_document_id:
+                        document_obj=Persistence.get_document_by_id(qa_document_id)
+                        title=document_obj['title']
+                        is_document_selected=True
+                        params['title']=title
+                        
+                    params['collection_name']=collection_name
+                    params['is_document_selected']=is_document_selected
+                    logging.info("calling qa retrieval executor")
+                    executor_instance = QaRetrieval()
+                    res = executor_instance.execute(query=prompt, is_private=is_private, chat_history=history, params=params)
+
+                except Exception as e:
+                    yield ("Sorry. Some error occured. Please try again.")
+                    logging.error("error: "+str(e))
+            elif (executor == "sql"):
+                try:
+                    logging.info("calling qa sql executor")
+                    executor_instance = Sql()
+                    res = executor_instance.execute(query=prompt, is_private=is_private, chat_history=history, params=params)
+
+                except Exception as e:
+                    yield ("Sorry. Some error occured. Please try again.")
+                    logging.error("error: "+str(e))
+            elif (executor == "visualization"):
+                try:
+                    logging.info("calling qa sql executor")
+                    executor_instance = Visualization()
+                    res = executor_instance.execute(query=prompt, is_private=is_private, chat_history=history, params=params)
+
+                except Exception as e:
+                    yield ("Sorry. Some error occured. Please try again.")
+                    logging.error("error: "+str(e))
+
             else:
-                messages = []
-                role = "assistant"
-                if (manage_conversation_context):
-                    messages = chat_service.get_history_for_bot(
-                        conversation_id, current_user_id)
+                yield (json.dumps({"error": "Invalid executor"}))
 
-                is_private = False
-                history = []
-                if len(messages) > 1:
-                    for i in range(len(messages)-1):
-                        if (messages[i]['role'] == 'user'):
-                            history.append(
-                                (messages[i]['content'], messages[i+1]['content']))
+            answer = res['answer']
 
-                res = None
-                
-                if (executor == "summarize"):
-                    try:
-                        logging.info("calling summarize brief executor")
-                        if(not is_document_uploaded):
-                            DocumentService.create_document(filename,filepath,task_params,uploaded_by,uploaded_at)
-                        executor_instance = Summarize()
-                        res = executor_instance.execute(filepath=filepath,document_array=document_array,is_document_uploaded=is_document_uploaded, params=params)
+            msg_info = {
+                "sources": res['sources'] if 'sources' in res else [],
+                "visualization": res['visualization'] if 'visualization' in res else None,
+                "dataset": res['dataset'] if 'dataset' in res else None,
+            }
+            chunk = json.dumps({
+                "role": "assistant",
+                "content": answer,
+                "msg_info": msg_info,
+            })
+            yield (chunk)
+            current_completion += answer
 
-                    except Exception as e:
-                        yield ("Sorry. Some error occured. Please try again.")
-                        logging.error("error: "+str(e))
-
-                elif (executor == "extraction"):
-                    try:
-                        if(not is_document_uploaded):
-                            DocumentService.create_document(filename,filepath,task_params,uploaded_by,uploaded_at)
-                        executor_instance = Extraction()
-                        res= executor_instance.execute(filepath=filepath,document_array=document_array,is_document_uploaded=is_document_uploaded, params=params)
-
-                    except Exception as e:
-                        yield ("Sorry. Some error occured. Please try again.")
-                        logging.error("error: "+str(e))
-                elif (executor == "conversation"):
-                    try:
-                        logging.info("calling conversation executor")
-                        executor_instance = Conversation()
-                        res = executor_instance.execute(query=prompt, is_private=is_private, chat_history=history, params=params)
-
-                    except Exception as e:
-                        yield ("Sorry. Some error occured. Please try again.")
-                        logging.error("error: "+str(e))
-                elif (executor == "qaRetrieval"):
-                    try:
-                        is_document_selected=False
-                        if qa_document_id:
-                            document_obj=Persistence.get_document_by_id(qa_document_id)
-                            title=document_obj['title']
-                            is_document_selected=True
-                            params['title']=title
-                            
-                        params['collection_name']=collection_name
-                        params['is_document_selected']=is_document_selected
-                        logging.info("calling qa retrieval executor")
-                        executor_instance = QaRetrieval()
-                        res = executor_instance.execute(query=prompt, is_private=is_private, chat_history=history, params=params)
-
-                    except Exception as e:
-                        yield ("Sorry. Some error occured. Please try again.")
-                        logging.error("error: "+str(e))
-                elif (executor == "sql"):
-                    try:
-                        logging.info("calling qa sql executor")
-                        executor_instance = Sql()
-                        res = executor_instance.execute(query=prompt, is_private=is_private, chat_history=history, params=params)
-
-                    except Exception as e:
-                        yield ("Sorry. Some error occured. Please try again.")
-                        logging.error("error: "+str(e))
-                elif (executor == "visualization"):
-                    try:
-                        logging.info("calling qa sql executor")
-                        executor_instance = Visualization()
-                        res = executor_instance.execute(query=prompt, is_private=is_private, chat_history=history, params=params)
-
-                    except Exception as e:
-                        yield ("Sorry. Some error occured. Please try again.")
-                        logging.error("error: "+str(e))
-
-                else:
-                    yield (json.dumps({"error": "Invalid executor"}))
-
-                answer = res['answer']
-
-                msg_info = {
-                    "sources": res['sources'] if 'sources' in res else [],
-                    "visualization": res['visualization'] if 'visualization' in res else None,
-                    "dataset": res['dataset'] if 'dataset' in res else None,
-                }
-                chunk = json.dumps({
-                    "role": "assistant",
-                    "content": answer,
-                    "msg_info": msg_info,
-                })
-                yield (chunk)
-                current_completion += answer
-
-            chat_service.save_chat_log(current_user_id, updated_prompt)
+            chat_service.save_chat_log(current_user_id, prompt)
             chat_service.update_conversation(
-                conversation_id, current_completion, role, current_user_id, task, None, task_params,metadata, msg_info, user_action_required)
+                conversation_id, current_completion, role, current_user_id, task, None, task_params,metadata, msg_info)
         except Exception as e:
             yield (json.dumps({"error": "error"}))
             logging.error("Error in chat completion: "+str(e))
@@ -226,15 +207,6 @@ class chat_service:
         finally:
             if filepath:
                 os.remove(filepath)
-
-    def validate_prompt(prompt):
-        logging.info("pii_scan: ", pii_scan)
-        logging.info("nsfw_scan: ", nsfw_scan)
-        stop_conversation = False
-        stop_response = ""
-        role = "guardrails"
-        
-        return stop_conversation, stop_response, prompt, role
 
     def create_Conversation(prompt, email, task, msg_info, title=None, id=None,task_params=None,metadata=None):
         message = message_obj(
@@ -264,7 +236,7 @@ class chat_service:
             conversation)
         return new_conversation_id
 
-    def update_conversation(conversation_id, content, role, user_id, task, title=None, task_params=None,metadata=None, msg_info=None, user_action_required=False):
+    def update_conversation(conversation_id, content, role, user_id, task, title=None, task_params=None,metadata=None, msg_info=None):
         conversation = conversation_context.get_conversation_by_id(
             conversation_id, user_id)
         if (conversation == None):
@@ -280,7 +252,6 @@ class chat_service:
             content=content,
             created=datetime.now(),
             children=[],
-            user_action_required=user_action_required,
             msg_info=msg_info,
             task=task
         )

@@ -15,7 +15,6 @@ import HomeContext from "@/pages/home/home.context";
 import { ChatInput } from "./ChatInput";
 import { ChatLoader } from "./ChatLoader";
 import { MemoizedChatMessage } from "./MemoizedChatMessage";
-import PublicPrivateSwitch from "../PublicPrivateSwitch";
 import AdditionalInputs from "../AdditionalInputs/AdditionalInputs";
 import Tiles from "../Tiles/Tiles";
 import RequestAccessComponent from "../Tiles/RequestAccess";
@@ -470,7 +469,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             </>
           )}
         </div>
-        {selectedTile?.code != "summarize-brief" && (
+        {selectedTile.params?.executor != "summarize"  && selectedTile.params?.executor != "extraction" && (
           <ChatInput
             stopConversationRef={stopConversationRef}
             textareaRef={textareaRef}
