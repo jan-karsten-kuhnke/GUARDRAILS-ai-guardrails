@@ -142,14 +142,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         let params: any = {
           ...documentId ? { documentId } : {},
           ...( selectedCollection && sendCollectionName ) ? { collectionName: selectedCollection } : {},
-          ...( selectedDocument && sendQaDocumentId ) ? { qaDocumentId: selectedDocument } : {},
           ...( selectedDocument && sendQaDocumentId ) ? { qaDocumentId: selectedDocument.id } : {},
           ...( selectedDocument && sendQaDocumentId ) ? { qaDocumentTitle: selectedDocument.title } : {},
         };
         if (
           selectedTile.params?.useExecuteOnDoc
         ) {
-
           try {
             toast.loading(
               "Summarization might be a time taking process depending on the size of your document",

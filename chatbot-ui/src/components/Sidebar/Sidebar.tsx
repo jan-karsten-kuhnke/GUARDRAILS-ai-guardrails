@@ -155,24 +155,36 @@ const Sidebar = <T,>({
             </div>
           )}
         </div>
-        <div>
+        
+        <div className="flex flex-col gap-2">
           {side === 'right' && (
             <>
-              <div className="text-[16px] font-bold">Current Coversation:</div>
-              <div className="flex w-full item-center gap-1 py-2">
-                <IconListDetails size={20}/>
-                <span className="font-bold">Applet: </span>{taskTitle}</div>
+              <div className="pt-1 border-t border-white/20"></div>
+              <div className="text-[14px] font-semibold">Current Conversation</div>
+              <div className={`text-[12px] flex w-full item-center gap-2 py-1 ${theme.botMsgTextColorTheme}`}>
+                <IconListDetails size={20} />
+                <span className="font-semibold">Applet: </span>
+                <div className="text-end w-full">
+                  {taskTitle}
+                </div>
+              </div>
               {selectedConversation && selectedConversation.messages.length > 0 && (
                 <>
-                  {collectionName && 
-                  <div className="flex w-full item-center gap-1 py-2">
-                    <IconBoxMultiple size={20}/>
-                    <span className="font-bold">Collection: </span>{collectionName}
+                  {collectionName &&
+                    <div className={`text-[12px] flex w-full item-center gap-2 py-1 ${theme.botMsgTextColorTheme}`}>
+                      <IconBoxMultiple size={20} />
+                      <span className="font-semibold">Collection: </span>
+                      <div className="text-end w-full">
+                        {collectionName}
+                      </div>
                     </div>}
-                  {qaDocumentTitle && 
-                  <div className="flex w-full item-center gap-1 py-2">
-                    <IconFileDescription size={20} />
-                    <span className="font-bold">Document:</span> {qaDocumentTitle}
+                  {qaDocumentTitle &&
+                    <div className={`text-[12px] flex w-full item-center gap-2 py-1 ${theme.botMsgTextColorTheme}`}>
+                      <IconFileDescription size={20} />
+                      <span className="font-semibold">Document:</span>
+                      <div className="text-end w-full">
+                        {qaDocumentTitle}
+                      </div>
                     </div>}
                 </>
               )}
