@@ -1,12 +1,16 @@
 from oidc import get_current_user_email
 from database.models import ChainEntity
-from database.postgres import Session
-from oidc import get_current_user_groups
+from database.postgres import Session, engine
+from oidc import get_current_user_groups, get_current_user_roles, get_current_user_name
 from integration.flowable_wrapper import flowable_wrapper
 from database.repository import Persistence
 from globals import Globals
 from utils.util import required_chain_fields
 import logging
+import json
+from globals import Globals
+from sqlalchemy import cast, create_engine, text, select
+
 class userdata_service:
     def get_all_folders(user_email):
         return Persistence.get_folder_data(user_email)
@@ -25,18 +29,39 @@ class userdata_service:
 
     def get_tiles(user_email):
         try:
+            pg_schema = Globals.pg_schema
+            chain_table = ChainEntity.__tablename__
             user_groups = get_current_user_groups()
+            user_roles = get_current_user_roles()
+            user_name = get_current_user_name()
             session=Session()
             all_chains  = session.query(ChainEntity).all()
+            query = text(
+                f"SELECT * FROM {pg_schema}.{chain_table} "
+                f"WHERE '{json.dumps(user_roles)}' @> (acl->'rid') "
+                f"OR '{json.dumps(user_groups)}' @> (acl->'gid') "
+                f"OR '{json.dumps([user_name])}' @> (acl->'uid')")
+
+            connection = engine.connect()
+            assigned_chains = connection.execute(query)
+
+            assigned_chain_codes = []
             previous_requests = []
             if(Globals.applet_access_request_feature_flag == "Enabled"):
                 previous_requests = flowable_wrapper.get_submitted_requests_code(user_email)
                 
             res = []
+            for assigned_chain in assigned_chains:
+                 chain_dict = ChainEntity.to_dict(assigned_chain)
+                 assigned_chain_codes.append(chain_dict['code'])
 
             for chain in all_chains:
                 chain_dict = chain.to_dict()
                 filtered_chain = required_chain_fields(chain_dict, user_groups, previous_requests)
+                if chain_dict['code'] in assigned_chain_codes :
+                   filtered_chain['has_access'] = True
+                else:
+                   filtered_chain['has_access'] = False
                 res.append(filtered_chain)
             res.sort(key=lambda x: x['displayOrder'])
             return res
