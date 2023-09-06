@@ -143,6 +143,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           ...documentId ? { documentId } : {},
           ...( selectedCollection && sendCollectionName ) ? { collectionName: selectedCollection } : {},
           ...( selectedDocument && sendQaDocumentId ) ? { qaDocumentId: selectedDocument } : {},
+          ...( selectedDocument && sendQaDocumentId ) ? { qaDocumentId: selectedDocument.id } : {},
+          ...( selectedDocument && sendQaDocumentId ) ? { qaDocumentTitle: selectedDocument.title } : {},
         };
         if (
           selectedTile.params?.useExecuteOnDoc

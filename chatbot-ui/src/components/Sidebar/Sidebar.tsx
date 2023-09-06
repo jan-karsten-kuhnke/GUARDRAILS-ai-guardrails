@@ -48,10 +48,11 @@ const Sidebar = <T,>({
   handleDrop,
 }: Props<T>) => {
   const {
-    state: { theme, selectedConversation, selectedTile, tiles },
+    state: { theme, selectedConversation, selectedTile, tiles },   
   } = useContext(HomeContext);
-
   const [taskTitle, setTaskTitle] = useState<string>('');
+  const [collectionName, setCollectionName] = useState<string | null>(null);
+  const [qaDocumentTitle, setQaDocumentTitle] = useState<string | null>(null);
 
   const allowDrop = (e: any) => {
     e.preventDefault();
@@ -69,6 +70,8 @@ const Sidebar = <T,>({
     // Checking for new chat
     if(selectedConversation?.messages.length === 0){
       setTaskTitle(selectedTile.title);
+      setCollectionName('');
+      setQaDocumentTitle('');
     }
     // for an existing chat
     else{
@@ -76,6 +79,10 @@ const Sidebar = <T,>({
       if(selectedTask){
         setTaskTitle(selectedTask.title);
       }
+    }
+    if (selectedConversation && selectedConversation.task_params) {
+      setCollectionName(selectedConversation?.task_params.collectionName);
+      setQaDocumentTitle(selectedConversation.task_params.qaDocumentTitle);
     }
   },[selectedConversation,selectedTile]);
 
@@ -148,8 +155,19 @@ const Sidebar = <T,>({
           )}
         </div>
         <div>
-            <h2>{taskTitle}</h2>
-            {/* <h3>{selectedConversation?.task_params.collectionName}</h3> */}
+          {side === 'right' && (
+            <>
+            <div>Current Coversation:</div>
+            <div className="flex items-center mt-2">Applet: {taskTitle}</div>      
+        {selectedConversation && selectedConversation.messages.length > 0 && (
+            <>
+            {collectionName && <h3>Collection: {collectionName}</h3>}
+          {qaDocumentTitle && <h3>Document: {qaDocumentTitle}</h3>}
+            </>
+          )}
+          </>
+          )}
+        
         </div>
         {footerComponent}
       </div>

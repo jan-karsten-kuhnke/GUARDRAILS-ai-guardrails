@@ -31,7 +31,7 @@ export interface HomeInitialState {
   selectedCollection: string;
   showOnboardingGuide: boolean;
   documents:document[];
-  selectedDocument:number | undefined;
+  selectedDocument:document | undefined;
 }
 
 export const initialState: HomeInitialState = {
