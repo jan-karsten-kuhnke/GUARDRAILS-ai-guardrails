@@ -160,7 +160,9 @@ const Sidebar = <T,>({
           {side === 'right' && (
             <>
               <div className="pt-1 border-t border-white/20"></div>
-              <div className="text-[14px] font-semibold">Current Conversation</div>
+              {selectedConversation && selectedConversation.messages.length > 0 && (
+                <>
+                              <div className="text-[14px] font-semibold">Current Conversation</div>
               <div className={`text-[12px] flex w-full item-center gap-2 py-1 ${theme.botMsgTextColorTheme}`}>
                 <IconListDetails size={20} />
                 <span className="font-semibold">Applet: </span>
@@ -168,8 +170,6 @@ const Sidebar = <T,>({
                   {taskTitle}
                 </div>
               </div>
-              {selectedConversation && selectedConversation.messages.length > 0 && (
-                <>
                   {collectionName &&
                     <div className={`text-[12px] flex w-full item-center gap-2 py-1 ${theme.botMsgTextColorTheme}`}>
                       <IconBoxMultiple size={20} />
