@@ -164,7 +164,7 @@ const Sidebar = <T,>({
               <div className={`text-[12px] flex w-full item-center gap-2 py-1 ${theme.botMsgTextColorTheme}`}>
                 <IconListDetails size={20} />
                 <span className="font-semibold">Applet: </span>
-                <div className="text-end w-full">
+                <div className="w-full">
                   {taskTitle}
                 </div>
               </div>
@@ -174,7 +174,7 @@ const Sidebar = <T,>({
                     <div className={`text-[12px] flex w-full item-center gap-2 py-1 ${theme.botMsgTextColorTheme}`}>
                       <IconBoxMultiple size={20} />
                       <span className="font-semibold">Collection: </span>
-                      <div className="text-end w-full">
+                      <div className="w-full">
                         {collectionName}
                       </div>
                     </div>}
@@ -182,7 +182,7 @@ const Sidebar = <T,>({
                     <div className={`text-[12px] flex w-full item-center gap-2 py-1 ${theme.botMsgTextColorTheme}`}>
                       <IconFileDescription size={20} />
                       <span className="font-semibold">Document:</span>
-                      <div className="text-end w-full">
+                      <div className=" w-full">
                         {qaDocumentTitle}
                       </div>
                     </div>}
