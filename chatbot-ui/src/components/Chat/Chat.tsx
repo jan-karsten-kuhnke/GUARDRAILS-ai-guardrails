@@ -15,13 +15,12 @@ import HomeContext from "@/pages/home/home.context";
 import { ChatInput } from "./ChatInput";
 import { ChatLoader } from "./ChatLoader";
 import { MemoizedChatMessage } from "./MemoizedChatMessage";
-import PublicPrivateSwitch from "../PublicPrivateSwitch";
 import AdditionalInputs from "../AdditionalInputs/AdditionalInputs";
 import Tiles from "../Tiles/Tiles";
 import RequestAccessComponent from "../Tiles/RequestAccess";
 
 import { COLLECTION_PICKER, DOCUMENT_PICKER } from "@/utils/constants";
-        
+
 import {
   anonymizeMessage,
   fetchPrompt,
@@ -57,7 +56,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       selectedCollection,
       selectedDocument
     },
-    handleSelectedTile,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -323,24 +321,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   }, [selectedConversation, throttledScrollDown]);
 
   useEffect(() => {
-    const foundTile = tiles.find((tile) => tile.code === selectedConversation?.task);
-    if (foundTile) {
-      handleSelectedTile(foundTile);
-    }
-
-    if(selectedConversation?.task_params && selectedConversation?.task_params?.collectionName){
-      homeDispatch({field: "selectedCollection", value: selectedConversation?.task_params?.collectionName})
-    }
-
-    if(selectedConversation?.task_params && selectedConversation?.task_params?.qaDocumentId){
-      homeDispatch({field: "selectedDocument", value: selectedConversation?.task_params?.qaDocumentId})
-    }
-    else{
-      homeDispatch({field: "selectedDocument", value: undefined})
-    }
-  },[selectedConversation])
-
-  useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         setAutoScrollEnabled(entry.isIntersecting);
@@ -489,7 +469,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             </>
           )}
         </div>
-        {selectedTile?.code != "summarize-brief" && (
+        {selectedTile.params?.executor != "summarize"  && selectedTile.params?.executor != "extraction" && (
           <ChatInput
             stopConversationRef={stopConversationRef}
             textareaRef={textareaRef}
