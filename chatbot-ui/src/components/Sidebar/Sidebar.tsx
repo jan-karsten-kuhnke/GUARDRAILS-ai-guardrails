@@ -1,5 +1,6 @@
 import { IconFolderPlus, IconMistOff, IconPlus } from "@tabler/icons-react";
 import { ReactNode, useContext } from "react";
+import { useEffect,useState } from "react";
 import HomeContext from "@/pages/home/home.context";
 
 import {
@@ -47,8 +48,10 @@ const Sidebar = <T,>({
   handleDrop,
 }: Props<T>) => {
   const {
-    state: { theme },
+    state: { theme, selectedConversation, selectedTile, tiles },
   } = useContext(HomeContext);
+
+  const [taskTitle, setTaskTitle] = useState<string>('');
 
   const allowDrop = (e: any) => {
     e.preventDefault();
@@ -61,6 +64,20 @@ const Sidebar = <T,>({
   const removeHighlight = (e: any) => {
     e.target.style.background = "none";
   };
+
+  useEffect(() => {
+    // Checking for new chat
+    if(selectedConversation?.messages.length === 0){
+      setTaskTitle(selectedTile.title);
+    }
+    // for an existing chat
+    else{
+      const selectedTask = tiles.find(tile => tile.code === selectedConversation?.task);
+      if(selectedTask){
+        setTaskTitle(selectedTask.title);
+      }
+    }
+  },[selectedConversation,selectedTile]);
 
   return isOpen ? (
     <div>
@@ -129,6 +146,10 @@ const Sidebar = <T,>({
               </span>
             </div>
           )}
+        </div>
+        <div>
+            <h2>{taskTitle}</h2>
+            {/* <h3>{selectedConversation?.task_params.collectionName}</h3> */}
         </div>
         {footerComponent}
       </div>
