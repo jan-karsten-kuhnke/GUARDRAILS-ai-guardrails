@@ -143,7 +143,8 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         let params: any = {
           ...documentId ? { documentId } : {},
           ...(selectedCollection && sendCollectionName) ? { collectionName: selectedCollection } : {},
-          ...(selectedDocument && sendQaDocumentId) ? { documentId: selectedDocument } : {},
+          ...(selectedDocument && sendQaDocumentId) ? { qaDocumentId: selectedDocument.id } : {},
+          ...(selectedDocument && sendQaDocumentId) ? { documentName: selectedDocument.title } : {},
         };
 
         try {

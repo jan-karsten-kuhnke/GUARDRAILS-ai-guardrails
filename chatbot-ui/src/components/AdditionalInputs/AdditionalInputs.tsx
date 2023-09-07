@@ -91,11 +91,14 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
     });
   };
   const handleDocumentSelect = (id: any) => {
-    if (id == "All") {
+    if (id == undefined) {
       homeDispatch({ field: "selectedDocument", value: undefined });
       return;
     }
-    homeDispatch({ field: "selectedDocument", value: id });
+    const documentSelected = documents.find((document: any) => document.id === id);
+    if(documentSelected){
+    homeDispatch({ field: "selectedDocument", value: documentSelected });
+    }
   };
 
   return (
@@ -166,7 +169,7 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
                   </div>
                   <FormControl sx={{ minWidth: 120, width: "100%" }} size="small">
                     <DropDown data={documentData}
-                      value={selectedDocument ? selectedDocument : "None"}
+                      value={selectedDocument?.id ? selectedDocument.id : "None"}
                       label={"All"}
                       defaultSelectable={true}
                       onChange={(document) => {

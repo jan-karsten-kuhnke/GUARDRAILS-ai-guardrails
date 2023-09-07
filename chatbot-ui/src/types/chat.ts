@@ -17,4 +17,5 @@ export interface Conversation {
   folderId: string | null;
   archived: boolean;
   task: string;
+  task_params: any;
 }
