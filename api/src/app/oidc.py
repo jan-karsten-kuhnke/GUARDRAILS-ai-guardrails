@@ -30,8 +30,4 @@ def get_current_user_roles():
     token = request.headers['authorization'].split(' ')[1]
     user_info = oidc._get_token_info(token)
     return user_info['realm_access']['roles']
-
-def get_current_user_name():
-    token = request.headers['authorization'].split(' ')[1]
-    user_info = oidc._get_token_info(token)
-    return user_info['preferred_username']    
+   
