@@ -34,6 +34,8 @@ from google.cloud import documentai_v1 as documentai
 from langchain.docstore.document import Document
 # import json
 # import cv2
+from PIL import Image
+import io
 
 class CustomPDFLoader:
 
@@ -71,12 +73,25 @@ class CustomPDFLoader:
         for page_number in range(pdf_document.page_count):
             page = pdf_document.load_page(page_number)
             image_matrix = page.get_pixmap()
-        
-            roothtml = self.process_document(project_id, processor_id, page)
+
+        # Convert pixmap to bytes
+            image_bytes = self.convert_pixmap_to_bytes(image_matrix)
+            roothtml = self.process_document(project_id, processor_id, image_bytes)
 
             docs.append(Document(metadata={"source": self.file_path, "page_number":0}, page_content=roothtml))
         return docs
 
+    def convert_pixmap_to_bytes(self, pixmap):
+        # Create a Pillow Image from the pixmap 
+        img = Image.frombytes("RGB", [pixmap.width, pixmap.height], pixmap.samples)
+
+        # Create an in-memory binary stream and save the image as bytes
+        output = io.BytesIO()
+        img.save(output, format="JPEG")  # You can use other formats like PNG as needed
+        image_bytes = output.getvalue()
+        output.close()
+
+        return image_bytes
 
 
     def process_document(self, project_id, processor_id, image_data):
@@ -94,7 +109,7 @@ class CustomPDFLoader:
         #     image_data = f.read()
 
         print("image data type", type(image_data))
-        fdocument = {"content": image_data, "mime_type": "application/pdf"}
+        fdocument = {"content": image_data, "mime_type": "image/png"}
         
         request = {"name": formname, "raw_document": fdocument}
         ocrrequest = {"name": ocrname, "raw_document": fdocument}
