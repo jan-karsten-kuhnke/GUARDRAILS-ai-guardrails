@@ -1,7 +1,7 @@
 from oidc import get_current_user_id
 from database.models import ChainEntity
 from database.postgres import Session, engine
-from oidc import get_current_user_groups, get_current_user_roles, get_current_user_name
+from oidc import get_current_user_groups, get_current_user_roles
 from integration.flowable_wrapper import flowable_wrapper
 from database.repository import Persistence
 from globals import Globals
@@ -33,14 +33,13 @@ class userdata_service:
             chain_table = ChainEntity.__tablename__
             user_groups = get_current_user_groups()
             user_roles = get_current_user_roles()
-            user_name = get_current_user_name()
             session=Session()
             all_chains  = session.query(ChainEntity).all()
             query = text(
                 f"SELECT * FROM {pg_schema}.{chain_table} "
                 f"WHERE '{json.dumps(user_roles)}' @> (acl->'rid') "
                 f"OR '{json.dumps(user_groups)}' @> (acl->'gid') "
-                f"OR '{json.dumps([user_name])}' @> (acl->'uid')")
+                f"OR '{json.dumps([user_id])}' @> (acl->'uid')")
 
             connection = engine.connect()
             assigned_chains = connection.execute(query)
