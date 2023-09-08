@@ -26,6 +26,8 @@ from database.postgres import session
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores.pgvector import PGVector
 
+from service.custom_pdf_loader import CustomPDFLoader 
+
 chunk_size = Globals.chunk_size
 chunk_overlap = Globals.chunk_overlap
 
@@ -40,7 +42,7 @@ FILE_MAPPING = {
     ".html": (UnstructuredHTMLLoader, {}),
     ".md": (UnstructuredMarkdownLoader, {}),
     ".odt": (UnstructuredODTLoader, {}),
-    ".pdf": (PyPDFLoader, {}),
+    ".pdf": (CustomPDFLoader, {}),
     ".ppt": (UnstructuredPowerPointLoader, {}),
     ".pptx": (UnstructuredPowerPointLoader, {}),
     ".txt": (TextLoader, {"encoding": "utf8"}),
