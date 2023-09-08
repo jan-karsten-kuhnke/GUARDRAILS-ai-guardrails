@@ -73,7 +73,7 @@ class  IngestionService :
         ext = os.path.splitext(file_path)[1]
         if ext in FILE_MAPPING:
             loader_class, loader_args = FILE_MAPPING[ext]
-            loader = loader_class(file_path, **loader_args)
+            loader = loader_class(file_path, "bonedge-ml", "8c088965419fb93a", "78ab45671a5cc21b",**loader_args)
             return loader.load()
 
         raise ValueError(f"Unsupported file type '{ext}'")

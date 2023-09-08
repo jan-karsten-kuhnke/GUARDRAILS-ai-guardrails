@@ -1,58 +1,41 @@
-# from langchain.document_loaders.parsers.pdf import (
-#     PyPDFParser
-# )
-
-# from typing import List, Optional, Union
-# from langchain.docstore.document import Document
-
-# import fitz
-# import tabula  # For table extraction
-# from PIL import Image  # For handling images
-# import pandas as pd  # For handling tables
-# import layoutparser as lp
-# import pytesseract
-# from ipytree import Tree, Node
-# import PyPDF2
-# import json
-# import os
-# import re
-# from bs4 import BeautifulSoup
-# import logging
-# from langchain.docstore.document import Document
-
-# pytesseract.pytesseract.tesseract_cmd = (r'/usr/bin/tesseract')
-
 from langchain.document_loaders.parsers.pdf import (
     PyPDFParser
 )
 import os
 import fitz  # PyMuPDF
-# import shutil
 from typing import Optional, List, Union
 from google.cloud import documentai_v1 as documentai
-# from google.cloud.documentai_toolbox import document
 from langchain.docstore.document import Document
-# import json
-# import cv2
+import logging
+from PIL import Image
+import io
 
 class CustomPDFLoader:
 
-
     # Get the current directory where your Python script is located.
     current_directory = os.path.dirname(os.path.abspath(__file__))
-
+    logging.info(f"current_directory: {current_directory}")
+    
     # Construct the full path to your JSON key file.
     key_file_path = os.path.join(current_directory, "bonedge-ml-e1153ee50759.json")
-
+    logging.info(f"key_file_path: {key_file_path}")
+    
     # Set the GOOGLE_APPLICATION_CREDENTIALS environment variable.
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_file_path
-
-
+    
     def __init__(
-        self, file_path: str, password: Optional[Union[str, bytes]] = None
+        self, file_path: str, 
+        project_id: str,
+        processor_id: str,
+        ocrprocessor_id: str, 
+        password: Optional[Union[str, bytes]] = None
     ) -> None:
+        logging.info("inside init method-----------")
         """Initialize with a file path."""
         self.file_path = file_path
+        self.project_id = project_id
+        self.processor_id = processor_id
+        self.ocrprocessor_id = ocrprocessor_id
 
         try:
             import pypdf  # noqa:F401
@@ -63,38 +46,46 @@ class CustomPDFLoader:
         self.parser = PyPDFParser(password=password)
 
     def load(self) -> List[Document]:
-        project_id = "bonedge-ml"
-        processor_id = "8c088965419fb93a" #form processor
+        # project_id = "bonedge-ml"
+        # processor_id = "8c088965419fb93a" #form processor
 
         pdf_document = fitz.open(self.file_path)
         docs = []
         for page_number in range(pdf_document.page_count):
             page = pdf_document.load_page(page_number)
-            image_matrix = page.get_pixmap()
+            image_matrix = page.get_pixmap() # render page to an image
         
-            roothtml = self.process_document(project_id, processor_id, page)
-
+            # roothtml = self.process_document(project_id, processor_id, image_matrix)
+            
+            # Convert pixmap to bytes
+            image_bytes = self.convert_pixmap_to_bytes(image_matrix)
+            roothtml = self.process_document(image_bytes)
+            
             docs.append(Document(metadata={"source": self.file_path, "page_number":0}, page_content=roothtml))
         return docs
+    
+    def convert_pixmap_to_bytes(self, pixmap):
+        # Create a Pillow Image from the pixmap 
+        img = Image.frombytes("RGB", [pixmap.width, pixmap.height], pixmap.samples)
 
+        # Create an in-memory binary stream and save the image as bytes
+        output = io.BytesIO()
+        img.save(output, format="JPEG")  # You can use other formats like PNG as needed
+        image_bytes = output.getvalue()
+        output.close()
 
+        return image_bytes
 
-    def process_document(self, project_id, processor_id, image_data):
-        ocrprocessor_id = "78ab45671a5cc21b" #form processor
+    def process_document(self, image_data):
+        # ocrprocessor_id = "78ab45671a5cc21b" #form processor
         roothtml = ""
         # Initialize the Document AI client
         client = documentai.DocumentProcessorServiceClient()
-
         # Specify the processor, project, and location
-        formname = f"projects/{project_id}/locations/us/processors/{processor_id}"
-        ocrname = f"projects/{project_id}/locations/us/processors/{ocrprocessor_id}"
+        formname = f"projects/{self.project_id}/locations/us/processors/{self.processor_id}"
+        ocrname = f"projects/{self.project_id}/locations/us/processors/{self.ocrprocessor_id}"
 
-        # Read the file into memory
-        # with open(file_path, "rb") as f:
-        #     image_data = f.read()
-
-        print("image data type", type(image_data))
-        fdocument = {"content": image_data, "mime_type": "application/pdf"}
+        fdocument = {"content": image_data, "mime_type": "image/png"}
         
         request = {"name": formname, "raw_document": fdocument}
         ocrrequest = {"name": ocrname, "raw_document": fdocument}
@@ -105,12 +96,12 @@ class CustomPDFLoader:
         # Read the document and parse tables
         formdocument = formresult.document
         ocrdocument = ocrresult.document
-        roothtml = self.extract_and_save_text(formdocument,ocrdocument, image_data) # file_path = output_images\\page_1.png
+        roothtml = self.extract_and_save_text(formdocument,ocrdocument) # file_path = output_images\\page_1.png
 
         return roothtml
         
     
-    def extract_and_save_text(self, inpdocument,ocrdocument, file_path):
+    def extract_and_save_text(self, inpdocument,ocrdocument):
         # Initialize a list to store paragraphs and tables along with their bounding box info
         elements = []
         roothtml = ""

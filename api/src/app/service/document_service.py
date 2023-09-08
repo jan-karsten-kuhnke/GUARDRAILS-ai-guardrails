@@ -20,6 +20,7 @@ class DocumentService:
 
     
     def create_documents(location,collection_name,uploaded_by,uploaded_at,metadata):
+        logging.info("create_documents method in doc service ------------")
         try:
             ingestion_service = IngestionService()
             files = IngestionService.get_all_documents(location)
