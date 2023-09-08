@@ -19,7 +19,11 @@ class SqlAgent:
 
     def execute(self, query, is_private, chat_history, params):
         start_time = time.time()
-        model_type = params['modelType']
+        llm_details=params['llm']
+        model_type=llm_details['model_type']
+        use_chat_model=llm_details['use_chat_model']
+        max_output_token=llm_details['max_output_token']
+        increase_model_token_limit=llm_details['increase_model_token_limit']
        
         data_source_id = params['dataSourceId']
         data_source = Persistence.get_data_source_by_id(data_source_id)
@@ -37,7 +41,7 @@ class SqlAgent:
             include_tables = tables
         )
         
-        llm=LlmProvider.get_llm(class_name= __class__.__name__,model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
+        llm=LlmProvider.get_llm(class_name= __class__.__name__,model_type=model_type, is_private=is_private, use_chat_model=use_chat_model, max_output_token=max_output_token, increase_model_token_limit=increase_model_token_limit)
         
         agent_executor = create_sql_agent(
             llm=llm,
