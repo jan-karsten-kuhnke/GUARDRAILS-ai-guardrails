@@ -63,9 +63,9 @@ class admin_service:
         else:
             return {"data":{},"success":False,"message":"Error in retrieving the data"}
     
-    def get_conversation_approval_requests_list( user_email,sort, range_, filter_):
-        total_count=conversation_context.get_conversation_approval_requests_count(user_email, filter_)
-        rows=conversation_context.get_conversation_approval_requests(user_email, sort, range_, filter_)
+    def get_conversation_approval_requests_list( user_id,sort, range_, filter_):
+        total_count=conversation_context.get_conversation_approval_requests_count(user_id, filter_)
+        rows=conversation_context.get_conversation_approval_requests(user_id, sort, range_, filter_)
 
         if total_count['success'] and rows['success']:
             data={"rows":rows['data'],"totalRows":total_count['data']}
@@ -73,16 +73,16 @@ class admin_service:
         else:
             return {"data":{},"success":False,"message":"Error in retrieving the data"}
 
-    def approve_escalation(conversation_id, user_email):
+    def approve_escalation(conversation_id, user_id):
         data=conversation_context.approve_escalation(conversation_id)
-        message = f"Request Approved by: {user_email}"
-        chat_service.update_conversation(conversation_id,message,'guardrails',user_email,task=None,user_action_required=False)
+        message = f"Request Approved by: {user_id}"
+        chat_service.update_conversation(conversation_id,message,'guardrails',user_id,task=None,user_action_required=False)
         return data
 
-    def reject_escalation(conversation_id, user_email):
+    def reject_escalation(conversation_id, user_id):
         data=conversation_context.reject_escalation(conversation_id)
-        message = f"Request Rejected by: {user_email}"
-        chat_service.update_conversation(conversation_id,message,'guardrails',user_email,task=None,user_action_required=False)
+        message = f"Request Rejected by: {user_id}"
+        chat_service.update_conversation(conversation_id,message,'guardrails',user_id,task=None,user_action_required=False)
         return data
 
 

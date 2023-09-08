@@ -7,7 +7,7 @@ from database.models import DocumentEntity
 from globals import Globals
 import os
 from oidc import oidc
-from oidc import get_current_user_email
+from oidc import get_current_user_id
 from datetime import datetime
 from time import time
 from utils.util import validate_fields
@@ -50,7 +50,7 @@ def create_document():
         return jsonify(Error="Missing collectionName"),400
     if len(files) == 0 or files[0].filename == '':
         return jsonify(Error="Missing file"),400
-    uploaded_by = get_current_user_email()
+    uploaded_by = get_current_user_id()
     uploaded_at = str(datetime.now())
     metadata = json.loads(request.form['metaData']) if 'metaData' in request.form else {}
     temp_dir_name = "temp-" + str(time())

@@ -33,14 +33,14 @@ class ChatLogEntity(Base):
     __tablename__ = 'chat_log'
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
     created_at = Column(TIMESTAMP, server_default=func.now())
-    user_email = Column(Text)
+    user_id = Column(Text)
     text = Column(Text)
     
     def to_dict(self):
         return {
             'id': str(self.id),
             'created_at': self.created_at,
-            'user_email': self.user_email,
+            'user_id': self.user_id,
             'text': self.text
         }
 
@@ -52,7 +52,7 @@ class AnonymizeAuditEntity(Base):
     anonymized_text = Column(Text)
     flagged_text = Column(Text)
     created_at = Column(TIMESTAMP, server_default=func.now())
-    user_email = Column(Text)
+    user_id = Column(Text)
     analysed_entity = Column(Text)
     criticality = Column(Text)
     
@@ -63,7 +63,7 @@ class AnonymizeAuditEntity(Base):
             'anonymized_text': self.anonymized_text,
             'flagged_text': self.flagged_text,
             'created_at': self.created_at,
-            'user_email': self.user_email,
+            'user_id': self.user_id,
             'analysed_entity': self.analysed_entity,
             'criticality': self.criticality
         }
@@ -74,7 +74,7 @@ class AnalysisAuditEntity(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
     text = Column(Text)
     created_at = Column(TIMESTAMP, server_default=func.now())
-    user_email = Column(Text)
+    user_id = Column(Text)
     flagged_text = Column(Text)
     analysed_entity = Column(Text)
     criticality = Column(Text)
@@ -84,7 +84,7 @@ class AnalysisAuditEntity(Base):
             'id': str(self.id),
             'text': self.text,
             'created_at': self.created_at,
-            'user_email': self.user_email,
+            'user_id': self.user_id,
             'flagged_text': self.flagged_text,
             'analysed_entity': self.analysed_entity,
             'criticality': self.criticality
@@ -176,13 +176,13 @@ class ChainEntity(Base):
 class FolderEntity(Base):
     __tablename__ = 'folders'
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
-    user_email = Column(String(255))
+    user_id = Column(String(255))
     folders = Column(ARRAY(JSONB))
     
     def to_dict(self):
         return {
             'id': str(self.id),
-            'user_email': self.user_email,
+            'user_id': self.user_id,
             'folders': self.folders
         }
         
@@ -190,13 +190,13 @@ class FolderEntity(Base):
 class PromptEntity(Base):
     __tablename__ = 'prompts'
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
-    user_email = Column(String(255))
+    user_id = Column(String(255))
     prompts = Column(ARRAY(JSONB))
     
     def to_dict(self):
         return {
             'id': str(self.id),
-            'user_email': self.user_email,
+            'user_id': self.user_id,
             'prompts': self.prompts
         }
         
@@ -204,14 +204,14 @@ class PromptEntity(Base):
 class EulaEntity(Base):
     __tablename__ = 'eula'
     id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
-    user_email = Column(String(255))
+    user_id = Column(String(255))
     eula= Column(Boolean)
     eula_accepted_on = Column(TIMESTAMP, server_default=func.now())
     
     def to_dict(self):
         return {
             'id': str(self.id),
-            'user_email': self.user_email,
+            'user_id': self.user_id,
             'eula': self.eula,
             'eula_accepted_on': self.eula_accepted_on,
         }

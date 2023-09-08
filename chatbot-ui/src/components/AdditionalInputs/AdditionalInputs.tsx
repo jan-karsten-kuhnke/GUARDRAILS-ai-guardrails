@@ -38,16 +38,12 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
     if (!files || files.length === 0) {
       return;
     }
-
     const formData = new FormData();
     formData.append("files", files[0]);
 
     let message: Message = {
       role: "user",
-      content:
-        selectedTile.code === "summarize-brief"
-          ? `Summarize ${files[0].name}`
-          : `Extract key metrics from ${files[0].name}`,
+      content: `${selectedTile?.params?.prompt} ${files[0].name}`,
       userActionRequired: false,
       msg_info: null,
     };
@@ -95,11 +91,14 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
     });
   };
   const handleDocumentSelect = (id: any) => {
-    if (id == "All") {
+    if (id == undefined) {
       homeDispatch({ field: "selectedDocument", value: undefined });
       return;
     }
-    homeDispatch({ field: "selectedDocument", value: id });
+    const documentSelected = documents.find((document: any) => document.id === id);
+    if(documentSelected){
+    homeDispatch({ field: "selectedDocument", value: documentSelected });
+    }
   };
 
   return (
@@ -170,7 +169,7 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
                   </div>
                   <FormControl sx={{ minWidth: 120, width: "100%" }} size="small">
                     <DropDown data={documentData}
-                      value={selectedDocument ? selectedDocument : "None"}
+                      value={selectedDocument?.id ? selectedDocument.id : "None"}
                       label={"All"}
                       defaultSelectable={true}
                       onChange={(document) => {
