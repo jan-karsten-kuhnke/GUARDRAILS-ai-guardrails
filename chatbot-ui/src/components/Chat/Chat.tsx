@@ -56,6 +56,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       selectedCollection,
       selectedDocument
     },
+    handleSelectedTile,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -127,7 +128,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         let response: any;
         //params for selected tiles
         let sendCollectionName = false
-        let sendQaDocumentId = false
+        let sendDocumentData = false
 
         selectedTile?.params?.inputs?.forEach((item:any) => {
           const { type } = item;
@@ -135,16 +136,16 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             sendCollectionName = true
           }
           else if (type === DOCUMENT_PICKER) {
-            sendQaDocumentId = true
+            sendDocumentData = true
           }
         })
 
         //renamed qaDocumentId to documentId
-        let params: any = {
+        let taskParams: any = {
           ...documentId ? { documentId } : {},
           ...(selectedCollection && sendCollectionName) ? { collectionName: selectedCollection } : {},
-          ...(selectedDocument && sendQaDocumentId) ? { qaDocumentId: selectedDocument.id } : {},
-          ...(selectedDocument && sendQaDocumentId) ? { documentName: selectedDocument.title } : {},
+          ...(selectedDocument && sendDocumentData) ? { documentId : selectedDocument.id } : {},
+          ...(selectedDocument && sendDocumentData) ? { documentName: selectedDocument.title } : {},
         };
 
         try {
@@ -163,13 +164,13 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
                 selectedConversation.id,
                 selectedTask,
                 isPrivate,
-                params
+                taskParams
               );
             } else {
               const payload = {
-                conversation_id: selectedConversation.id,
+                conversationId: selectedConversation.id,
                 task: selectedTask,
-                params,
+                taskParams,
               };
               formData.append("data", JSON.stringify(payload));
               response = await executeOnDoc(formData);
@@ -180,7 +181,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               selectedConversation.id,
               selectedTask,
               isPrivate,
-              params
+              taskParams
             );
           }
         } catch (err:any) {
@@ -358,6 +359,24 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       }
     }
   },[selectedConversation,selectedTile]);
+
+  useEffect(() => {
+    const foundTile = tiles.find((tile) => tile.code === selectedConversation?.task);
+    if (foundTile) {
+      handleSelectedTile(foundTile);
+    }
+
+    if(selectedConversation?.task_params && selectedConversation?.task_params?.collectionName){
+      homeDispatch({field: "selectedCollection", value: selectedConversation?.task_params?.collectionName})
+    }
+
+    if(selectedConversation?.task_params && selectedConversation?.task_params?.documentId){
+      homeDispatch({field: "selectedDocument", value: {id:selectedConversation?.task_params?.documentId, title:selectedConversation?.task_params?.documentName}})
+    }
+    else{
+      homeDispatch({field: "selectedDocument", value: undefined})
+    }
+  },[selectedConversation])
 
   return (
     <div className={`relative flex-1 overflow-hidden ${theme.chatBackground}`}>

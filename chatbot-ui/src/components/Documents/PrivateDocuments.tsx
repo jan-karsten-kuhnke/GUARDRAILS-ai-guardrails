@@ -108,7 +108,7 @@ export const PrivateDocuments = () => {
   }));
 
   const taskData = tiles
-    .filter((tile: any) => tile?.params?.executor === "summarize" || tile?.params?.executor === "extraction")
+    .filter((tile: any) => (tile?.params?.executor === "summarize" || tile?.params?.executor === "extraction") &&  tile.has_access)
     .map((tile: any) => ({
       value: tile?.code,
       title: tile?.title

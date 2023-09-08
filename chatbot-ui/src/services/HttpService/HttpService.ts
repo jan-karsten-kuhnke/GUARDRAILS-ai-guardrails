@@ -35,7 +35,7 @@ export const fetchPrompt = (
   conversationId: string | null,
   task: string | undefined,
   isPrivate: boolean | undefined,
-  params:object ,
+  taskParams:object ,
 ) =>
   fetch(`${import.meta.env.VITE_CHAT_SERVICE_URL}/chat/completions`, {
     method: "POST",
@@ -47,9 +47,9 @@ export const fetchPrompt = (
       conversationId
         ? {
           message: message,
-          conversation_id: conversationId,
+          conversationId: conversationId,
           task: task,
-          params: params,
+          taskParams: taskParams,
         }
         : { message: message }
     ),

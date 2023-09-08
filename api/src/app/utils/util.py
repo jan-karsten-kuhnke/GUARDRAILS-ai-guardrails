@@ -70,7 +70,7 @@ def validate_fields(data, required_fields = None):
                 return jsonify(error=f"Missing required fields: {', '.join(missing_fields)}"), 400
             nulls_allowed = ['folderId']
             for field in required_fields:
-                if field == 'params':
+                if field == 'taskParams':
                     if not isinstance(data[field], dict):
                         return jsonify(error=f"Invalid data type for {field}"), 400
                 elif not (isinstance(data[field], str) or (field in nulls_allowed and type(data[field]) == type(None))):

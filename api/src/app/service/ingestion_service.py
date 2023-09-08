@@ -22,7 +22,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import Chroma
 from globals import Globals
 from database.models import DocumentEntity
-from database.postgres import session
+from database.postgres import Session
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores.pgvector import PGVector
 
@@ -108,6 +108,7 @@ class  IngestionService :
         #TODO:start a background thread for each document
         # for doc in documents:
         #     try:
+        #         session = Session()
         #         doc_text = text_splitter.split_documents([doc])
         #         doc_summary = IngestionService.summarize(doc_text)
         #         document = session.query(DocumentEntity).filter(DocumentEntity.location == doc.dict()['metadata']['source']).first()
