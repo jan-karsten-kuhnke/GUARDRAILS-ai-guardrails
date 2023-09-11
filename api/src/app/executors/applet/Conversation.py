@@ -24,7 +24,7 @@ class Conversation:
         llm_details=params['llm']
         curr_date = datetime.today()
         current_date = curr_date.strftime("%Y-%m-%d %H:%M:%S")
-                
+        llm_details = params["llm"]      
         memory = ConversationBufferMemory(memory_key="chat_history",return_messages=True)
         
         for history in chat_history:

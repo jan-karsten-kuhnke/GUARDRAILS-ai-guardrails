@@ -44,6 +44,9 @@ pgvector = "0.2.1"
 cryptography = "41.0.3"
 pymssql = "2.2.8"
 flask-swagger-ui = "4.11.1"
+PyMuPDF = "1.23.0"
+PyPDF2 = "3.0.1"
+google-cloud-documentai = "2.18.0"
 
 [dev-packages]
 black = "*"

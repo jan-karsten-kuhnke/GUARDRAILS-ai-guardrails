@@ -3,7 +3,6 @@ import json
 import logging
 from langchain.embeddings import HuggingFaceEmbeddings
 
-
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "keys/vertexai.json"
 os.environ["TOKENIZERS_PARALLELISM"]="false"
 
@@ -71,7 +70,9 @@ class Globals:
     
     open_ai_api_key=os.environ.get("OPENAI_API_KEY")
 
-
+    project_id = os.environ.get("PROJECT_ID")
+    processor_id = os.environ.get("PROCESSOR_ID")
+    ocr_processor_id = os.environ.get("OCR_PROCESSOR_ID")
 
     #FeatureFlaga
 
