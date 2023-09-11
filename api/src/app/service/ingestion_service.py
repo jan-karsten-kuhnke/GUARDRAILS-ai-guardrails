@@ -26,6 +26,8 @@ from database.postgres import Session
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores.pgvector import PGVector
 
+from service.document_ai_loader import DocumentAILoader 
+
 chunk_size = Globals.chunk_size
 chunk_overlap = Globals.chunk_overlap
 
@@ -40,20 +42,19 @@ FILE_MAPPING = {
     ".html": (UnstructuredHTMLLoader, {}),
     ".md": (UnstructuredMarkdownLoader, {}),
     ".odt": (UnstructuredODTLoader, {}),
-    ".pdf": (PyPDFLoader, {}),
     ".ppt": (UnstructuredPowerPointLoader, {}),
     ".pptx": (UnstructuredPowerPointLoader, {}),
     ".txt": (TextLoader, {"encoding": "utf8"}),
 }
 
 class  IngestionService :
-    def ingest_file(self,file_path: str,collection_name,uploaded_by,uploaded_at,metadata={}):
+    def ingest_file(self,file_path: str,collection_name,uploaded_by,uploaded_at,ingest_with_google = False, metadata={}):
         embeddings = HuggingFaceEmbeddings()
 
         CONNECTION_STRING = Globals.VECTOR_STORE_DB_URI
         COLLECTION_NAME = collection_name
 
-        document = IngestionService.load_document(file_path)
+        document = IngestionService.load_document(file_path, ingest_with_google)
         texts = IngestionService.process_document(document,uploaded_by,uploaded_at,metadata)
     
         store = PGVector(
@@ -67,14 +68,24 @@ class  IngestionService :
         return custom_ids
 
     
-    def load_document(file_path: str) -> List[Document]:
+    def load_document(file_path: str, ingest_with_google: bool) -> List[Document]:
         ext = os.path.splitext(file_path)[1]
-        if ext in FILE_MAPPING:
+        loader = None
+
+        if ext == ".pdf":
+            if ingest_with_google:
+                loader_class, loader_args = DocumentAILoader, {}
+                loader = loader_class(file_path, Globals.project_id, Globals.processor_id, Globals.ocr_processor_id,**loader_args)
+            else:
+                loader_class, loader_args = PyPDFLoader, {}
+                loader = loader_class(file_path, **loader_args)
+        elif ext in FILE_MAPPING:
             loader_class, loader_args = FILE_MAPPING[ext]
             loader = loader_class(file_path, **loader_args)
-            return loader.load()
-
-        raise ValueError(f"Unsupported file type '{ext}'")
+        else:
+            raise ValueError(f"Unsupported file type '{ext}'")
+    
+        return loader.load()
 
 
     def get_all_documents(directory: str) -> List[Document]:
