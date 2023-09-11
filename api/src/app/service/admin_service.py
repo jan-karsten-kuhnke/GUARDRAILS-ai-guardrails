@@ -6,7 +6,7 @@ from integration.flowable_wrapper import flowable_wrapper
 from database.postgres import Session
 from database.models import ChainEntity
 from utils.encryption import Encryption
-from oidc import get_current_user_name
+from oidc import get_current_user_id
 from oidc import get_current_user_groups
 from oidc import get_current_user_roles
 
@@ -55,7 +55,7 @@ class admin_service:
         return Persistence.update_data_source(id=id, name=name, connection_string=encrypted_connection_string, schemas=schemas, tables_to_include=tables_to_include, custom_schema_description=custom_schema_description)
 
     def get_all_data_source():
-        userName = get_current_user_name()
+        userName = get_current_user_id()
         userGroups = get_current_user_groups()
         userRoles = get_current_user_roles()
         return Persistence.get_all_data_source(userName, userGroups, userRoles)
