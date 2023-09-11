@@ -14,7 +14,7 @@ from executors.applet.Conversation import Conversation
 from executors.applet.QaRetrieval import QaRetrieval
 from executors.applet.Sql import Sql
 from executors.applet.Visualization import Visualization
-from oidc import get_current_user_name
+from oidc import get_current_user_id
 from oidc import get_current_user_groups
 from oidc import get_current_user_roles
 
@@ -285,7 +285,7 @@ class chat_service:
         Persistence.insert_chat_log(user_id, text)
 
     def get_conversations(user_id, flag=False):
-        userName = get_current_user_name()
+        userName = get_current_user_id()
         userGroups = get_current_user_groups()
         userRoles = get_current_user_roles()
         cursor = conversation_context.get_conversations_by_user_email(
@@ -297,7 +297,7 @@ class chat_service:
         return conversations
 
     def get_conversation_by_id(conversation_id, user_id):
-        userName = get_current_user_name()
+        userName = get_current_user_id()
         userGroups = get_current_user_groups()
         userRoles = get_current_user_roles()
         cursor = conversation_context.get_conversation_by_id(conversation_id, userName, userGroups, userRoles)
