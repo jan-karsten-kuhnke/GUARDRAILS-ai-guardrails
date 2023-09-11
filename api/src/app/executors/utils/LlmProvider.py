@@ -9,11 +9,15 @@ from typing import Any
 from executors.utils.LlmCallbackHandler import LlmCallbackHandler
 
 class LlmProvider:
-    def get_llm(class_name = None,model_type="OpenAI", is_private=False, use_chat_model= False, max_output_token = 1000 , increase_model_token_limit=False):
+    def get_llm(class_name=None,is_private=False,llm_details=None):
         private_llm: Any = None
         public_llm: Any = None
         callbacks = [StreamingStdOutCallbackHandler(),LlmCallbackHandler(class_name=class_name)]
         temp = Globals.model_temp
+        model_type= llm_details['model_type'] if 'model_type' in llm_details else 'OpenAI'
+        use_chat_model=llm_details['use_chat_model'] if 'use_chat_model' in llm_details else False
+        max_output_token=llm_details['max_output_token'] if 'max_output_token' in llm_details else 1000
+        increase_model_token_limit=llm_details['increase_model_token_limit'] if 'increase_model_token_limit' in llm_details else False
         
             
         if model_type == "OpenAI":

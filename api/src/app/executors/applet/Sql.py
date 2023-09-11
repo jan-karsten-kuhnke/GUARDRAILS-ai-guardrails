@@ -23,7 +23,7 @@ class Sql:
 
     def execute(self, query, is_private, chat_history, params):
         start_time = time.time()
-        model_type = params['modelType']
+        llm_details=params['llm']
         
         PROMPT_SUFFIX =params['promptSuffix']
 
@@ -62,7 +62,7 @@ class Sql:
             include_tables = tables
         )
         
-        llm=LlmProvider.get_llm(class_name= __class__.__name__,model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
+        llm=LlmProvider.get_llm(class_name= __class__.__name__,is_private=is_private, llm_details=llm_details)
         
         chain = SQLDatabaseSequentialChain.from_llm(
             llm, db, verbose=True, return_intermediate_steps=True,decider_prompt=DECIDER_PROMPT,

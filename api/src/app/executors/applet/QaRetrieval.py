@@ -20,9 +20,7 @@ class QaRetrieval:
 
     def execute(self, query, is_private, chat_history, params):
         start_time = time.time()
-        model_type = params['modelType']
-
-
+        llm_details=params['llm']
         embeddings = HuggingFaceEmbeddings()
         
         CONNECTION_STRING =Globals.VECTOR_STORE_DB_URI
@@ -42,7 +40,7 @@ class QaRetrieval:
             retriever = store.as_retriever(
             )
         
-        llm=LlmProvider.get_llm(class_name= __class__.__name__,model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
+        llm=LlmProvider.get_llm(class_name= __class__.__name__,is_private=is_private, llm_details=llm_details)
 
         chain = ConversationalRetrievalChain.from_llm(
             llm=llm,
