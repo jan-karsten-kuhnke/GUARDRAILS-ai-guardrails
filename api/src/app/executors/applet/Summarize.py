@@ -18,15 +18,11 @@ class Summarize:
         
         start_time = time.time()
         llm_details=params['llm']
-        model_type=llm_details['model_type']
-        use_chat_model=llm_details['use_chat_model']
-        max_output_token=llm_details['max_output_token']
-        increase_model_token_limit=llm_details['increase_model_token_limit']
         map_prompt_template = params['mapPromptTemplate']
         reduce_prompt_template = params['reducePromptTemplate']
         chain_type = params['chainType']
         
-        llm=LlmProvider.get_llm(class_name= __class__.__name__,model_type=model_type, is_private=False, use_chat_model=use_chat_model, max_output_token=max_output_token, increase_model_token_limit=increase_model_token_limit)
+        llm=LlmProvider.get_llm(class_name= __class__.__name__,is_private=False, llm_details=llm_details)
         
         docs=[]
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
