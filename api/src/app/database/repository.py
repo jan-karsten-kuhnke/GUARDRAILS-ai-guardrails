@@ -428,8 +428,7 @@ class Persistence:
             return res
         except Exception as ex:
             logging.error(f"Exception while getting data source: {ex}")
-        finally:
-            session.close()
+        
 
     def get_folder_data(user_id):
         try:

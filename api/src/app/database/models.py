@@ -235,6 +235,5 @@ class DataSourceEntity(Base):
             'connection_string': self.connection_string,
             'schemas': self.schemas,
             'tables_to_include': self.tables_to_include,
-            'custom_schema_description': self.custom_schema_description,
-            'acl': self.acl
+            'custom_schema_description': self.custom_schema_description
         }
