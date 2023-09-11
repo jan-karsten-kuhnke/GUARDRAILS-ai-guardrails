@@ -14,6 +14,9 @@ from executors.applet.Conversation import Conversation
 from executors.applet.QaRetrieval import QaRetrieval
 from executors.applet.Sql import Sql
 from executors.applet.Visualization import Visualization
+from oidc import get_current_user_name
+from oidc import get_current_user_groups
+from oidc import get_current_user_roles
 
 
 class conversation_obj(TypedDict):
@@ -277,17 +280,24 @@ class chat_service:
         Persistence.insert_chat_log(user_id, text)
 
     def get_conversations(user_id, flag=False):
-        cursor = conversation_context.get_conversations_by_user_email(
-            user_id, flag)
-        conversations = []
+        userName = get_current_user_name()
+        userGroups = get_current_user_groups()
+        userRoles = get_current_user_roles()
+        cursor = conversation_context.get_conversations_by_user_email_test(
+            user_id, flag, userName, userGroups, userRoles)
+        conversations = {}
         for conversation in cursor:
-            conversations.append(conversation)
+            conversations =conversation['owned']
         conversations.sort(key=lambda x: x.get('created'), reverse=True)
         return conversations
 
     def get_conversation_by_id(conversation_id, user_id):
-        return conversation_context.get_conversation_by_id(conversation_id, user_id)
-
+        userName = get_current_user_name()
+        userGroups = get_current_user_groups()
+        userRoles = get_current_user_roles()
+        cursor = conversation_context.get_conversation_by_id_test(conversation_id, userName, userGroups, userRoles)
+        return list(cursor)[0]['owned']
+    
     def archive_all_conversations(user_id):
         conversation_context.archive_all_conversations(user_id)
 

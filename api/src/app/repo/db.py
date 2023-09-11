@@ -1,5 +1,9 @@
 
+from bson.json_util import dumps
+from bson.json_util import loads
 import pymongo
+from bson import ObjectId
+from typing import Union
 
 from utils.apiResponse import ApiResponse
 from globals import *
@@ -38,6 +42,48 @@ def get_filter_parameter(filter_list):
     
     return filter_parameter
 
+def conversation_pipeline(user_id: Union[ObjectId, str], flag, username, user_groups, user_roles):
+    match_query = {}
+    
+    if flag== None:
+        match_query["$match"] = {"_id": user_id, "acl.owner": username}
+    elif isinstance(user_id, str) and flag != None:
+        match_query["$match"] = {"user_id": user_id, "archived": flag, "acl.owner": username}
+    
+    print(match_query)
+    project_stage = {
+        "$project": {
+            "acl": 0
+        }
+    }
+    facet_stage = {
+        "$facet": {
+            "shared": [
+                {
+                    "$match": {
+                        "archived": flag,
+                        "$or": [
+                            {"acl.gid": {"$in": user_groups}},
+                            {"acl.rid": {"$in": user_roles}},
+                            {"acl.uid": {"$in": [username]}}
+                        ]
+                    }
+                },project_stage
+            ],
+            "owned": [
+                match_query,project_stage
+            ]
+        }
+    }
+    if flag== None:
+        facet_stage["$facet"]["shared"][0]["$match"].pop("archived", None)
+
+
+    print(facet_stage)
+    
+    pipeline = [facet_stage]
+    return pipeline
+
 class conversation_context:
     def insert_conversation(conversation):
         conversation['archived'] = False
@@ -46,10 +92,21 @@ class conversation_context:
 
     def get_conversation_by_id(conversation_id, user_id):
         return conversations_collection.find_one({"_id":conversation_id , "user_id":user_id})
+
+    def get_conversation_by_id_test(conversation_id,  username, user_groups, user_roles):
+        pipeline  = conversation_pipeline(conversation_id, None, username, user_groups, user_roles)
+        results = conversations_collection.aggregate(pipeline)
+        return results
+        # return conversations_collection.find_one({"_id":conversation_id , "user_id":user_id})
     
     def get_conversations_by_user_email(user_id,flag):
         return conversations_collection.find({"user_id":user_id, "archived":flag}, {"messages":0, "last_node":0, "updated":0,"user_id":0,"root_message":0})
     
+    def get_conversations_by_user_email_test(user_id,flag, username, user_groups, user_roles):
+        pipeline  = conversation_pipeline(user_id,flag, username, user_groups, user_roles)
+        results = conversations_collection.aggregate(pipeline)
+        return loads(dumps(results))
+
     def update_conversation(conversation_id, conversation):
         conversations_collection.update_one({"_id":conversation_id}, {"$set":conversation})
 

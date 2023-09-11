@@ -412,11 +412,14 @@ class Persistence:
 
     def get_all_data_source(userName, userGroups, userRoles):
         try:
+            pg_schema = Globals.pg_schema
+            data_source_table = DataSourceEntity.__tablename__
             query = text(
-                f"SELECT * FROM aiguardrails.data_source "
+                f"SELECT * FROM {pg_schema}.{data_source_table} "
                 f"WHERE '{json.dumps(userRoles)}' @> (acl->'rid') "
                 f"OR '{json.dumps(userGroups)}' @> (acl->'gid') "
                 f"OR '{json.dumps([userName])}' @> (acl->'uid')"
+                f"OR '{json.dumps(userName)}' @> (acl->'owner')"
                 )
             connection = engine.connect()
             result = connection.execute(query)
