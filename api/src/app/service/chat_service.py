@@ -46,8 +46,8 @@ class chat_service:
     def chat_completion(data, current_user_id, token, filename=None, filepath=None):
         try:
             task = str(data["task"]) if "task" in data else None
-            task_params = data["taskParams"] if "taskParams" in data else None
-            document_id = task_params["documentId"] if "documentId" in task_params else None
+            task_params = data["task_params"] if "task_params" in data else None
+            document = task_params["document"] if "document" in task_params else None
             collection_name = task_params["collectionName"] if "collectionName" in task_params else None
             metadata = data["metadata"] if "metadata" in data else None
             
@@ -68,8 +68,8 @@ class chat_service:
             is_document_uploaded=False
             document_array=[]
 
-            if document_id and executor in ["summarize","extraction"]:
-                document_obj=Persistence.get_pgvector_document_by_id(document_id)
+            if document and executor in ["summarize","extraction"]:
+                document_obj=Persistence.get_pgvector_document_by_id(document['id'])
                 is_document_uploaded=True
                 filename=document_obj['metadata']['title']
                 document_array=document_obj['docs']
@@ -89,8 +89,8 @@ class chat_service:
                 prompt = str(data["message"]) if "message" in data else "Task."
                 title = None
 
-            if ('conversationId' in data and data['conversationId']):
-                conversation_id = data['conversationId']
+            if ('conversation_id' in data and data['conversation_id']):
+                conversation_id = data['conversation_id']
                 manage_conversation_context = True
 
             
@@ -150,8 +150,8 @@ class chat_service:
             elif (executor == "qaRetrieval"):
                 try:
                     is_document_selected=False
-                    if document_id:
-                        document_obj=Persistence.get_document_by_id(document_id)
+                    if document:
+                        document_obj=Persistence.get_document_by_id(document['id'])
                         title=document_obj['title']
                         is_document_selected=True
                         params['title']=title

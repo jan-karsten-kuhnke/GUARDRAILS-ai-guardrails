@@ -10,7 +10,7 @@ import DropDown from "../DropDown/DropDown";
 
 export const PrivateDocuments = () => {
   const {
-    state: { theme, tiles, collections, selectedCollection },
+    state: { theme, tiles, collections, selectedCollection, documents },
     dispatch: homeDispatch,
     handleNewConversation,
   } = useContext(HomeContext);
@@ -91,7 +91,10 @@ export const PrivateDocuments = () => {
 
   const handleExecuteOnUploadedDoc = (id: any, documentTitle: string, code: string) => {
     const params: any = tiles.find((tile) => tile.code === code)?.params;
-    executeOnUploadedDocRef.current = { id: id, title: `${params?.prompt}  ${documentTitle}`, code: code };
+    let document = documents.find((doc: any) => doc.id == id);
+
+    executeOnUploadedDocRef.current = { document: document, title: `${params?.prompt}  ${documentTitle}`, code: code };
+
     homeDispatch({ field: "isDocumentDialogOpen", value: false });
     homeDispatch({
       field: "selectedTile",

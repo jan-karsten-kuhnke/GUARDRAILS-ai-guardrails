@@ -1,4 +1,5 @@
 import { Conversation } from '@/types/chat';
+import { COLLECTION_PICKER, DOCUMENT_PICKER } from '../constants';
 
 export const updateConversation = (
   updatedConversation: Conversation,
@@ -101,4 +102,16 @@ export const updateMessagesAndConversation = (
     field: "selectedConversation",
     value: updatedConversation,
   });
+}
+
+export const getTaskParams = (inputs:any,collections:any) => {
+  const params:any = {};
+  inputs?.forEach((input: any) => {
+    if (input.type === DOCUMENT_PICKER) {
+      params["document"] = undefined;
+    } else if (input.type === COLLECTION_PICKER) {
+      params["collectionName"] = collections[0]?.name;
+    }
+  })
+  return params;
 }

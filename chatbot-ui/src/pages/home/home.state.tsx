@@ -31,7 +31,6 @@ export interface HomeInitialState {
   selectedCollection: string;
   showOnboardingGuide: boolean;
   documents:document[];
-  selectedDocument:document | undefined;
 }
 
 export const initialState: HomeInitialState = {
@@ -59,5 +58,4 @@ export const initialState: HomeInitialState = {
   selectedTile: {},
   showOnboardingGuide: false,
   documents:[],
-  selectedDocument:undefined
 };
