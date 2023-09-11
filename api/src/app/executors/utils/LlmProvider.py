@@ -33,8 +33,15 @@ class LlmProvider:
                     public_llm = OpenAI(callbacks=callbacks, verbose=False, temperature=temp,max_tokens=max_output_token)
         elif model_type == "VertexAI":
             if use_chat_model:
-                public_llm=ChatVertexAI(max_output_tokens=max_output_token, verbose=False)
+                if increase_model_token_limit:
+                    public_llm=ChatVertexAI(max_output_tokens=max_output_token, verbose=False, model_name="chat-bison-32k")    
+                else: 
+                    public_llm=ChatVertexAI(max_output_tokens=max_output_token, verbose=False)
             else:    
-                public_llm = VertexAI(max_output_tokens=max_output_token, verbose=False)
+                if increase_model_token_limit:
+                    public_llm=VertexAI(max_output_tokens=max_output_token, verbose=False, model_name="chat-bison-32k")    
+                else: 
+                    public_llm=VertexAI(max_output_tokens=max_output_token, verbose=False)
+                
         
         return public_llm
