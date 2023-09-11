@@ -11,16 +11,6 @@ from PIL import Image
 import io
 
 class DocumentAILoader:
-
-    # Get the current directory where your Python script is located.
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    
-    # Construct the full path to your JSON key file.
-    key_file_path = os.path.join(current_directory, "bonedge-ml-e1153ee50759.json")
-    
-    # Set the GOOGLE_APPLICATION_CREDENTIALS environment variable.
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_file_path
-    
     def __init__(
         self, file_path: str, 
         project_id: str,
