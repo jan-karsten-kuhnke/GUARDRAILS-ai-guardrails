@@ -46,12 +46,10 @@ class chat_service:
     def chat_completion(data, current_user_id, token, filename=None, filepath=None):
         try:
             task = str(data["task"]) if "task" in data else None
-            task_params = data["params"] if "params" in data else None
-            document_id = task_params["documentId"] if "documentId" in task_params else None
+            task_params = data["task_params"] if "task_params" in data else None
+            document = task_params["document"] if "document" in task_params else None
             collection_name = task_params["collectionName"] if "collectionName" in task_params else None
-            qa_document_id=task_params["qaDocumentId"] if "qaDocumentId" in task_params else None
             metadata = data["metadata"] if "metadata" in data else None
-            qa_document_id = task_params["qaDocumentId"] if "qaDocumentId" in task_params else None
             
             uploaded_by = current_user_id
             uploaded_at = str(datetime.now())
@@ -70,11 +68,16 @@ class chat_service:
             is_document_uploaded=False
             document_array=[]
 
-            if document_id:
-                document_obj=Persistence.get_pgvector_document_by_id(document_id)
+            if document and executor in ["summarize","extraction"]:
+                document_obj=Persistence.get_pgvector_document_by_id(document['id'])
                 is_document_uploaded=True
                 filename=document_obj['metadata']['title']
                 document_array=document_obj['docs']
+
+
+                
+            
+            
 
             conversation_id = None
             manage_conversation_context = False
@@ -90,6 +93,8 @@ class chat_service:
                 conversation_id = data['conversation_id']
                 manage_conversation_context = True
 
+            
+            
             chat_service.update_conversation(
                 conversation_id, prompt, 'user', current_user_id, task, title, task_params, metadata)
 
@@ -145,8 +150,8 @@ class chat_service:
             elif (executor == "qaRetrieval"):
                 try:
                     is_document_selected=False
-                    if qa_document_id:
-                        document_obj=Persistence.get_document_by_id(qa_document_id)
+                    if document:
+                        document_obj=Persistence.get_document_by_id(document['id'])
                         title=document_obj['title']
                         is_document_selected=True
                         params['title']=title
