@@ -11,7 +11,6 @@ from utils.apiResponse import ApiResponse
 from flask import jsonify
 from service.ingestion_service import IngestionService
 import logging
-from sqlalchemy.sql import exists
 
 
 from database.postgres import engine, vector_store_engine, Session , Vector_Session 

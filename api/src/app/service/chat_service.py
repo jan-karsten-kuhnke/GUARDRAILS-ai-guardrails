@@ -283,7 +283,7 @@ class chat_service:
         userName = get_current_user_name()
         userGroups = get_current_user_groups()
         userRoles = get_current_user_roles()
-        cursor = conversation_context.get_conversations_by_user_email_test(
+        cursor = conversation_context.get_conversations_by_user_email(
             user_id, flag, userName, userGroups, userRoles)
         conversations = {}
         for conversation in cursor:
@@ -295,7 +295,7 @@ class chat_service:
         userName = get_current_user_name()
         userGroups = get_current_user_groups()
         userRoles = get_current_user_roles()
-        cursor = conversation_context.get_conversation_by_id_test(conversation_id, userName, userGroups, userRoles)
+        cursor = conversation_context.get_conversation_by_id(conversation_id, userName, userGroups, userRoles)
         return list(cursor)[0]['owned']
     
     def archive_all_conversations(user_id):

@@ -90,19 +90,12 @@ class conversation_context:
         result = conversations_collection.insert_one(conversation) 
         return result.inserted_id
 
-    def get_conversation_by_id(conversation_id, user_id):
-        return conversations_collection.find_one({"_id":conversation_id , "user_id":user_id})
-
-    def get_conversation_by_id_test(conversation_id,  username, user_groups, user_roles):
+    def get_conversation_by_id(conversation_id,  username, user_groups, user_roles):
         pipeline  = conversation_pipeline(conversation_id, None, username, user_groups, user_roles)
         results = conversations_collection.aggregate(pipeline)
         return results
-        # return conversations_collection.find_one({"_id":conversation_id , "user_id":user_id})
     
-    def get_conversations_by_user_email(user_id,flag):
-        return conversations_collection.find({"user_id":user_id, "archived":flag}, {"messages":0, "last_node":0, "updated":0,"user_id":0,"root_message":0})
-    
-    def get_conversations_by_user_email_test(user_id,flag, username, user_groups, user_roles):
+    def get_conversations_by_user_email(user_id,flag, username, user_groups, user_roles):
         pipeline  = conversation_pipeline(user_id,flag, username, user_groups, user_roles)
         results = conversations_collection.aggregate(pipeline)
         return loads(dumps(results))
