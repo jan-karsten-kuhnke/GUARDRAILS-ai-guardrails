@@ -24,13 +24,13 @@ class Conversation:
         model_type = params['modelType']
         curr_date = datetime.today()
         current_date = curr_date.strftime("%Y-%m-%d %H:%M:%S")
-                
+        llm_details = params["llm"]      
         memory = ConversationBufferMemory(memory_key="chat_history",return_messages=True)
         
         for history in chat_history:
             memory.save_context({"input": history[0]}, {"output": history[1]})
         
-        llm=LlmProvider.get_llm(class_name= __class__.__name__,model_type=model_type, is_private=is_private, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
+        llm=LlmProvider.get_llm(llm_details,is_private,)
         
         _DEFAULT_TEMPLATE = params['promptTemplate']
         _DEFAULT_TEMPLATE = _DEFAULT_TEMPLATE.replace("currDate", current_date)
