@@ -1,4 +1,4 @@
-import { FC, useContext, useState, useEffect } from "react";
+import { FC, useContext, useEffect } from "react";
 import { ChangeEvent } from "react";
 import { IconUpload } from "@tabler/icons-react";
 import { Message } from "@/types/chat";
@@ -26,10 +26,10 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
       theme,
       selectedTile,
       collections,
-      selectedCollection,
       documents,
-      selectedDocument,
+      selectedConversation
     },
+    handleUpdateSelectedConversation,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -81,7 +81,14 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
   }, []);
 
   const handleCollectionSelect = (name: any) => {
-    homeDispatch({ field: "selectedCollection", value: name });
+    let isDocumentPicker = false;
+    inputs.forEach((input) => {
+      if (input.key === "document" && input.type === "documentPicker") {
+        isDocumentPicker = true;
+      }
+    });
+    handleUpdateSelectedConversation({ key: "task_params", value: { ...selectedConversation?.task_params, collectionName: name, ...isDocumentPicker ? { document: undefined } : {} } })
+
     getDocumentsByCollectionName(name).then((res) => {
       if (res?.data?.success && res?.data?.data?.length) {
         homeDispatch({ field: "documents", value: res?.data?.data });
@@ -91,11 +98,14 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
     });
   };
   const handleDocumentSelect = (id: any) => {
-    if (id == "All") {
-      homeDispatch({ field: "selectedDocument", value: undefined });
+    if (id == undefined) {
+    handleUpdateSelectedConversation({ key: "task_params", value: { ...selectedConversation?.task_params, document: undefined } })
       return;
     }
-    homeDispatch({ field: "selectedDocument", value: id });
+    const documentSelected = documents.find((document: any) => document.id === id);
+    if(documentSelected){
+    handleUpdateSelectedConversation({ key: "task_params", value: { ...selectedConversation?.task_params, document: documentSelected } })
+    }
   };
 
   return (
@@ -146,7 +156,7 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
                   </div>
                   <FormControl sx={{ minWidth: 120, width: "100%" }} size="small">
                     <DropDown data={collectionData}
-                      value={selectedCollection}
+                      value={selectedConversation?.task_params?.collectionName ? selectedConversation?.task_params?.collectionName : "None"}
                       label={"Select Collection"}
                       onChange={(collection) => {
                         handleCollectionSelect(collection)
@@ -166,7 +176,7 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
                   </div>
                   <FormControl sx={{ minWidth: 120, width: "100%" }} size="small">
                     <DropDown data={documentData}
-                      value={selectedDocument ? selectedDocument : "None"}
+                      value={selectedConversation?.task_params?.document ? selectedConversation?.task_params?.document?.id : "None"}
                       label={"All"}
                       defaultSelectable={true}
                       onChange={(document) => {

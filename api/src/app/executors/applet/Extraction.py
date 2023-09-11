@@ -18,7 +18,7 @@ class Extraction:
 
     def execute(self,filepath,document_array,is_document_uploaded, params):
         start_time = time.time()
-        model_type = params['modelType']
+        llm_details=params['llm']
 
         if is_document_uploaded:
             loader = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
@@ -44,7 +44,7 @@ class Extraction:
             "required": []
         }
 
-        llm = LlmProvider.get_llm(class_name= __class__.__name__,model_type=model_type, is_private=False, use_chat_model=True, max_output_token=1000, increase_model_token_limit=True)
+        llm = LlmProvider.get_llm(class_name= __class__.__name__,is_private=False, llm_details=llm_details)
 
         chain = create_extraction_chain(schema=schema, llm=llm)
 

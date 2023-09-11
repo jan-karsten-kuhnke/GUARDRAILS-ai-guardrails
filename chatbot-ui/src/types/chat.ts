@@ -8,7 +8,6 @@ export interface Message {
 
 export type Role = 'assistant' | 'user' | 'guardrails';
 export interface Conversation {
-  model: string;
   id: string;
   title: string;
   messages: Message[];
@@ -17,4 +16,5 @@ export interface Conversation {
   folderId: string | null;
   archived: boolean;
   task: string;
+  task_params: any;
 }

@@ -21,6 +21,10 @@ export interface HomeContextProps {
     conversation: Conversation,
     data: KeyValuePair,
   ) => void;
+  handleUpdateSelectedConversation: (
+    data: KeyValuePair,
+  ) => void;
+  
   handleIsPrivate:(isPrivate:boolean)=>void;
   handleSelectedTile:(tile:Tile)=>void;
 }
