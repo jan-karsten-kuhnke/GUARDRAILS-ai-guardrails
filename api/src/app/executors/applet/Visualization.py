@@ -29,8 +29,7 @@ class Visualization:
     def execute(self, query, is_private, chat_history, params):
         try:
             start_time = time.time()
-            model_type = params['modelType']
-              
+            llm_details=params['llm']
             sources = []
 
             data_source_id = params['dataSourceId']
@@ -38,7 +37,7 @@ class Visualization:
 
             db_url = Encryption.decrypt(data_source['connection_string'])
             
-            llm=LlmProvider.get_llm(class_name= __class__.__name__,model_type=model_type, is_private=is_private,use_chat_model=True,max_output_token=1000,increase_model_token_limit=True)
+            llm=LlmProvider.get_llm(class_name= __class__.__name__,is_private=is_private,llm_details=llm_details)
             
             sql_applet_code=params['sqlAppletCode']
             

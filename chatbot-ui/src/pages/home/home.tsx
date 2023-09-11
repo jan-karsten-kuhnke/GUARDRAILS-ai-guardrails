@@ -26,6 +26,7 @@ import { Prompt } from "@/types/prompt";
 import { Tile } from "@/types/tiles";
 import { EulaDialog } from "@/components/EulaDialog/EulaDialog";
 import { ThemeProvider, createTheme } from "@mui/material";
+import { getTaskParams } from "@/utils/app/conversation";
 
 export const Home = () => {
   const contextValue = useCreateReducer<HomeInitialState>({
@@ -45,6 +46,8 @@ export const Home = () => {
       refreshConversations,
       isArchiveView,
       showOnboardingGuide,
+      selectedTile,
+      collections
     },
     dispatch,
   } = contextValue;
@@ -67,6 +70,7 @@ export const Home = () => {
         name: "New Conversation",
         messages: [],
         folderId: null,
+        task_params:{}
       },
     });
 
@@ -121,6 +125,7 @@ export const Home = () => {
       title: "New Conversation",
       messages: [],
       folderId: null,
+      task_params: getTaskParams(selectedTile?.params?.inputs,collections)
     };
     dispatch({
       field: "conversations",
@@ -247,12 +252,31 @@ export const Home = () => {
     });
   };
 
+  const handleUpdateSelectedConversation = (
+    data: KeyValuePair
+  ) => {
+    const updatedConversation = {
+      ...selectedConversation,
+      [data.key]: data.value,
+    };
+    dispatch({ field: "selectedConversation", value: updatedConversation });
+    dispatch({
+      field: "conversations",
+      value: conversations.map((c) =>
+        c.id === updatedConversation.id ? updatedConversation : c
+      ),
+    });
+  
+  };
+
+
   const handleIsPrivate = (isPrivate: boolean) => {
     dispatch({ field: "isPrivate", value: isPrivate });
   };
 
   const handleSelectedTile = (tile: Tile) => {
     dispatch({ field: "selectedTile", value: tile });
+    handleUpdateSelectedConversation({key:"task_params",value:getTaskParams(tile?.params?.inputs,collections)})
   };
 
   return (
@@ -267,6 +291,7 @@ export const Home = () => {
         handleUpdateConversation,
         handleIsPrivate,
         handleSelectedTile,
+        handleUpdateSelectedConversation
       }}
     >
       <ThemeProvider theme={muiComponentTheme}>

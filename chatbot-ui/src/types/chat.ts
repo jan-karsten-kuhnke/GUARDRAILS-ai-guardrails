@@ -8,7 +8,6 @@ export interface Message {
 
 export type Role = 'assistant' | 'user' | 'guardrails';
 export interface Conversation {
-  model: string;
   id: string;
   title: string;
   messages: Message[];

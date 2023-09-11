@@ -27,7 +27,7 @@ import {
   requestApproval,
   executeOnDoc,
 } from "@/services";
-import { parseChunk, updateMessagesAndConversation} from "@/utils/app/conversation";
+import { getTaskParams, parseChunk, updateMessagesAndConversation} from "@/utils/app/conversation";
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -54,7 +54,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       selectedTile,
       tiles,
       selectedCollection,
-      selectedDocument
     },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
@@ -76,7 +75,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       message: Message,
       deleteCount = 0,
       formData: FormData = new FormData(),
-      documentId: string | undefined = undefined
+      document: any = undefined
     ) => {
       if (containsOnlyWhitespacesOrNewlines(message.content)) return;
       message.content = message.content.trim();
@@ -127,7 +126,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         let response: any;
         //params for selected tiles
         let sendCollectionName = false
-        let sendQaDocumentId = false
+        let sendDocumentData = false
 
         selectedTile?.params?.inputs?.forEach((item:any) => {
           const { type } = item;
@@ -135,16 +134,12 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             sendCollectionName = true
           }
           else if (type === DOCUMENT_PICKER) {
-            sendQaDocumentId = true
+            sendDocumentData = true
           }
         })
-
         //renamed qaDocumentId to documentId
-        let params: any = {
-          ...documentId ? { documentId } : {},
-          ...(selectedCollection && sendCollectionName) ? { collectionName: selectedCollection } : {},
-          ...(selectedDocument && sendQaDocumentId) ? { qaDocumentId: selectedDocument.id } : {},
-          ...(selectedDocument && sendQaDocumentId) ? { documentName: selectedDocument.title } : {},
+        let task_params: any = {
+          ...document?.id ? { document } : selectedConversation?.task_params,
         };
 
         try {
@@ -157,19 +152,19 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               }
             );
         
-            if (documentId) { //if selectedTile.params?.useExecuteOnDoc is true
+            if (document) { //if selectedTile.params?.useExecuteOnDoc is true
               response = await fetchPrompt(
                 chatBody.message,
                 selectedConversation.id,
                 selectedTask,
                 isPrivate,
-                params
+                task_params
               );
             } else {
               const payload = {
                 conversation_id: selectedConversation.id,
                 task: selectedTask,
-                params,
+                task_params,
               };
               formData.append("data", JSON.stringify(payload));
               response = await executeOnDoc(formData);
@@ -180,7 +175,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               selectedConversation.id,
               selectedTask,
               isPrivate,
-              params
+              task_params
             );
           }
         } catch (err:any) {
@@ -232,7 +227,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         homeDispatch({ field: "messageIsStreaming", value: false });
       }
     },
-    [conversations, selectedConversation, stopConversationRef, isPrivate, selectedTile, selectedCollection, selectedDocument]
+    [conversations, selectedConversation, stopConversationRef, isPrivate, selectedTile, selectedCollection]
   );
 
   const handleRequestApproval = async (conversationId: string) => {
@@ -307,7 +302,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         userActionRequired: false,
         msg_info: null,
       };
-      handleSend(message, 0, undefined, executeOnUploadedDocRef.current.id)
+      handleSend(message, 0, undefined, executeOnUploadedDocRef.current.document)
       executeOnUploadedDocRef.current = null;
     }
 
@@ -358,6 +353,24 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       }
     }
   },[selectedConversation,selectedTile]);
+
+  // useEffect(() => {
+  //   const foundTile = tiles.find((tile) => tile.code === selectedConversation?.task);
+  //   if (foundTile) {
+  //     handleSelectedTile(foundTile);
+  //   }
+
+  //   if(selectedConversation?.task_params && selectedConversation?.task_params?.collectionName){
+  //     homeDispatch({field: "selectedCollection", value: selectedConversation?.task_params?.collectionName})
+  //   }
+
+  //   if(selectedConversation?.task_params && selectedConversation?.task_params?.documentId){
+  //     homeDispatch({field: "selectedDocument", value: {id:selectedConversation?.task_params?.documentId, title:selectedConversation?.task_params?.documentName}})
+  //   }
+  //   else{
+  //     homeDispatch({field: "selectedDocument", value: undefined})
+  //   }
+  // },[selectedConversation])
 
   return (
     <div className={`relative flex-1 overflow-hidden ${theme.chatBackground}`}>
