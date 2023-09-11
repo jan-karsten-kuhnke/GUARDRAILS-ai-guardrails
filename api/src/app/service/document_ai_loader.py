@@ -10,18 +10,7 @@ import logging
 from PIL import Image
 import io
 
-class CustomPDFLoader:
-
-    # Get the current directory where your Python script is located.
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    logging.info(f"current_directory: {current_directory}")
-    
-    # Construct the full path to your JSON key file.
-    key_file_path = os.path.join(current_directory, "bonedge-ml-e1153ee50759.json")
-    logging.info(f"key_file_path: {key_file_path}")
-    
-    # Set the GOOGLE_APPLICATION_CREDENTIALS environment variable.
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_file_path
+class DocumentAILoader:
     
     def __init__(
         self, file_path: str, 

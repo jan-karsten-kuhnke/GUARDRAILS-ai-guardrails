@@ -42,6 +42,7 @@ def get_document(document_id):
 @oidc.accept_token(require_token=True)
 def create_document():
     files = request.files.getlist('files')
+    ingest_with_google = request.form.get('ingestWithGoogle', default=False, type=bool)
     try:
         collection_name = request.form['collectionName']
         if not collection_name or type(collection_name) != str:
@@ -58,7 +59,7 @@ def create_document():
     for file in files:
         file.save(os.path.join(temp_dir_name, file.filename))
     
-    response = DocumentService.create_documents(location=temp_dir_name,collection_name = collection_name,uploaded_by=uploaded_by,uploaded_at=uploaded_at,metadata=metadata)
+    response = DocumentService.create_documents(location=temp_dir_name,collection_name = collection_name,uploaded_by=uploaded_by,uploaded_at=uploaded_at, ingest_with_google=ingest_with_google, metadata=metadata)
     shutil.rmtree(temp_dir_name)
     return response
 
