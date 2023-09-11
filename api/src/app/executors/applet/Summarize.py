@@ -18,16 +18,16 @@ class Summarize:
     def execute(self,filepath,document_array,is_document_uploaded, params):
         
         start_time = time.time()
-        model_type = params['modelType']
+        llm_details=params['llm']
         map_prompt_template = params['mapPromptTemplate']
         reduce_prompt_template = params['reducePromptTemplate']
         chain_type = params['chainType']
         chunk_config=params['chunk_config']
         chunk_overlap = chunk_config['chunkOverlap']
         chunk_size = chunk_config['chunkSize']
-        
-        llm=LlmProvider.get_llm(class_name= __class__.__name__,model_type=model_type, is_private=False, use_chat_model=False, max_output_token=1000, increase_model_token_limit=False)
-            
+      
+        llm=LlmProvider.get_llm(class_name= __class__.__name__,is_private=False, llm_details=llm_details)
+       
         docs=[]
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
         if is_document_uploaded:
