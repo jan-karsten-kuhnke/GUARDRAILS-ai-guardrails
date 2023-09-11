@@ -35,16 +35,11 @@ class DocumentAILoader:
         self.parser = PyPDFParser(password=password)
 
     def load(self) -> List[Document]:
-        # project_id = "bonedge-ml"
-        # processor_id = "8c088965419fb93a" #form processor
-
         pdf_document = fitz.open(self.file_path)
         docs = []
         for page_number in range(pdf_document.page_count):
             page = pdf_document.load_page(page_number)
             image_matrix = page.get_pixmap() # render page to an image
-        
-            # roothtml = self.process_document(project_id, processor_id, image_matrix)
             
             # Convert pixmap to bytes
             image_bytes = self.convert_pixmap_to_bytes(image_matrix)
@@ -66,7 +61,6 @@ class DocumentAILoader:
         return image_bytes
 
     def process_document(self, image_data):
-        # ocrprocessor_id = "78ab45671a5cc21b" #form processor
         roothtml = ""
         # Initialize the Document AI client
         client = documentai.DocumentProcessorServiceClient()
