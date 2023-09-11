@@ -11,6 +11,15 @@ from PIL import Image
 import io
 
 class DocumentAILoader:
+
+    # Get the current directory where your Python script is located.
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    
+    # Construct the full path to your JSON key file.
+    key_file_path = os.path.join(current_directory, "bonedge-ml-e1153ee50759.json")
+    
+    # Set the GOOGLE_APPLICATION_CREDENTIALS environment variable.
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_file_path
     
     def __init__(
         self, file_path: str, 
@@ -19,7 +28,6 @@ class DocumentAILoader:
         ocrprocessor_id: str, 
         password: Optional[Union[str, bytes]] = None
     ) -> None:
-        logging.info("inside init method-----------")
         """Initialize with a file path."""
         self.file_path = file_path
         self.project_id = project_id
@@ -35,6 +43,7 @@ class DocumentAILoader:
         self.parser = PyPDFParser(password=password)
 
     def load(self) -> List[Document]:
+        
         pdf_document = fitz.open(self.file_path)
         docs = []
         for page_number in range(pdf_document.page_count):
@@ -45,7 +54,7 @@ class DocumentAILoader:
             image_bytes = self.convert_pixmap_to_bytes(image_matrix)
             roothtml = self.process_document(image_bytes)
             
-            docs.append(Document(metadata={"source": self.file_path, "page_number":0}, page_content=roothtml))
+            docs.append(Document(metadata={"source": self.file_path, "page_number": page_number + 1}, page_content=roothtml))
         return docs
     
     def convert_pixmap_to_bytes(self, pixmap):
@@ -79,7 +88,7 @@ class DocumentAILoader:
         # Read the document and parse tables
         formdocument = formresult.document
         ocrdocument = ocrresult.document
-        roothtml = self.extract_and_save_text(formdocument,ocrdocument) # file_path = output_images\\page_1.png
+        roothtml = self.extract_and_save_text(formdocument,ocrdocument)
 
         return roothtml
         

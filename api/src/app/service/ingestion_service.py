@@ -42,14 +42,13 @@ FILE_MAPPING = {
     ".html": (UnstructuredHTMLLoader, {}),
     ".md": (UnstructuredMarkdownLoader, {}),
     ".odt": (UnstructuredODTLoader, {}),
-    # ".pdf": (CustomPDFLoader, {}),
     ".ppt": (UnstructuredPowerPointLoader, {}),
     ".pptx": (UnstructuredPowerPointLoader, {}),
     ".txt": (TextLoader, {"encoding": "utf8"}),
 }
 
 class  IngestionService :
-    def ingest_file(self,file_path: str,collection_name,uploaded_by,uploaded_at,ingest_with_google, metadata={}):
+    def ingest_file(self,file_path: str,collection_name,uploaded_by,uploaded_at,ingest_with_google = False, metadata={}):
         embeddings = HuggingFaceEmbeddings()
 
         CONNECTION_STRING = Globals.VECTOR_STORE_DB_URI
