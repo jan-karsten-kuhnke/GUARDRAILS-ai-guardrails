@@ -148,7 +148,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             toast.loading(
               "Summarization might be a time taking process depending on the size of your document",
               {
-                position: "bottom-right",
+                position: "bottom-center",
                 duration: 5000,
               }
             );
