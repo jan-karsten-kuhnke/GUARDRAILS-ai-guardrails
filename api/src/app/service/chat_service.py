@@ -133,6 +133,7 @@ class chat_service:
                     if(not is_document_uploaded):
                         DocumentService.create_document(filename,filepath,task_params,uploaded_by,uploaded_at)
                     executor_instance = Extraction()
+                    params['collection_name']=collection_name
                     res= executor_instance.execute(filepath=filepath,document_array=document_array,is_document_uploaded=is_document_uploaded, params=params)
 
                 except Exception as e:

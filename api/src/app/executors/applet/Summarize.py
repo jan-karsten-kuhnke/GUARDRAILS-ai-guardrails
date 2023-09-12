@@ -18,7 +18,8 @@ class Summarize:
     def execute(self,filepath,document_array,is_document_uploaded, params):
         
         start_time = time.time()
-        llm_details=params['llm']
+        map_llm_details=params['map_llm']
+        reduce_llm_details=params['reduce_llm']
         map_prompt_template = params['mapPromptTemplate']
         reduce_prompt_template = params['reducePromptTemplate']
         chain_type = params['chainType']
@@ -26,7 +27,8 @@ class Summarize:
         chunk_overlap = chunk_config['chunkOverlap']
         chunk_size = chunk_config['chunkSize']
       
-        llm=LlmProvider.get_llm(class_name= __class__.__name__,is_private=False, llm_details=llm_details)
+        map_llm=LlmProvider.get_llm(class_name= __class__.__name__,is_private=False, llm_details=map_llm_details)
+        reduce_llm=LlmProvider.get_llm(class_name= __class__.__name__,is_private=False, llm_details=reduce_llm_details)
        
         docs=[]
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
@@ -49,7 +51,7 @@ class Summarize:
         
         MAP_PROMPT = PromptTemplate(template=map_prompt_template, input_variables=["text"])
         REDUCE_PROMPT = PromptTemplate(template=reduce_prompt_template, input_variables=["text"])
-        chain = load_summarize_chain(llm, chain_type=chain_type,  map_prompt=MAP_PROMPT, combine_prompt=REDUCE_PROMPT,verbose=True)
+        chain = load_summarize_chain(map_llm, chain_type=chain_type,  map_prompt=MAP_PROMPT, combine_prompt=REDUCE_PROMPT,verbose=True, reduce_llm = reduce_llm)
         result = chain({"input_documents": docs}, return_only_outputs=True)
         
         response=AppletResponse(result["output_text"], [])
