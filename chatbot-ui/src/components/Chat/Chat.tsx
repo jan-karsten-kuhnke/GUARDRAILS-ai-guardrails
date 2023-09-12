@@ -75,7 +75,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       message: Message,
       deleteCount = 0,
       formData: FormData = new FormData(),
-      document: any = undefined
+      task_params: any = undefined
     ) => {
       if (containsOnlyWhitespacesOrNewlines(message.content)) return;
       message.content = message.content.trim();
@@ -110,6 +110,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           updatedConversation = {
             ...selectedConversation,
             messages: [...selectedConversation.messages, message],
+            ... task_params ? {task_params} : {}
           };
         }
         homeDispatch({
@@ -137,11 +138,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             sendDocumentData = true
           }
         })
-        //renamed qaDocumentId to documentId
-        let task_params: any = {
-          ...document?.id ? { document } : selectedConversation?.task_params,
-        };
 
+        if(!task_params)
+        {
+          task_params = selectedConversation?.task_params
+        }
         try {
           if (selectedTile.params?.useExecuteOnDoc) {
             toast.loading(
@@ -152,7 +153,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               }
             );
         
-            if (document) { //if selectedTile.params?.useExecuteOnDoc is true
+            if (task_params?.document) { //if selectedTile.params?.useExecuteOnDoc is true
               response = await fetchPrompt(
                 chatBody.message,
                 selectedConversation.id,
@@ -229,7 +230,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     },
     [conversations, selectedConversation, stopConversationRef, isPrivate, selectedTile, selectedCollection]
   );
-
   const handleRequestApproval = async (conversationId: string) => {
     homeDispatch({ field: "loading", value: true });
     homeDispatch({ field: "messageIsStreaming", value: true });
@@ -302,10 +302,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         userActionRequired: false,
         msg_info: null,
       };
-      handleSend(message, 0, undefined, executeOnUploadedDocRef.current.document)
+      handleSend(message, 0, undefined, executeOnUploadedDocRef.current.task_params)
       executeOnUploadedDocRef.current = null;
     }
-
   }, [executeOnUploadedDocRef.current])
 
   useEffect(() => {
@@ -353,24 +352,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       }
     }
   },[selectedConversation,selectedTile]);
-
-  // useEffect(() => {
-  //   const foundTile = tiles.find((tile) => tile.code === selectedConversation?.task);
-  //   if (foundTile) {
-  //     handleSelectedTile(foundTile);
-  //   }
-
-  //   if(selectedConversation?.task_params && selectedConversation?.task_params?.collectionName){
-  //     homeDispatch({field: "selectedCollection", value: selectedConversation?.task_params?.collectionName})
-  //   }
-
-  //   if(selectedConversation?.task_params && selectedConversation?.task_params?.documentId){
-  //     homeDispatch({field: "selectedDocument", value: {id:selectedConversation?.task_params?.documentId, title:selectedConversation?.task_params?.documentName}})
-  //   }
-  //   else{
-  //     homeDispatch({field: "selectedDocument", value: undefined})
-  //   }
-  // },[selectedConversation])
 
   return (
     <div className={`relative flex-1 overflow-hidden ${theme.chatBackground}`}>
