@@ -32,6 +32,7 @@ class conversation_obj(TypedDict):
     task: str
     metadata: dict
     task_params: dict
+    acl:dict
 
 
 class message_obj(TypedDict):
@@ -43,6 +44,11 @@ class message_obj(TypedDict):
     msg_info: Optional[dict]
     task: str
 
+class acl_obj(TypedDict):
+    uid: list
+    gid: list
+    rid: list
+    owner:str
 
 class chat_service:
 
@@ -226,6 +232,13 @@ class chat_service:
             msg_info=msg_info
         )
 
+        acl = acl_obj(
+            uid=[email],
+            gid=[],
+            rid=[],
+            owner=email
+        )
+
         messages = [message]
         conversation = conversation_obj(
             _id=id if id else str(uuid.uuid4()),
@@ -238,7 +251,8 @@ class chat_service:
             state='active',
             task=task,
             task_params=task_params,
-            metadata=metadata
+            metadata=metadata,
+            acl=acl
         )
         new_conversation_id = conversation_context.insert_conversation(
             conversation)
