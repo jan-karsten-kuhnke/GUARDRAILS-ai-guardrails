@@ -52,8 +52,6 @@ const Sidebar = <T,>({
     state: { theme, selectedConversation, selectedTile, tiles },   
   } = useContext(HomeContext);
   const [taskTitle, setTaskTitle] = useState<string>('');
-  const [collectionName, setCollectionName] = useState<string | null>(null);
-  const [qaDocumentTitle, setQaDocumentTitle] = useState<string | null>(null);
 
   const allowDrop = (e: any) => {
     e.preventDefault();
@@ -68,11 +66,10 @@ const Sidebar = <T,>({
   };
 
   useEffect(() => {
+
     // Checking for new chat
     if(selectedConversation?.messages.length === 0){
       setTaskTitle(selectedTile.title);
-      setCollectionName('');
-      setQaDocumentTitle('');
     }
     // for an existing chat
     else{
@@ -80,10 +77,6 @@ const Sidebar = <T,>({
       if(selectedTask){
         setTaskTitle(selectedTask.title);
       }
-    }
-    if (selectedConversation && selectedConversation.task_params) {
-      setCollectionName(selectedConversation?.task_params.collectionName);
-      setQaDocumentTitle(selectedConversation.task_params.documentName);
     }
   },[selectedConversation,selectedTile]);
 
@@ -170,20 +163,20 @@ const Sidebar = <T,>({
                       {taskTitle}
                     </div>
                   </div>
-                  {collectionName &&
+                  {selectedConversation?.task_params?.collectionName &&
                     <div className={`text-[12px] flex w-full item-center gap-2 py-1 ${theme.botMsgTextColorTheme}`}>
                       <IconBoxMultiple size={20} />
                       <span className="font-semibold">Collection: </span>
                       <div className="w-full">
-                        {collectionName}
+                        {selectedConversation?.task_params?.collectionName}
                       </div>
                     </div>}
-                  {qaDocumentTitle &&
+                  {selectedConversation?.task_params?.document?.title &&
                     <div className={`text-[12px] flex w-full item-center gap-2 py-1 ${theme.botMsgTextColorTheme}`}>
                       <IconFileDescription size={20} />
                       <span className="font-semibold">Document:</span>
                       <div className=" w-full">
-                        {qaDocumentTitle}
+                        {selectedConversation?.task_params?.document?.title}
                       </div>
                     </div>}
                 </>

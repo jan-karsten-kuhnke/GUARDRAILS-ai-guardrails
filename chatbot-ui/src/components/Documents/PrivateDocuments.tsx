@@ -10,7 +10,7 @@ import DropDown from "../DropDown/DropDown";
 
 export const PrivateDocuments = () => {
   const {
-    state: { theme, tiles, collections, selectedCollection },
+    state: { theme, tiles, collections, selectedCollection, documents },
     dispatch: homeDispatch,
     handleNewConversation,
   } = useContext(HomeContext);
@@ -91,7 +91,10 @@ export const PrivateDocuments = () => {
 
   const handleExecuteOnUploadedDoc = (id: any, documentTitle: string, code: string) => {
     const params: any = tiles.find((tile) => tile.code === code)?.params;
-    executeOnUploadedDocRef.current = { id: id, title: `${params?.prompt}  ${documentTitle}`, code: code };
+    let document = documents.find((doc: any) => doc.id == id);
+
+    executeOnUploadedDocRef.current = { document: document, title: `${params?.prompt}  ${documentTitle}`, code: code };
+
     homeDispatch({ field: "isDocumentDialogOpen", value: false });
     homeDispatch({
       field: "selectedTile",
@@ -108,7 +111,7 @@ export const PrivateDocuments = () => {
   }));
 
   const taskData = tiles
-    .filter((tile: any) => tile?.params?.executor === "summarize" || tile?.params?.executor === "extraction")
+    .filter((tile: any) => (tile?.params?.executor === "summarize" || tile?.params?.executor === "extraction") &&  tile.has_access)
     .map((tile: any) => ({
       value: tile?.code,
       title: tile?.title

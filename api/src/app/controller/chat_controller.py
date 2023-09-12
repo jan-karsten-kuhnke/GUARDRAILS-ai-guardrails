@@ -17,7 +17,7 @@ def chat_completion():
     try:
         data = request.get_json(silent=True)
         data.setdefault('isOverride', False)
-        required_fields = ['message', 'conversation_id', 'task', 'params']
+        required_fields = ['message', 'conversation_id', 'task', 'task_params']
         validation_result = validate_fields(data, required_fields)
         if validation_result:
             return validation_result
@@ -99,7 +99,7 @@ def execute_on_document():
     try:
         data = json.loads(request.form['data'])
         data.setdefault('isOverride', False)
-        required_fields = ['conversation_id', 'task', 'params']
+        required_fields = ['conversation_id', 'task', 'task_params']
         validation_result = validate_fields(data, required_fields)
         if validation_result:
             return validation_result

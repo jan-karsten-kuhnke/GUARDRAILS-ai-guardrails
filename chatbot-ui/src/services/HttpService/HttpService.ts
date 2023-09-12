@@ -32,10 +32,10 @@ _axios.interceptors.response.use(handleSuccess, handleError);
 
 export const fetchPrompt = (
   message: string,
-  conversationId: string | null,
+  conversation_id: string | null,
   task: string | undefined,
   isPrivate: boolean | undefined,
-  params:object ,
+  task_params:object ,
 ) =>
   fetch(`${import.meta.env.VITE_CHAT_SERVICE_URL}/chat/completions`, {
     method: "POST",
@@ -44,12 +44,12 @@ export const fetchPrompt = (
       Authorization: `Bearer ${AuthService.getToken()}`,
     },
     body: JSON.stringify(
-      conversationId
+      conversation_id
         ? {
           message: message,
-          conversation_id: conversationId,
+          conversation_id: conversation_id,
           task: task,
-          params: params,
+          task_params: task_params,
         }
         : { message: message }
     ),
