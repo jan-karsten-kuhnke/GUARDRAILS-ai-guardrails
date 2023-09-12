@@ -45,6 +45,8 @@ class Extraction:
         docs = store.similarity_search(query)
                 
         prompt = params['promptTemplate']
+        prompt_properties = ":'' ,".join(propertiesArray)
+        prompt = prompt.replace("_properties_",prompt_properties)
         context_content = " ".join([doc.page_content for doc in docs])
 
         PROMPT = PromptTemplate(
