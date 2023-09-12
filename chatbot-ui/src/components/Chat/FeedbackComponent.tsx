@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react';
 import { IconThumbUp, IconThumbDown, IconThumbUpFilled, IconThumbDownFilled } from '@tabler/icons-react';
 import toast from "react-hot-toast";
+import { set } from 'lodash';
 
 const FeedbackComponent = () => {
     const [feedback, setFeedback] = useState('');
     const [isThumbsupHighlighted, setIsThumbsupHighlighted] = useState(false);
     const [isThumbsdownHighlighted, setIsThumbsdownHighlighted] = useState(false);
     const [additionalFeedback, setAdditionalFeedback] = useState('');
+    const [submitClicked, setSubmitClicked] = useState(false);
 
     const handleThumbClick = (isThumbsup: any) => {
         setIsThumbsupHighlighted(isThumbsup);
         setIsThumbsdownHighlighted(!isThumbsup);
         setFeedback(isThumbsup ? 'Thanks for your positive feedback!' : 'We appreciate your feedback. How can we improve?');
+        setSubmitClicked(false); 
     };
 
     const handleAdditionalFeedbackChange = (event: any) => {
@@ -19,6 +22,12 @@ const FeedbackComponent = () => {
     };
 
     const handleSubmitFeedback = () => {
+        if (isThumbsupHighlighted || isThumbsdownHighlighted) {
+            const feedbackStatus = isThumbsupHighlighted ? 'positive' : 'negative';
+            const feedbackData = {
+                feedback: feedbackStatus,
+                message: additionalFeedback,
+            };
         if (isThumbsupHighlighted) {
             toast.success('We are glad to know that you like the response, thanks for sharing your feedback', {
                 position: "bottom-center",
@@ -30,11 +39,10 @@ const FeedbackComponent = () => {
                 duration: 5000
             });
         }
-        setIsThumbsupHighlighted(false);
-        setIsThumbsdownHighlighted(false);
-        setAdditionalFeedback('');
+        setSubmitClicked(true);
+        setAdditionalFeedback(''); 
     };
-
+    }
     return (
         <div className="flex flex-col gap-3 pt-4">
             <div className="flex gap-3">
@@ -54,7 +62,7 @@ const FeedbackComponent = () => {
             <p className={`prose dark:prose-invert dark ${isThumbsupHighlighted || isThumbsdownHighlighted ? '' : 'hidden'}`}>
                 {feedback}
             </p>
-            {isThumbsupHighlighted || isThumbsdownHighlighted ? (
+            {!submitClicked && (isThumbsupHighlighted || isThumbsdownHighlighted) ? (
                 <>
                     <textarea
                         placeholder="Add additional feedback (optional)"
@@ -72,5 +80,3 @@ const FeedbackComponent = () => {
 };
 
 export default FeedbackComponent;
-
-
