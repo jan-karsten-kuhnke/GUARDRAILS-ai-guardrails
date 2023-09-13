@@ -1,9 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { IconThumbUp, IconThumbDown, IconThumbUpFilled, IconThumbDownFilled } from '@tabler/icons-react';
 import toast from "react-hot-toast";
-import { set } from 'lodash';
+import { updateFeedback } from '@/services';
+import HomeContext from "@/pages/home/home.context";
 
-const FeedbackComponent = () => {
+interface Props {
+    id?: string;
+  }
+
+const FeedbackComponent = ({ id }: Props) => {
+    const {
+        state: {  selectedConversation }, handleFeedbackResponse 
+      } = useContext(HomeContext);
     const [feedback, setFeedback] = useState('');
     const [isThumbsupHighlighted, setIsThumbsupHighlighted] = useState(false);
     const [isThumbsdownHighlighted, setIsThumbsdownHighlighted] = useState(false);
@@ -20,29 +28,36 @@ const FeedbackComponent = () => {
     const handleAdditionalFeedbackChange = (event: any) => {
         setAdditionalFeedback(event.target.value);
     };
-
-    const handleSubmitFeedback = () => {
+    const handleSubmitFeedback = async () => {
         if (isThumbsupHighlighted || isThumbsdownHighlighted) {
             const feedbackStatus = isThumbsupHighlighted ? 'positive' : 'negative';
             const feedbackData = {
+                message_id: id,
                 feedback: feedbackStatus,
                 message: additionalFeedback,
-            };
-        if (isThumbsupHighlighted) {
-            toast.success('We are glad to know that you like the response, thanks for sharing your feedback', {
-                position: "bottom-center",
-                duration: 5000
-            });
-        } else if (isThumbsdownHighlighted) {
-            toast.error('Thanks for sharing the feedback, this feedback will be used to improve our responses and generate better results in the future.', {
-                position: "bottom-center",
-                duration: 5000
-            });
+            };   
+            try {
+                const data = await updateFeedback(selectedConversation?.id, feedbackData);
+                handleFeedbackResponse(feedbackData)
+                if (isThumbsupHighlighted) {
+                    toast.success('We are glad to know that you like the response, thanks for sharing your feedback', {
+                        position: "bottom-center",
+                        duration: 5000
+                    });
+                } else if (isThumbsdownHighlighted) {
+                    toast.error('Thanks for sharing the feedback, this feedback will be used to improve our responses and generate better results in the future.', {
+                        position: "bottom-center",
+                        duration: 5000
+                    });
+                }
+                setSubmitClicked(true);
+                setAdditionalFeedback('');
+            } catch (error) {
+                console.error("Error submitting feedback:", error);
+            }
         }
-        setSubmitClicked(true);
-        setAdditionalFeedback(''); 
     };
-    }
+    
     return (
         <div className="flex flex-col gap-3 pt-4">
             <div className="flex gap-3">

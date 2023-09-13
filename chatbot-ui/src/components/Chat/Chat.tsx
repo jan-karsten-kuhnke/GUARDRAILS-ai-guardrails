@@ -207,6 +207,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         let text = "";
         let msg_info = null;
         let role;
+        let message_id;
         while (!done) {
           if (stopConversationRef.current === true) {
             controller.abort();
@@ -217,12 +218,13 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           done = doneReading;
           const chunkValue = decoder.decode(value); // stores role, content, msg_info (JSON String)
           if (!chunkValue || chunkValue === "") continue;
-          let parsed = parseChunk(chunkValue, text, msg_info, role);
+          let parsed = parseChunk(chunkValue, text, msg_info, role,message_id);
           role = parsed.role;
           msg_info = parsed.msg_info;
           text += parsed.content;
+          message_id = parsed.id;
         
-          updateMessagesAndConversation(isFirst, homeDispatch, updatedConversation, text, role, msg_info, parsed)
+          updateMessagesAndConversation(isFirst, homeDispatch, updatedConversation, text, role, msg_info, parsed,message_id)
         }
         homeDispatch({ field: "messageIsStreaming", value: false });
       }

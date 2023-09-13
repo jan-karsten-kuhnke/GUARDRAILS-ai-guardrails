@@ -19,7 +19,7 @@ export const updateConversation = (
   };
 };
 
-export const parseChunk = (chunkValue : any, text: any, msg_info : any, role : any) => {
+export const parseChunk = (chunkValue : any, text: any, msg_info : any, role : any, id:any) => {
   
   let parsed = null; 
 
@@ -27,15 +27,15 @@ export const parseChunk = (chunkValue : any, text: any, msg_info : any, role : a
     const split = chunkValue.split("}{");
     split.forEach((chunk : string, index : number) => {
       const jsonChunk = (index === 0 ? chunk + "}" : index === split.length - 1 ? "{" + chunk : "{" + chunk + "}");
-      parsed = parseSingleJSON(jsonChunk, text, msg_info, role);
+      parsed = parseSingleJSON(jsonChunk, text, msg_info, role, id);
     });
   } else {
-    parsed = parseSingleJSON(chunkValue, text, msg_info, role);
+    parsed = parseSingleJSON(chunkValue, text, msg_info, role, id);
   }
   return parsed;
 }
 
-const parseSingleJSON = (jsonString : any, text :any , msg_info: any, role : any) => {
+const parseSingleJSON = (jsonString : any, text :any , msg_info: any, role : any,id:any) => {
   try {
     const parsed = JSON.parse(jsonString);
     if (parsed.content === undefined) {
@@ -45,6 +45,7 @@ const parseSingleJSON = (jsonString : any, text :any , msg_info: any, role : any
     }
     msg_info = parsed.msg_info;
     role = parsed.role;
+    id = parsed.id;
     return parsed;
   } catch (error) {
     console.error("Error parsing JSON:", error);
@@ -59,7 +60,8 @@ export const updateMessagesAndConversation = (
   text: string, 
   role: any, 
   msg_info : any, 
-  parsed: any
+  parsed: any,
+  message_id : any
   ) => {
 
   let updatedMessages;
@@ -74,6 +76,7 @@ export const updateMessagesAndConversation = (
     }));
 
     updatedMessages.push({
+      id: message_id,
       role: role,
       content: text,
       msg_info: msg_info,

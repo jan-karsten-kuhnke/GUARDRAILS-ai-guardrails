@@ -1,5 +1,6 @@
 
 export interface Message {
+  id?: string ;
   role: Role;
   content: string;
   userActionRequired: boolean;

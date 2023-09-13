@@ -204,16 +204,43 @@ export const Home = () => {
     updateUserPrompts(updatedPrompts);
   };
 
+  const handleFeedbackResponse = (feedbackData:any) => {
+    console.log("feedbackData....", feedbackData);
+    const updatedMessages = selectedConversation?.messages.map((m) => {
+      if (m.id === feedbackData.message_id) {
+        return {
+          ...m,
+          feedback: feedbackData.feedback,
+          message: feedbackData.message
+        };
+      }
+      return m;
+    });
+    dispatch({
+      field: "selectedConversation",
+      value: {
+        ...selectedConversation,
+        messages: updatedMessages,
+      },
+    });
+  }
+
   const handleSelectConversation = (conversation: Conversation) => {
     fetchConversationById(conversation.id).then((res) => {
       conversation.messages = res.data.messages.map(
         (message: {
+          id: string;
+          feedback: string;
+          message: string;
           role: any;
           content: any;
           user_action_required: any;
           msg_info: any;
         }) => ({
+          id: message.id,
           role: message.role,
+          feedback: message.feedback,
+          message: message.message,
           content: message.content,
           userActionRequired: message.user_action_required,
           msg_info: message.msg_info,
@@ -291,7 +318,8 @@ export const Home = () => {
         handleUpdateConversation,
         handleIsPrivate,
         handleSelectedTile,
-        handleUpdateSelectedConversation
+        handleUpdateSelectedConversation,
+        handleFeedbackResponse,
       }}
     >
       <ThemeProvider theme={muiComponentTheme}>

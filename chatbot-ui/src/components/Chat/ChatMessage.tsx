@@ -369,7 +369,7 @@ export const ChatMessage: FC<Props> = memo(
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <FeedbackComponent />
+                  <FeedbackComponent id={message.id}/>
                 </div>
               </div>
             )}
