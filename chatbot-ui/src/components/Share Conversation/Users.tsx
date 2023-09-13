@@ -120,7 +120,7 @@ export const Users: FC<Props> = () => {
   return (
     <>
       <Search
-        placeholder={"Search..." || ""}
+        placeholder={"Search users..." || ""}
         searchTerm={searchTerm}
         onSearch={handleSearchTerm}
       />
