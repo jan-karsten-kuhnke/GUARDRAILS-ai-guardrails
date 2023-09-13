@@ -15,15 +15,21 @@ export const Groups: FC<Props> = ({}) => {
   } = useContext(HomeContext);
 
   const [allGroups, setAllGroups] = useState([]);
+  const [loading, setLoading] = useState(false);
+
 
   useEffect(() => {
+    setLoading(true);
     userGroups().then((res) => {
       setAllGroups(res?.data?.filter(
         (group: any) =>
           !selectedConversation?.acl?.gid.includes(group)
       ))
+      setLoading(false);
+
     });
   }, []);
+  console.log(loading)
 
 
   const handleShare = (group: any) => {
@@ -86,6 +92,11 @@ export const Groups: FC<Props> = ({}) => {
     <>
       <Divider sx={{ margin: "10px 0px" }}>All groups</Divider>
 
+      {loading && (
+        <div
+          className={`h-4 w-4 animate-spin rounded-full border-t-2 ${theme.chatLoadingTheme}`}
+        ></div>
+      )}
       {allGroups?.map((group: any, index) => (
         <div key={index} className=" p-2 mb-1">
           <div className="flex justify-between">
