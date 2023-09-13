@@ -172,7 +172,9 @@ export const ConversationComponent = ({ conversation }: Props) => {
                 <IconTrash size={18} />
               </Tooltip>
             </SidebarActionButton>
-            <SidebarActionButton
+
+            {selectedConversation?.messages?.length > 0 && (
+              <SidebarActionButton
               handleClick={() => {
                 setIsShareConversationDialogOpen(true);
               }}
@@ -181,6 +183,8 @@ export const ConversationComponent = ({ conversation }: Props) => {
                 <IconShare size={18} />
               </Tooltip>
             </SidebarActionButton>
+            )}
+            
           </div>
         )}
 

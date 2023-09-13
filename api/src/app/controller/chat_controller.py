@@ -91,6 +91,16 @@ def update_conversation_properties(conversation_id):
         return jsonify(error="Conversation not found"), 404
     return {"result": "success"}
 
+@endpoints.route('/conversations/<conversation_id>/acl', methods=['PUT'])
+@oidc.accept_token(require_token=True)
+def update_conversation_acl(conversation_id):
+    acl = request.get_json(silent=True)
+    user_id = get_current_user_id()
+    result = chat_service.update_conversation_acl(
+        conversation_id, acl, user_id)
+    if result.matched_count == 0:
+        return jsonify(error="Conversation not found"), 404
+    return {"result": "Succesfully updated conversation acl", "success": True}
 
 @endpoints.route('/executeondoc', methods=['POST'])
 @oidc.accept_token(require_token=True)

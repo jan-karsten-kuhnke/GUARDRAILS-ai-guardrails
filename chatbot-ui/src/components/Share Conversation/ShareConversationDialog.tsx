@@ -6,6 +6,7 @@ import { IconSquareRoundedX } from "@tabler/icons-react";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Box, Tab, Tooltip } from "@mui/material";
 import {Users} from "./Users";
+import { Groups } from "./Groups";
 
 
 interface Props {
@@ -104,10 +105,10 @@ export const ShareConversationDialog: FC<Props> = ({ open, onClose }) => {
                 </TabList>
               </Box>
               <TabPanel value="1" sx={{ padding: "24px 0px" }}>
-                <Users users={selectedConversation?.acl?.uid}/>
+                <Users />
               </TabPanel>
               <TabPanel value="2" sx={{ padding: "24px 0px" }}>
-                {/* <Collections handleGetCollections={handleGetCollections} /> */}
+                <Groups />
               </TabPanel>
             </TabContext>
           </div>

@@ -1,6 +1,6 @@
 import { FC, useState, useEffect, useContext } from "react";
 import Search from "../Search/Search";
-import { searchUsers, updateConversationAcl } from "@/services";
+import { updateConversationAcl, userGroups } from "@/services";
 import { Button, Divider, List, ListItem, ListItemText } from "@mui/material";
 import HomeContext from "@/pages/home/home.context";
 import { set } from "lodash";
@@ -8,71 +8,33 @@ import toast from "react-hot-toast";
 
 interface Props {}
 
-export const Users: FC<Props> = () => {
+export const Groups: FC<Props> = ({}) => {
   const {
     state: { theme, selectedConversation },
     handleUpdateSelectedConversation,
   } = useContext(HomeContext);
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredUsers, setFilteredUsers] = useState([]);
-  const [loading, setLoading] = useState(false);
-  let debounceTimeout: NodeJS.Timeout | null = null; // A variable to store the timeout
-
-  const handleSearchTerm = (newSearchTerm: string) => {
-    setSearchTerm(newSearchTerm);
-    if (searchTerm.length === 0) {
-      setFilteredUsers([]);
-      setLoading(false);
-    }
-  };
+  const [allGroups, setAllGroups] = useState([]);
 
   useEffect(() => {
-    // Clear the previous timeout if it exists
-    setLoading(true);
-    if (debounceTimeout) {
-      clearTimeout(debounceTimeout);
-    }
+    userGroups().then((res) => {
+      setAllGroups(res?.data?.filter(
+        (group: any) =>
+          !selectedConversation?.acl?.gid.includes(group)
+      ))
+    });
+  }, []);
 
-    // Set a new timeout to make the API call after a delay
-    debounceTimeout = setTimeout(() => {
-      if (searchTerm.length === 0) {
-        setLoading(false);
-        setFilteredUsers([]);
-      } else {
-        searchUsers(searchTerm).then((res) => {
-            setFilteredUsers(
-              res?.data?.filter(
-                (user: any) =>
-                  !selectedConversation?.acl?.uid.includes(user.email)
-              )
-            );
-          
-          console.log(searchTerm)
-          console.log(filteredUsers)
-          setLoading(false);
-        });
-        
-      }
-    }, 500);
 
-    // Clean up the timeout on component unmount
-    return () => {
-      if (debounceTimeout) {
-        clearTimeout(debounceTimeout);
-      }
-    };
-  }, [searchTerm]);
-
-  const handleShare = (user: any) => {
+  const handleShare = (group: any) => {
     if (!selectedConversation) return;
     const updatedAcl = selectedConversation?.acl;
-    updatedAcl.uid.push(user.email);
+    updatedAcl.gid.push(group);
     toast
       .promise(
         updateConversationAcl(selectedConversation?.id, updatedAcl), //calling api here
         {
-          loading: `Sharing the conversation with ${user.firstName} ${user.lastName}`,
+          loading: `Sharing the conversation with ${group} group`,
           success: <b>Succefully shared the conversation</b>,
           error: <b>Error in sharing the conversation</b>,
         },
@@ -83,28 +45,28 @@ export const Users: FC<Props> = () => {
       .then((res: any) => {
         if (res?.data?.success) {
           handleUpdateSelectedConversation({ key: "acl", value: updatedAcl });
-          //remove the user from the filtered list
-          setFilteredUsers(filteredUsers.filter(
-            (filteredUser: any) => filteredUser.email !== user.email
-          ));
-
-
+       
+          setAllGroups(
+            allGroups.filter(
+              (filteredGroup: any) => filteredGroup !== group
+            )
+          );
         }
       });
   };
 
-  const handleUnshare = (user: any) => {
+  const handleUnshare = (group: any) => {
     if (!selectedConversation) return;
     const updatedAcl = selectedConversation?.acl;
-    const index = updatedAcl.uid.indexOf(user);
+    const index = updatedAcl.gid.indexOf(group);
     if (index > -1) {
-      updatedAcl.uid.splice(index, 1);
+      updatedAcl.gid.splice(index, 1);
     }
     toast
     .promise(
       updateConversationAcl(selectedConversation?.id, updatedAcl), //calling api here
       {
-        loading: `Unsharing the conversation with ${user}`,
+        loading: `Unsharing the conversation with ${group} group`,
         success: <b>Succefully unshared the conversation</b>,
         error: <b>Error in unsharing the conversation</b>,
       },
@@ -115,36 +77,20 @@ export const Users: FC<Props> = () => {
     .then((res: any) => {
       if (res?.data?.success) {
         handleUpdateSelectedConversation({ key: "acl", value: updatedAcl });
+        setAllGroups([...allGroups, group] as never[]);
       }
     });
   };
 
   return (
     <>
-      <Search
-        placeholder={"Search..." || ""}
-        searchTerm={searchTerm}
-        onSearch={handleSearchTerm}
-      />
-      <Divider sx={{ margin: "10px 0px" }}>Searched users</Divider>
-      {((filteredUsers?.length === 0 && !loading) || searchTerm.length==0 ) && <p>No users found</p>}
-      {loading && searchTerm.length!=0 && (
-        <div
-          className={`h-4 w-4 animate-spin rounded-full border-t-2 ${theme.chatLoadingTheme}`}
-        ></div>
-      )}
-      {searchTerm.length>0 &&  filteredUsers?.map((user: any, index) => (
+      <Divider sx={{ margin: "10px 0px" }}>All groups</Divider>
+
+      {allGroups?.map((group: any, index) => (
         <div key={index} className=" p-2 mb-1">
           <div className="flex justify-between">
             <div>
-              <p className="text-[12.5px]font-bold">
-                {user.firstName} {user.lastName}
-              </p>
-            </div>
-            <div>
-              <p className="text-[12.5px]font-bold">
-                {user.email}
-              </p>
+              <p className="text-[12.5px]font-bold">{group}</p>
             </div>
             <div>
               <Button
@@ -157,7 +103,7 @@ export const Users: FC<Props> = () => {
                   textTransform: "Capitalize",
                   margin: "0px 5px",
                 }}
-                onClick={() => handleShare(user)}
+                onClick={() => handleShare(group)}
               >
                 Share
               </Button>
@@ -167,7 +113,7 @@ export const Users: FC<Props> = () => {
       ))}
 
       <Divider sx={{ margin: "10px 0px" }}>Already shared</Divider>
-      {selectedConversation?.acl?.uid?.map((user: any, index: number) => (
+      {selectedConversation?.acl?.gid?.map((user: any, index: number) => (
         <div key={index} className=" p-2 mb-1">
           <div className="flex justify-between">
             <div>

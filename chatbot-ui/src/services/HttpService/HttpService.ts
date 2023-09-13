@@ -147,3 +147,10 @@ export const setEulaStatus = () => {
 export const searchUsers = (searchTerm: string) => {
   return _axios.get(`/user/search-users/${searchTerm}`);
 }
+export const userGroups = () => {
+  return _axios.get(`/user/user-groups`);
+}
+
+export const updateConversationAcl=(conversationId:string,acl:object)=>{
+  return _axios.put(`/chat/conversations/${conversationId}/acl`,acl);
+}

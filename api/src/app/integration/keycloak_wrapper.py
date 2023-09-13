@@ -28,21 +28,6 @@ class keycloak_wrapper:
             return json.loads(response.text)
         return []
     
-    #get users gruops by email
-    def get_user_groups(email):
-        url = base_url + "/users?email=" + email
-        token = keycloak_wrapper._get_access_token()
-        response = requests.request("GET", url, headers={"Authorization": "Bearer " + token})
-        if (response.status_code == 200):
-            user = json.loads(response.text)[0]
-            #get groups by user id
-            url = base_url + "/users/" + user['id'] + "/groups"
-            response = requests.request("GET", url, headers={"Authorization": "Bearer " + token})
-            if (response.status_code == 200):
-                return json.loads(response.text)   
-        return []
-    
-    
     def get_users_by_role(role_name):
         url = base_url + "/roles/" + role_name + "/users"
         token = keycloak_wrapper._get_access_token()

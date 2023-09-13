@@ -70,7 +70,13 @@ export const Home = () => {
         name: "New Conversation",
         messages: [],
         folderId: null,
-        task_params:{}
+        task_params:{},
+        acl:{
+          uid:[],
+          rid:[],
+          gid:[],
+          owner:""
+        }
       },
     });
 
@@ -125,7 +131,13 @@ export const Home = () => {
       title: "New Conversation",
       messages: [],
       folderId: null,
-      task_params: getTaskParams(selectedTile?.params?.inputs,collections)
+      task_params: getTaskParams(selectedTile?.params?.inputs,collections),
+      acl:{
+        uid:[],
+        rid:[],
+        gid:[],
+        owner:""
+      }
     };
     dispatch({
       field: "conversations",

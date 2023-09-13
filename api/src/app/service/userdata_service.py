@@ -95,4 +95,10 @@ class userdata_service:
         return Persistence.set_eula_status(user_id)
     
     def search_users(name):
-        return keycloak_wrapper.search_users(name)
+        all_users= keycloak_wrapper.search_users(name)
+        current_user_id = get_current_user_id()
+        users = list(filter(lambda x: x['email'] != current_user_id, all_users))
+        return users
+    
+    def get_user_groups():
+        return get_current_user_groups()
