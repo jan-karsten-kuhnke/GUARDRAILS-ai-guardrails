@@ -204,26 +204,6 @@ export const Home = () => {
     updateUserPrompts(updatedPrompts);
   };
 
-  const handleFeedbackResponse = (feedbackData:any) => {
-    const updatedMessages = selectedConversation?.messages.map((m) => {
-      if (m.id === feedbackData.message_id) {
-        return {
-          ...m,
-          feedback: feedbackData.feedback,
-          message: feedbackData.message
-        };
-      }
-      return m;
-    });
-    dispatch({
-      field: "selectedConversation",
-      value: {
-        ...selectedConversation,
-        messages: updatedMessages,
-      },
-    });
-  }
-
   const handleSelectConversation = (conversation: Conversation) => {
     fetchConversationById(conversation.id).then((res) => {
       conversation.messages = res.data.messages.map(
@@ -318,7 +298,6 @@ export const Home = () => {
         handleIsPrivate,
         handleSelectedTile,
         handleUpdateSelectedConversation,
-        handleFeedbackResponse,
       }}
     >
       <ThemeProvider theme={muiComponentTheme}>

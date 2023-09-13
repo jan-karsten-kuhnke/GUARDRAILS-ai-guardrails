@@ -3,7 +3,6 @@ import { IconThumbUp, IconThumbDown, IconThumbUpFilled, IconThumbDownFilled } fr
 import toast from "react-hot-toast";
 import { updateFeedback } from '@/services';
 import HomeContext from "@/pages/home/home.context";
-import { set } from 'lodash';
 import { Message } from '@/types/chat';
 
 interface Props {
@@ -12,10 +11,10 @@ interface Props {
 
 const FeedbackComponent = ({ message }: Props) => {
     if (message.role!="assistant") return <></>;
-
     const {
-        state: {  selectedConversation }, handleFeedbackResponse 
-      } = useContext(HomeContext);
+        state: {  selectedConversation, theme },
+        handleUpdateSelectedConversation
+    } = useContext(HomeContext);
     const [additionalFeedback, setAdditionalFeedback] = useState('');
     const [showMessageBox, setShowMessageBox] = useState(false);
 
@@ -40,16 +39,41 @@ const FeedbackComponent = ({ message }: Props) => {
     };
     const handleSubmitFeedback = async () => {
         if (thumbs === "positive" || thumbs === "negative") {
-            // const feedbackStatus = isThumbsupHighlighted ? 'positive' : 'negative';
             const feedbackStatus = thumbs;
             const feedbackData = {
                 message_id: message.id,
                 feedback: feedbackStatus,
                 message: additionalFeedback,
-            };   
+            };
+            // const feedbackData = {
+            //     message_id: message.id,
+            //     user_feedback: {type:feedbackStatus, message:additionalFeedback},
+            // };   
             try {
                 const data = await updateFeedback(selectedConversation?.id, feedbackData);
-                handleFeedbackResponse(feedbackData)
+                const updatedMessages = selectedConversation?.messages.map((m) => {
+                    if (m.id === feedbackData.message_id) {
+                      return {
+                        ...m,
+                        feedback: feedbackData.feedback,
+                        message: feedbackData.message
+                      };
+                    }
+                    return m;
+                  });
+                // const updatedMessages = selectedConversation?.messages.map((m) => {
+                //     if (m.id === feedbackData.message_id) {
+                //       return {
+                //         ...m,
+                //         user_feedback:{type:feedbackStatus, message:additionalFeedback}
+                //       };
+                //     }
+                //     return m;
+                //   });
+
+
+                handleUpdateSelectedConversation({key:"messages",value:updatedMessages})
+                
                 if (thumbs === "positive") {
                     toast.success('We are glad to know that you like the response, thanks for sharing your feedback', {
                         position: "bottom-center",
@@ -93,7 +117,7 @@ const FeedbackComponent = ({ message }: Props) => {
                         onChange={handleAdditionalFeedbackChange}
                         className="border border-gray-300 rounded-md p-2 resize-none"
                     />
-                    <button onClick={handleSubmitFeedback} className="bg-blue-500 text-white rounded-md p-2 hover:bg-blue-600">
+                    <button onClick={handleSubmitFeedback} className={` rounded-md p-2 ${theme.primaryButtonTheme}`}>
                         Submit Feedback
                     </button>
                 </>

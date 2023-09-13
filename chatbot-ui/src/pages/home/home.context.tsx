@@ -27,7 +27,6 @@ export interface HomeContextProps {
   
   handleIsPrivate:(isPrivate:boolean)=>void;
   handleSelectedTile:(tile:Tile)=>void;
-  handleFeedbackResponse:(feedbackData:any)=>void;
 }
 
 const HomeContext = createContext<HomeContextProps>(undefined!);
