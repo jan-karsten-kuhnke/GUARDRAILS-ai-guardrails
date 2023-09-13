@@ -47,9 +47,7 @@ export const Users: FC<Props> = () => {
                   !selectedConversation?.acl?.uid.includes(user.email)
               )
             );
-          
-          console.log(searchTerm)
-          console.log(filteredUsers)
+  
           setLoading(false);
         });
         
