@@ -52,7 +52,7 @@ class acl_obj(TypedDict):
 
 class chat_service:
 
-    def chat_completion(data, current_user_id, token, filename=None, filepath=None):
+    def chat_completion(data, current_user_id, token, user_groups, user_roles, filename=None, filepath=None):
         try:
             task = str(data["task"]) if "task" in data else None
             task_params = data["task_params"] if "task_params" in data else None
@@ -105,7 +105,7 @@ class chat_service:
             
             
             chat_service.update_conversation(
-                conversation_id, prompt, 'user', current_user_id, task, title, task_params, metadata)
+                conversation_id, prompt, 'user', current_user_id, task,user_groups, user_roles, title, task_params, metadata)
 
             current_completion = ''
             msg_info = None
@@ -115,7 +115,7 @@ class chat_service:
             role = "assistant"
             if (manage_conversation_context):
                 messages = chat_service.get_history_for_bot(
-                    conversation_id, current_user_id)
+                    conversation_id, current_user_id, user_groups, user_roles)
 
             is_private = False
             history = []
@@ -213,7 +213,7 @@ class chat_service:
 
             chat_service.save_chat_log(current_user_id, prompt)
             chat_service.update_conversation(
-                conversation_id, current_completion, role, current_user_id, task, None, task_params,metadata, msg_info)
+                conversation_id, current_completion, role, current_user_id, task,user_groups, user_roles, None, task_params,metadata, msg_info)
         except Exception as e:
             yield (json.dumps({"error": "error"}))
             logging.error("Error in chat completion: "+str(e))
@@ -258,10 +258,10 @@ class chat_service:
             conversation)
         return new_conversation_id
 
-    def update_conversation(conversation_id, content, role, user_id, task, title=None, task_params=None,metadata=None, msg_info=None):
+    def update_conversation(conversation_id, content, role, user_id, task,user_groups, user_roles, title=None, task_params=None,metadata=None, msg_info=None):
         conversation = conversation_context.get_conversation_by_id(
-            conversation_id, user_id)
-        if (conversation == None):
+            conversation_id, user_id, user_groups, user_roles)
+        if conversation is None:
             chat_service.create_Conversation(
                 content, user_id, task, msg_info, title, conversation_id, task_params,metadata)
             return
@@ -314,8 +314,8 @@ class chat_service:
         userName = get_current_user_id()
         userGroups = get_current_user_groups()
         userRoles = get_current_user_roles()
-        cursor = conversation_context.get_conversation_by_id(conversation_id, userName, userGroups, userRoles)
-        return list(cursor)[0]['owned']
+        conversation = conversation_context.get_conversation_by_id(conversation_id, userName, userGroups, userRoles)
+        return conversation
     
     def archive_all_conversations(user_id):
         conversation_context.archive_all_conversations(user_id)
@@ -325,9 +325,9 @@ class chat_service:
             user_id, conversation_id, flag)
         return result
 
-    def get_history_for_bot(conversation_id, user_id):
+    def get_history_for_bot(conversation_id, user_id, user_groups, user_roles):
         conversation = conversation_context.get_conversation_by_id(
-            conversation_id, user_id)
+            conversation_id, user_id, user_groups, user_roles)
         messages = conversation['messages']
         result = []
         for m in messages:

@@ -226,7 +226,6 @@ class DataSourceEntity(Base):
     schemas = Column(ARRAY(String))
     tables_to_include = Column(ARRAY(String))
     custom_schema_description = Column(Text)
-    acl = Column(JSONB)
     
     def to_dict(self):
         return {
@@ -242,7 +241,7 @@ class DataSourceEntity(Base):
 class AclEntity(Base):
     __tablename__ = 'acl'
     id=Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
-    entity_name=Column(String(255))
+    entity_type=Column(String(255))
     entity_id=Column(UUID(as_uuid=True))
     gid=Column(ARRAY(String))
     rid=Column(ARRAY(String))
@@ -252,7 +251,7 @@ class AclEntity(Base):
     def to_dict(self):
         return {
             'id': str(self.id),
-            'entity_name': self.entity_name,
+            'entity_type': self.entity_type,
             'entity_id': str(self.entity_id),
             'gid': self.gid,
             'rid': self.rid,

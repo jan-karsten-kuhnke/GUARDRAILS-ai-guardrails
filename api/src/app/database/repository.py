@@ -412,7 +412,6 @@ class Persistence:
         try:
             session=Session()
             subquery = Persistence.acl_subquery(userName, userGroups, userRoles, 'data_source', session)
-            print(subquery)
             main_query = (
                 session.query(DataSourceEntity)
                 .filter(DataSourceEntity.id.in_(subquery))
@@ -431,7 +430,7 @@ class Persistence:
         try:
             subquery = (
                 session.query(AclEntity.entity_id)
-                .filter(AclEntity.entity_name == entity_name)
+                .filter(AclEntity.entity_type == entity_name)
                 .filter(
                     AclEntity.gid.overlap(userGroups) |
                     AclEntity.rid.overlap(userRoles) |

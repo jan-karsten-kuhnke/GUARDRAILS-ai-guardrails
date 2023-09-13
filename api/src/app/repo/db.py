@@ -50,7 +50,6 @@ def conversation_pipeline(user_id: Union[ObjectId, str], flag, username, user_gr
     elif isinstance(user_id, str) and flag != None:
         match_query["$match"] = {"user_id": user_id, "archived": flag, "acl.owner": username}
     
-    print(match_query)
     project_stage = {
         "$project": {
             "acl": 0
@@ -78,9 +77,6 @@ def conversation_pipeline(user_id: Union[ObjectId, str], flag, username, user_gr
     if flag== None:
         facet_stage["$facet"]["shared"][0]["$match"].pop("archived", None)
 
-
-    print(facet_stage)
-    
     pipeline = [facet_stage]
     return pipeline
 
@@ -93,7 +89,13 @@ class conversation_context:
     def get_conversation_by_id(conversation_id,  username, user_groups, user_roles):
         pipeline  = conversation_pipeline(conversation_id, None, username, user_groups, user_roles)
         results = conversations_collection.aggregate(pipeline)
-        return results
+        conversation_array=[]
+        for c in results:
+            conversation_array.append(c)
+
+        if not conversation_array[0].get('owned'):
+            return None
+        return conversation_array[0].get('owned')[0]
     
     def get_conversations_by_user_email(user_id,flag, username, user_groups, user_roles):
         pipeline  = conversation_pipeline(user_id,flag, username, user_groups, user_roles)
