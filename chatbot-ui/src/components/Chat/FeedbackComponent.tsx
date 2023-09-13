@@ -11,33 +11,20 @@ interface Props {
   }
 
 const FeedbackComponent = ({ message }: Props) => {
+    if (message.role!="assistant") return <></>;
+
     const {
         state: {  selectedConversation }, handleFeedbackResponse 
       } = useContext(HomeContext);
-    
     const [additionalFeedback, setAdditionalFeedback] = useState('');
-    const [submitClicked, setSubmitClicked] = useState(false);
+    const [showMessageBox, setShowMessageBox] = useState(false);
 
     const [thumbs,setThumbs] = useState<string>("");
 
     const handleThumbClick = (isThumbsup: any) => {
-
-        setSubmitClicked(false); 
         setThumbs(isThumbsup);
+        setShowMessageBox(true);
     };
-    useEffect(() => {
-        if(selectedConversation && selectedConversation.messages.length > 0){
-            selectedConversation?.messages.map((message: any) => {
-                if (message.role === "assistant" && message.feedback === "positive"){
-                    setThumbs("positive");
-                }
-                else if (message.role === "assistant" && message.feedback === "negative"){
-                    setThumbs("negative");
-                }
-            })
-        }
-        setSubmitClicked(true);
-    },[selectedConversation])
 
     useEffect(() => {
         if (!message.feedback){
@@ -47,7 +34,6 @@ const FeedbackComponent = ({ message }: Props) => {
         setThumbs(message.feedback);
     },[message])
 
-    console.log("selectedConversation: ", selectedConversation);
 
     const handleAdditionalFeedbackChange = (event: any) => {
         setAdditionalFeedback(event.target.value);
@@ -75,7 +61,7 @@ const FeedbackComponent = ({ message }: Props) => {
                         duration: 5000
                     });
                 }
-                setSubmitClicked(true);
+                setShowMessageBox(false);
                 setAdditionalFeedback('');
             } catch (error) {
                 console.error("Error submitting feedback:", error);
@@ -99,10 +85,7 @@ const FeedbackComponent = ({ message }: Props) => {
                     {thumbs === "negative" ? <IconThumbDownFilled /> : <IconThumbDown />}
                 </button>
             </div>
-            {/* <p className={`prose dark:prose-invert dark ${thumbs === "positive" || thumbs === "negative" ? '' : 'hidden'}`}>
-                {feedback}
-            </p> */}
-            {!submitClicked && (thumbs === "positive" || thumbs === "negative") ? (
+            {showMessageBox && (thumbs === "positive" || thumbs === "negative") ? (
                 <>
                     <textarea
                         placeholder="Add additional feedback (optional)"

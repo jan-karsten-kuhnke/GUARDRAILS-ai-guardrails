@@ -205,7 +205,6 @@ export const Home = () => {
   };
 
   const handleFeedbackResponse = (feedbackData:any) => {
-    console.log("feedbackData....", feedbackData);
     const updatedMessages = selectedConversation?.messages.map((m) => {
       if (m.id === feedbackData.message_id) {
         return {

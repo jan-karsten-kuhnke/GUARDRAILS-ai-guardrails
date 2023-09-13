@@ -63,6 +63,8 @@ export const ChatMessage: FC<Props> = memo(
       dispatch: homeDispatch,
     } = useContext(HomeContext);
 
+    console.log(message)
+
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [isTyping, setIsTyping] = useState<boolean>(false);
     const [messageContent, setMessageContent] = useState(message.content);
@@ -369,7 +371,7 @@ export const ChatMessage: FC<Props> = memo(
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <FeedbackComponent message={message}/>
+                  <FeedbackComponent  message={message} key={message.id}/>
                 </div>
               </div>
             )}
