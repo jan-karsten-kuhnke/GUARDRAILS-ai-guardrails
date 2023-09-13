@@ -320,15 +320,21 @@ class chat_service:
        result =  conversation_context.update_conversation_properties(
             conversation_id, data, user_id)
        return result
-    def feedback(conversation_id, message_id, feedback, message, user_id):
+    def feedback(conversation_id, data, user_id):
         result=conversation_context.get_conversation_by_id(conversation_id,user_id)
         if result is None:
             return {"error": "Conversation not found"}, 404
         messages=result['messages']
+        status=False
         for m in messages:
-            if m['id']==message_id:
-                m['feedback']=feedback
-                m['message']=message
+            if m['id']==data['message_id']:
+                m['user_feedback']={
+                "type":data['user_feedback']['type'],
+                "message":data['user_feedback']['message'] if 'message' in data['user_feedback'] else None
+                }
+                status=True
                 break
+        if status==False:
+            return {"error": "Message ID not found"}, 404
         result=conversation_context.update_conversation(conversation_id,result)
         return {"result": "success"}
