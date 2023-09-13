@@ -4,7 +4,9 @@ export interface Message {
   role: Role;
   content: string;
   userActionRequired: boolean;
-  msg_info: any
+  msg_info: any;
+  feedback?: string;
+  message?: string;
 }
 
 export type Role = 'assistant' | 'user' | 'guardrails';
