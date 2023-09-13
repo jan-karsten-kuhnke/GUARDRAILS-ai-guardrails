@@ -17,4 +17,5 @@ export interface Conversation {
   archived: boolean;
   task: string;
   task_params: any;
+  acl: any;
 }

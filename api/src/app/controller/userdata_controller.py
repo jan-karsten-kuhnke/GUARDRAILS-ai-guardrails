@@ -110,4 +110,7 @@ def set_eula_status():
     result = userdata_service.set_eula_status(user_id)
     return result 
     
-    
+@userdataendpoints.route('/search-users/<name>', methods=['GET'])
+@oidc.accept_token(require_token=True)
+def search_users(name):
+    return userdata_service.search_users(name)

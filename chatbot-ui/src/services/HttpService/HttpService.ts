@@ -143,3 +143,7 @@ export const getEulaStatus = () => {
 export const setEulaStatus = () => {
   return _axios.post(`/user/eula`);
 };
+
+export const searchUsers = (searchTerm: string) => {
+  return _axios.get(`/user/search-users/${searchTerm}`);
+}

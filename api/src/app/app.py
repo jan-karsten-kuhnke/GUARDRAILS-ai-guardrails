@@ -11,10 +11,11 @@ from controller.userdata_controller import userdataendpoints
 from controller.documents_controller import documentsendpoints
 import secrets
 from flask_swagger_ui import get_swaggerui_blueprint
+from integration.keycloak_wrapper import keycloak_wrapper
 from oidc import oidc
 from globals import *
 
-Globals.prepare_client_secrets()
+Globals.prepare_client_secrets() 
 app = Flask(__name__)
 # sets the root level of the logger 
 def configure_logging():
@@ -24,7 +25,7 @@ def configure_logging():
 
 
 app.config["PROPAGATE_EXCEPTIONS"] = True
-
+print(keycloak_wrapper.get_user_groups("mohdtaha.khan@synergy-ai.us"))
 logging.info('client_secret', Globals.oidc_client_id)
 SWAGGER_URL = '/api/documentation'
 API_URL = 'http://127.0.0.1:8080/swagger.json'
