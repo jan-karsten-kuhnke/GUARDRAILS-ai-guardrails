@@ -29,20 +29,11 @@ class userdata_service:
 
     def get_tiles(user_id):
         try:
-            pg_schema = Globals.pg_schema
-            chain_table = ChainEntity.__tablename__
             user_groups = get_current_user_groups()
             user_roles = get_current_user_roles()
             session=Session()
             all_chains  = session.query(ChainEntity).all()
-            query = text(
-                f"SELECT * FROM {pg_schema}.{chain_table} "
-                f"WHERE '{json.dumps(user_roles)}' @> (acl->'rid') "
-                f"OR '{json.dumps(user_groups)}' @> (acl->'gid') "
-                f"OR '{json.dumps([user_id])}' @> (acl->'uid')")
-
-            connection = engine.connect()
-            assigned_chains = connection.execute(query)
+            assigned_chains = Persistence.get_all_tiles(user_id, user_groups, user_roles)
 
             assigned_chain_codes = []
             previous_requests = []

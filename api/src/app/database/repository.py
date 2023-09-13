@@ -3,7 +3,7 @@ import json
 from sqlalchemy import create_engine, text, func ,or_,and_, select
 from sqlalchemy.orm import sessionmaker
 
-from database.models import Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, DocumentEntity, FolderEntity , PromptEntity , OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity, ChainEntity,  EulaEntity, DataSourceEntity
+from database.models import AclEntity, Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, DocumentEntity, FolderEntity , PromptEntity , OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity, ChainEntity,  EulaEntity, DataSourceEntity
 from database.vector_store.vector_store_model import Vector_Base, CollectionEntity
 
 from globals import Globals
@@ -407,28 +407,57 @@ class Persistence:
             logging.error(f"Exception while getting data source: {ex}")
         finally:
             session.close()
- 
-
+        
     def get_all_data_source(userName, userGroups, userRoles):
         try:
-            pg_schema = Globals.pg_schema
-            data_source_table = DataSourceEntity.__tablename__
-            query = text(
-                f"SELECT * FROM {pg_schema}.{data_source_table} "
-                f"WHERE '{json.dumps(userRoles)}' @> (acl->'rid') "
-                f"OR '{json.dumps(userGroups)}' @> (acl->'gid') "
-                f"OR '{json.dumps([userName])}' @> (acl->'uid')"
-                f"OR '{json.dumps(userName)}' @> (acl->'owner')"
-                )
-            connection = engine.connect()
-            result = connection.execute(query)
+            session=Session()
+            subquery = Persistence.acl_subquery(userName, userGroups, userRoles, 'data_source', session)
+            print(subquery)
+            main_query = (
+                session.query(DataSourceEntity)
+                .filter(DataSourceEntity.id.in_(subquery))
+            )
+            results = main_query.all()
             res = []
-            for r in result:
+            for r in results:
                 res.append(DataSourceEntity.to_dict(r))
             return res
         except Exception as ex:
             logging.error(f"Exception while getting data source: {ex}")
-        
+        finally:
+            session.close()
+
+    def acl_subquery(userName, userGroups, userRoles, entity_name, session):
+        try:
+            subquery = (
+                session.query(AclEntity.entity_id)
+                .filter(AclEntity.entity_name == entity_name)
+                .filter(
+                    AclEntity.gid.overlap(userGroups) |
+                    AclEntity.rid.overlap(userRoles) |
+                    AclEntity.uid.overlap([userName]) |
+                    (AclEntity.owner == userName)
+                )
+            )
+            return subquery
+        except Exception as ex:
+            logging.error(f"Exception while getting acl subquery: {ex}")
+            # session.close()
+            
+    def get_all_tiles(userName, userGroups, userRoles):
+        try:
+            session=Session()
+            subquery = Persistence.acl_subquery(userName, userGroups, userRoles, 'chain', session)
+            main_query = (
+                session.query(ChainEntity)
+                .filter(ChainEntity.id.in_(subquery))
+            )
+            results = main_query.all()
+            return results
+        except Exception as ex:
+            logging.error(f"Exception while getting tiles: {ex}")
+        finally:
+            session.close()
 
     def get_folder_data(user_id):
         try:

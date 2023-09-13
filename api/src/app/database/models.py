@@ -237,3 +237,25 @@ class DataSourceEntity(Base):
             'tables_to_include': self.tables_to_include,
             'custom_schema_description': self.custom_schema_description
         }
+
+
+class AclEntity(Base):
+    __tablename__ = 'acl'
+    id=Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
+    entity_name=Column(String(255))
+    entity_id=Column(UUID(as_uuid=True))
+    gid=Column(ARRAY(String))
+    rid=Column(ARRAY(String))
+    uid=Column(ARRAY(String))
+    owner=Column(String(255))
+
+    def to_dict(self):
+        return {
+            'id': str(self.id),
+            'entity_name': self.entity_name,
+            'entity_id': str(self.entity_id),
+            'gid': self.gid,
+            'rid': self.rid,
+            'uid': self.uid,
+            'owner': self.owner
+        }
