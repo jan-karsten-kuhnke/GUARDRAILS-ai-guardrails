@@ -1,6 +1,5 @@
 import { IconFolderPlus, IconMistOff, IconPlus } from "@tabler/icons-react";
 import { ReactNode, useContext } from "react";
-import { useEffect,useState } from "react";
 import HomeContext from "@/pages/home/home.context";
 
 import {
@@ -9,8 +8,6 @@ import {
 } from "./components/OpenCloseButton";
 
 import Search from "../Search";
-import { IconFileDescription,IconBoxMultiple,IconListDetails   } from '@tabler/icons-react';
-
 interface Props<T> {
   isOpen: boolean;
   addItemButtonTitle: string;
@@ -49,9 +46,8 @@ const Sidebar = <T,>({
   handleDrop,
 }: Props<T>) => {
   const {
-    state: { theme, selectedConversation, selectedTile, tiles },   
+    state: { theme },   
   } = useContext(HomeContext);
-  const [taskTitle, setTaskTitle] = useState<string>('');
 
   const allowDrop = (e: any) => {
     e.preventDefault();
@@ -64,21 +60,6 @@ const Sidebar = <T,>({
   const removeHighlight = (e: any) => {
     e.target.style.background = "none";
   };
-
-  useEffect(() => {
-
-    // Checking for new chat
-    if(selectedConversation?.messages.length === 0){
-      setTaskTitle(selectedTile.title);
-    }
-    // for an existing chat
-    else{
-      const selectedTask = tiles.find(tile => tile.code === selectedConversation?.task);
-      if(selectedTask){
-        setTaskTitle(selectedTask.title);
-      }
-    }
-  },[selectedConversation,selectedTile]);
 
   return isOpen ? (
     <div>
@@ -146,42 +127,6 @@ const Sidebar = <T,>({
                 {`No ${itemDisplayName}`}
               </span>
             </div>
-          )}
-        </div>
-        
-        <div className="flex flex-col gap-2">
-          {side === 'right' && (
-            <>
-              <div className="pt-1 border-t border-white/20"></div>
-              {selectedConversation && selectedConversation.messages.length > 0 && (
-                <>
-                  <div className="text-[14px] font-semibold">Current Conversation</div>
-                  <div className={`text-[12px] flex w-full item-center gap-2 py-1 ${theme.botMsgTextColorTheme}`}>
-                    <IconListDetails size={20} />
-                    <span className="font-semibold">Applet: </span>
-                    <div className="w-full">
-                      {taskTitle}
-                    </div>
-                  </div>
-                  {selectedConversation?.task_params?.collectionName &&
-                    <div className={`text-[12px] flex w-full item-center gap-2 py-1 ${theme.botMsgTextColorTheme}`}>
-                      <IconBoxMultiple size={20} />
-                      <span className="font-semibold">Collection: </span>
-                      <div className="w-full">
-                        {selectedConversation?.task_params?.collectionName}
-                      </div>
-                    </div>}
-                  {selectedConversation?.task_params?.document?.title &&
-                    <div className={`text-[12px] flex w-full item-center gap-2 py-1 ${theme.botMsgTextColorTheme}`}>
-                      <IconFileDescription size={20} />
-                      <span className="font-semibold">Document:</span>
-                      <div className=" w-full">
-                        {selectedConversation?.task_params?.document?.title}
-                      </div>
-                    </div>}
-                </>
-              )}
-            </>
           )}
         </div>
         {footerComponent}
