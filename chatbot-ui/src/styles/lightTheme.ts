@@ -8,6 +8,7 @@ export const lightTheme = {
     "bg-[#ffffff] text-[#1c96a3] hover:bg-[#d8f5ff] border border-2 border-[#1c96a3]/80",
   searchBoxTheme:
     "border border-neutral-400 focus:border-[#1c96a3]/100 text-[#75777A] outline-none rounded focus:shadow-[0_0_2px_1px_rgba(28,150,163)] ",
+    errorInputTheme:"border border-neutral-400 focus:border-[#e50b0b]/100 text-[#75777A] outline-none rounded focus:shadow-[0_0_2px_1px_rgba(255,73,73,1)] ",
   dividerBottomTheme: "border-b border-black/20",
   dividerTopTheme: "border-t border-black/20",
   sideBarTheme:

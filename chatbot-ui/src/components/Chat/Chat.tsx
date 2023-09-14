@@ -464,7 +464,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             </>
           )}
         </div>
-        {selectedTile.params?.executor != "summarize"  && selectedTile.params?.executor != "extraction" && (
+        {!["summarize" ,"extraction", "tcot-p4d"].includes(selectedTile.params?.executor)&& (
           <ChatInput
             stopConversationRef={stopConversationRef}
             textareaRef={textareaRef}

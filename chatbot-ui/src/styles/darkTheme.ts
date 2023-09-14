@@ -8,6 +8,7 @@ export const darkTheme = {
   secondaryButtonTheme:
     "bg-[#202123] text-[#ffffff] hover:bg-[#343541] border border-white/20",
   searchBoxTheme: "border-neutral-600 bg-[#202123] text-white",
+  errorInputTheme:"border border-neutral-600 bg-[#202123] focus:border-[#e50b0b]/100 text-white outline-none rounded focus:shadow-[0_0_2px_1px_rgba(255,73,73,1)] ",
   dividerBottomTheme: "border-b border-white/20",
   dividerTopTheme: "border-t border-white/20",
   sideBarTheme: "bg-[#202123] text-[#ffffff] ",
