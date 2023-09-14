@@ -33,8 +33,9 @@ class acl_service:
                         acl[key] = array
                     else:
                         acl[key] = "" 
-            print(acl)  
-            return conversation_context.update_conversation_acl(id, acl)
+            res =  conversation_context.update_conversation_acl(id, acl)
+            res['message'] ="access provided" if data['is_provide_access'] else "access removed"
+            return res
         elif entity_type == 'chain':
             return Persistence.update_chain_acl(id,entity_type,data)
         elif entity_type == 'data-source':

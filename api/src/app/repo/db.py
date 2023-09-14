@@ -265,12 +265,14 @@ class conversation_context:
 
     def update_conversation_acl(id, acl):
         response = ApiResponse()
-        
-        res = conversations_collection.update_one({"_id":id}, {"$set":{"acl":acl}})
-        print(str(res)) 
-        return response.update(True,"Successfully approved",None)
-    # def update_conversation(conversation_id, conversation):
-    #     conversations_collection.update_one({"_id":conversation_id}, {"$set":conversation})
+        try:
+            res = conversations_collection.update_one({"_id":id}, {"$set":{"acl":acl}})
+            print(str(res)) 
+            response.update(True,"",None)
+        except Exception as ex:
+            logging.info(f"Error in updating access list: {ex}")
+            response.update(False,"Error in updating access list",None)    
+        return response.json()
 
 
 
