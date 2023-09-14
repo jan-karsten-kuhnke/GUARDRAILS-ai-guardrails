@@ -9,6 +9,7 @@ from controller.admin_controller import adminendpoints
 from controller.pii_controller import piiendpoints
 from controller.userdata_controller import userdataendpoints
 from controller.documents_controller import documentsendpoints
+from controller.acl_controller import aclendpoints
 import secrets
 from flask_swagger_ui import get_swaggerui_blueprint
 from oidc import oidc
@@ -41,6 +42,7 @@ app.register_blueprint(piiendpoints, name="pii", url_prefix="/api/pii")
 app.register_blueprint(userdataendpoints, name="user", url_prefix="/api/user")
 app.register_blueprint(adminendpoints, name="admin", url_prefix="/api/admin")
 app.register_blueprint(documentsendpoints, name="docs", url_prefix="/api/docs")
+app.register_blueprint(aclendpoints, name="acl", url_prefix="/api/acl")
 
 @app.route('/swagger.json')
 def swagger():

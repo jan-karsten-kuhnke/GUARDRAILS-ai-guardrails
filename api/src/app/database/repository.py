@@ -3,7 +3,7 @@ import json
 from sqlalchemy import create_engine, text, func ,or_,and_, select
 from sqlalchemy.orm import sessionmaker
 
-from database.models import AclEntity, Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, DocumentEntity, FolderEntity , PromptEntity , OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity, ChainEntity,  EulaEntity, DataSourceEntity
+from database.models import AclEntity, Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, DocumentEntity, FolderEntity , PromptEntity , OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity, ChainEntity,  EulaEntity, DataSourceEntity, AclEntity
 from database.vector_store.vector_store_model import Vector_Base, CollectionEntity
 
 from globals import Globals
@@ -654,3 +654,44 @@ class Persistence:
         finally:
             session.close()
         
+    
+    def update_chain_acl(id, data):
+        try:
+            session=Session()
+            acl_chain=session.query(AclEntity).filter(AclEntity.entity_id == id).first()
+            
+            if acl_chain:
+                   gid_array = acl_chain.gid
+                   gid_array.extend(data['groups'])
+                   acl_chain.gid = gid_array
+            else:
+                return jsonify({"message": "Cannot find the chain","success":False}), 500
+            session.commit()
+            return jsonify({"message": "Successfully updated chain acl","success":True}), 200
+        except Exception as e:
+            logging.error(f"Exception while updating chain: {e}")
+            session.rollback()
+            return jsonify({"message": "Error in updating chain acl","success":False}), 500
+        finally:
+            session.close()
+
+    def update_data_source_acl(id, data):
+        try:
+            session=Session()
+            data_source_acl=session.query(AclEntity).filter(AclEntity.entity_id == id).first()
+            
+            if data_source_acl:
+                    gid_array = data_source_acl.gid
+                    gid_array.extend(data['groups'])
+                    data_source_acl.gid = gid_array
+
+            else:
+                return jsonify({"message": "Cannot find the data source","success":False}), 500
+            session.commit()
+            return jsonify({"message": "Successfully updated data source acl","success":True}), 200
+        except Exception as e:
+            logging.error(f"Exception while updating data source: {e}")
+            session.rollback()
+            return jsonify({"message": "Error in updating data source acl","success":False}), 500
+        finally:
+            session.close() 
