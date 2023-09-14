@@ -20,6 +20,11 @@ const FeedbackComponent = ({ message }: Props) => {
 
     const [thumbs,setThumbs] = useState<string>("");
 
+    const handleDismiss = () => {
+        setShowMessageBox(false);
+        setAdditionalFeedback('');
+    };
+
     const callFeedbackApi = (feedbackData: any) => {
         
         try {
@@ -116,9 +121,14 @@ const FeedbackComponent = ({ message }: Props) => {
                         onChange={(event => setAdditionalFeedback(event.target.value))}
                         className={`rounded-md font-normal m-0 w-full resize-none pt-2 pr-8 pl-5 md:pt-2 md:pl-5 ${theme.feedbackTextAreaTheme}`}
                     />
-                    <button onClick={handleSubmitFeedback} className={` rounded-md p-2 ${theme.primaryButtonTheme}`}>
+                    <div className="flex flex-row gap-3">
+                    <button onClick={handleSubmitFeedback} className={` rounded-md p-1 ${theme.primaryButtonTheme}`}>
                         Submit Feedback
                     </button>
+                    <button onClick={handleDismiss} className={`rounded-md p-1 ${theme.secondaryButtonTheme}`}>
+                            Dismiss
+                    </button>
+                    </div>
                 </>
             ) : null}
         </div>
