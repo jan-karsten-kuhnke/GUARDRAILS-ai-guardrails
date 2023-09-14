@@ -122,10 +122,10 @@ const FeedbackComponent = ({ message }: Props) => {
                         className={`rounded-md font-normal m-0 w-full resize-none pt-2 pr-8 pl-5 md:pt-2 md:pl-5 ${theme.feedbackTextAreaTheme}`}
                     />
                     <div className="flex flex-row gap-3">
-                    <button onClick={handleSubmitFeedback} className={` rounded-md p-1 ${theme.primaryButtonTheme}`}>
+                    <button onClick={handleSubmitFeedback} className={` rounded-md p-2 text-sm ${theme.primaryButtonTheme}`}>
                         Submit Feedback
                     </button>
-                    <button onClick={handleDismiss} className={`rounded-md p-1 ${theme.secondaryButtonTheme}`}>
+                    <button onClick={handleDismiss} className={`rounded-md p-2 text-sm ${theme.secondaryButtonTheme}`}>
                             Dismiss
                     </button>
                     </div>
