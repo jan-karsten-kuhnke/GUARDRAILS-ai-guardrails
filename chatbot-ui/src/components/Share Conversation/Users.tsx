@@ -91,7 +91,7 @@ export const Users: FC<Props> = () => {
       });
   };
 
-  const handleUnshare = (user: any) => {
+  const handleRevoke = (user: any) => {
     if (!selectedConversation) return;
     const updatedAcl = selectedConversation?.acl;
     const index = updatedAcl.uid.indexOf(user);
@@ -102,9 +102,9 @@ export const Users: FC<Props> = () => {
     .promise(
       updateConversationAcl(selectedConversation?.id, updatedAcl), //calling api here
       {
-        loading: `Unsharing the conversation with ${user}`,
-        success: <b>Succefully unshared the conversation</b>,
-        error: <b>Error in unsharing the conversation</b>,
+        loading: `Revoking access to the conversation for ${user}`,
+        success: <b>Succefully revoked access to the conversation</b>,
+        error: <b>Error in revoking access to the conversation</b>,
       },
       {
         position: "bottom-center",
@@ -113,6 +113,18 @@ export const Users: FC<Props> = () => {
     .then((res: any) => {
       if (res?.data?.success) {
         handleUpdateSelectedConversation({ key: "acl", value: updatedAcl });
+        setLoading(true)
+        searchUsers(searchTerm).then((res) => {
+          setFilteredUsers(
+            res?.data?.filter(
+              (user: any) =>
+                !selectedConversation?.acl?.uid.includes(user.email)
+            )
+          );
+
+        setLoading(false);
+      });
+
       }
     });
   };
@@ -148,7 +160,7 @@ export const Users: FC<Props> = () => {
               <Button
                 variant="contained"
                 sx={{
-                  backgroundColor: theme.primaryColor,
+                  backgroundColor: theme.shareButtonColor,
                   fontSize: "12px",
                   color: "#fff",
                   padding: "5px",
@@ -181,7 +193,7 @@ export const Users: FC<Props> = () => {
                   textTransform: "Capitalize",
                   margin: "0px 5px",
                 }}
-                onClick={() => handleUnshare(user)}
+                onClick={() => handleRevoke(user)}
               >
                 Revoke
               </Button>

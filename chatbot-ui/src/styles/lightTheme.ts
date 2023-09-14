@@ -72,4 +72,6 @@ export const lightTheme = {
     disabledIconColor: "#BBBBBB",
   },
   bgLoader: "bg-[#1c96a3]",
+  shareButtonColor:"#1c96a3"
+
 };

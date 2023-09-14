@@ -61,7 +61,7 @@ export const Groups: FC<Props> = ({}) => {
       });
   };
 
-  const handleUnshare = (group: any) => {
+  const handleRevoke = (group: any) => {
     if (!selectedConversation) return;
     const updatedAcl = selectedConversation?.acl;
     const index = updatedAcl.gid.indexOf(group);
@@ -72,9 +72,9 @@ export const Groups: FC<Props> = ({}) => {
     .promise(
       updateConversationAcl(selectedConversation?.id, updatedAcl), //calling api here
       {
-        loading: `Unsharing the conversation with ${group} group`,
-        success: <b>Succefully unshared the conversation</b>,
-        error: <b>Error in unsharing the conversation</b>,
+        loading: `Revoking access to the conversation for ${group} group`,
+        success: <b>Succefully revoked access to the conversation</b>,
+        error: <b>Error in revoking access to the conversation</b>,
       },
       {
         position: "bottom-center",
@@ -107,7 +107,7 @@ export const Groups: FC<Props> = ({}) => {
               <Button
                 variant="contained"
                 sx={{
-                  backgroundColor: theme.primaryColor,
+                  backgroundColor: theme.shareButtonColor,
                   fontSize: "12px",
                   color: "#fff",
                   padding: "5px",
@@ -140,7 +140,7 @@ export const Groups: FC<Props> = ({}) => {
                   textTransform: "Capitalize",
                   margin: "0px 5px",
                 }}
-                onClick={() => handleUnshare(user)}
+                onClick={() => handleRevoke(user)}
               >
                 Revoke
               </Button>
