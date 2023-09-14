@@ -2,7 +2,10 @@ import { ChangeEvent, useState, useContext } from "react";
 import { Button, FormControl, MenuItem, Select, Tooltip } from "@mui/material";
 import { CustomDataGrid } from "./CustomDataGrid";
 import { IconUpload } from "@tabler/icons-react";
-import { uploadDocuments, deleteDocsGridData, getDocumentsByCollectionName } from "@/services/DocsService";
+import {
+  uploadDocuments,
+  deleteDocsGridData,
+} from "@/services/DocsService";
 import toast from "react-hot-toast";
 import HomeContext from "@/pages/home/home.context";
 import { executeOnUploadedDocRef } from "../Chat/Chat";
@@ -50,14 +53,6 @@ export const PrivateDocuments = () => {
       )
       .then(() => {
         setRefereshGridData((prevRefreshGridState) => !prevRefreshGridState);
-        getDocumentsByCollectionName(selectedCollection).then((res) => {
-          if (res?.data?.success && res?.data?.data?.length) {
-            homeDispatch({ field: "documents", value: res?.data?.data });
-          }
-          else {
-            homeDispatch({ field: "documents", value: [] });
-          }
-        });
         event.target.value = "";
       });
   };
@@ -77,24 +72,25 @@ export const PrivateDocuments = () => {
         }
       )
       .then(() => {
-        getDocumentsByCollectionName(selectedCollection).then((res) => {
-          if (res?.data?.success && res?.data?.data?.length) {
-            homeDispatch({ field: "documents", value: res?.data?.data });
-          }
-          else {
-            homeDispatch({ field: "documents", value: [] });
-          }
-        });
         setRefereshGridData((prevRefreshGridState) => !prevRefreshGridState);
       });
   };
 
-  const handleExecuteOnUploadedDoc = (id: any, documentTitle: string, code: string) => {
+  const handleExecuteOnUploadedDoc = (
+    id: any,
+    documentTitle: string,
+    code: string
+  ) => {
     const params: any = tiles.find((tile) => tile.code === code)?.params;
-    let document = documents.find((doc: any) => doc.id == id);
-
-    executeOnUploadedDocRef.current = { document: document, title: `${params?.prompt}  ${documentTitle}`, code: code };
-
+    const task_params = {
+      collectionName: selectedCollection,
+      document: { id: id, title: documentTitle },
+    };
+    executeOnUploadedDocRef.current = {
+      task_params: task_params,
+      title: `${params?.prompt}  ${documentTitle}`,
+      code: code,
+    };
     homeDispatch({ field: "isDocumentDialogOpen", value: false });
     homeDispatch({
       field: "selectedTile",
@@ -105,16 +101,28 @@ export const PrivateDocuments = () => {
     //In the next step useRef in chat component will call the handleSend function
   };
 
+  const handleSelection = (name: any) => {
+    homeDispatch({
+      field: "selectedCollection",
+      value: name,
+    });
+  };
+
   const collectionData = collections.map((collection: any) => ({
     value: collection?.name,
-    title: collection?.name
+    title: collection?.name,
   }));
 
   const taskData = tiles
-    .filter((tile: any) => (tile?.params?.executor === "summarize" || tile?.params?.executor === "extraction") &&  tile.has_access)
+    .filter(
+      (tile: any) =>
+        (tile?.params?.executor === "summarize" ||
+          tile?.params?.executor === "extraction") &&
+        tile.has_access
+    )
     .map((tile: any) => ({
       value: tile?.code,
-      title: tile?.title
+      title: tile?.title,
     }));
 
   const columns = [
@@ -128,14 +136,20 @@ export const PrivateDocuments = () => {
       renderCell: (params: any) => (
         <>
           <FormControl sx={{ m: 1, minWidth: 150 }} size="small">
-            <DropDown data={taskData}
+            <DropDown
+              data={taskData}
               value={"None"}
               label={"Select a task"}
               color={theme.documentSectionSelectTheme.color}
               backgroundColor={theme.documentSectionSelectTheme.backgroundColor}
               onChange={(code) => {
-                handleExecuteOnUploadedDoc(params.row.id, params.row.title, code)
-              }} />
+                handleExecuteOnUploadedDoc(
+                  params.row.id,
+                  params.row.title,
+                  code
+                );
+              }}
+            />
           </FormControl>
 
           <Button
@@ -155,7 +169,6 @@ export const PrivateDocuments = () => {
       ),
     },
   ];
-
   const entity = "documents";
   const initialSort = [
     {
@@ -163,35 +176,21 @@ export const PrivateDocuments = () => {
       sort: "asc",
     },
   ];
-
-  const handleSelection = (name: any) => {
-    homeDispatch({
-      field: "selectedCollection",
-      value: name,
-    });
-    getDocumentsByCollectionName(name).then((res) => {
-      if (res?.data?.success && res?.data?.data?.length) {
-        homeDispatch({ field: "documents", value: res?.data?.data });
-      }
-      else {
-        homeDispatch({ field: "documents", value: [] });
-      }
-    });
-  };
-
   return (
     <>
       <div className="flex items-center justify-end gap-5 px-4">
         <span className="font-bold text-base">Select collection:</span>
         <FormControl sx={{ m: 1, minWidth: 180 }} size="small">
-          <DropDown data={collectionData}
+          <DropDown
+            data={collectionData}
             value={selectedCollection}
             label={"Select a collection"}
             color={theme.documentSectionSelectTheme.color}
             backgroundColor={theme.documentSectionSelectTheme.backgroundColor}
             onChange={(collection) => {
-              handleSelection(collection)
-            }} />
+              handleSelection(collection);
+            }}
+          />
         </FormControl>
 
         <Tooltip

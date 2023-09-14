@@ -118,3 +118,11 @@ export const getTaskParams = (inputs:any,collections:any) => {
   })
   return params;
 }
+
+export const checkInput = (inputs:any, item:string) => {
+  if(!inputs || !item) return false;
+  return inputs?.some((input: any) => {
+    return input.type === item
+  })
+
+}

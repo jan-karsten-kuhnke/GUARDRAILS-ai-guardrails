@@ -20,24 +20,6 @@ export const DocumentDialog: FC<Props> = ({ open, onClose }) => {
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
-  const handleGetCollections = () => {
-    getCollections().then((res) => {
-      if (res?.data?.success && res?.data?.data?.length) {
-        homeDispatch({ field: "collections", value: res?.data?.data });
-        if (!selectedCollection) {
-          homeDispatch({
-            field: "selectedCollection",
-            value: res?.data?.data[0]?.name,
-          });
-        }
-      }
-    });
-  };
-
-  useEffect(() => {
-    handleGetCollections();
-  }, []);
-
   const [tab, setTab] = useState("1");
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
@@ -111,7 +93,7 @@ export const DocumentDialog: FC<Props> = ({ open, onClose }) => {
                 <PrivateDocuments />
               </TabPanel>
               <TabPanel value="2" sx={{ padding: "24px 0px" }}>
-                <Collections handleGetCollections={handleGetCollections} />
+                <Collections/>
               </TabPanel>
             </TabContext>
           </div>

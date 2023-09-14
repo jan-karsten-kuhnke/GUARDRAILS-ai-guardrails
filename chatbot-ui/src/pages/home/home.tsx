@@ -27,6 +27,7 @@ import { Tile } from "@/types/tiles";
 import { EulaDialog } from "@/components/EulaDialog/EulaDialog";
 import { ThemeProvider, createTheme } from "@mui/material";
 import { getTaskParams } from "@/utils/app/conversation";
+import { getCollections } from "@/services/DocsService";
 
 export const Home = () => {
   const contextValue = useCreateReducer<HomeInitialState>({
@@ -47,7 +48,8 @@ export const Home = () => {
       isArchiveView,
       showOnboardingGuide,
       selectedTile,
-      collections
+      collections,
+      selectedCollection
     },
     dispatch,
   } = contextValue;
@@ -60,79 +62,19 @@ export const Home = () => {
     },
   });
 
-  // on load
-  useEffect(() => {
-    //set a blank  new conversation
-    dispatch({
-      field: "selectedConversation",
-      value: {
-        id: uuidv4(),
-        name: "New Conversation",
-        messages: [],
-        folderId: null,
-        task_params:{}
-      },
-    });
-
-    fetchAllConversations(false).then((res) => {
-      const conversationHistory = res.data;
-      const cleanedConversationHistory =
-        cleanConversationHistory(conversationHistory);
-
-      dispatch({ field: "conversations", value: cleanedConversationHistory });
-    });
-
-    fetchFolders().then((res) => {
-      if (res && res.data && res.data.folders)
-        dispatch({ field: "folders", value: res.data.folders });
-    });
-
-    fetchPrompts().then((res) => {
-      if (res && res.data && res.data.prompts)
-        dispatch({ field: "prompts", value: res.data.prompts });
-    });
-
-    getEulaStatus().then((res) => {
+  const handleGetCollections = () => {
+    getCollections().then((res) => {
       if (res && res.data && res.data.success) {
-        setEulaStatus(res.data.data.eula);
+        dispatch({ field: "collections", value: res?.data?.data });
+        if (!selectedCollection) {
+          dispatch({
+            field: "selectedCollection",
+            value: res?.data?.data[0]?.name,
+          });
+        }
       }
     });
-
-    // fetchPrompts().then((res) => {
-    //   dispatch({ field: "prompts", value: res.data });
-    // });
-  }, []);
-
-  useEffect(() => {
-    if (refreshConversations) {
-      fetchAllConversations(isArchiveView).then((res) => {
-        const conversationHistory = res.data;
-        const cleanedConversationHistory =
-          cleanConversationHistory(conversationHistory);
-        dispatch({ field: "conversations", value: cleanedConversationHistory });
-        dispatch({ field: "refreshConversations", value: false });
-      });
-    }
-  }, [refreshConversations]);
-
-  useEffect(() => {
-    dispatch({ field: "refreshConversations", value: true });
-  }, [isArchiveView]);
-
-  const handleNewConversation = () => {
-    const conversation = {
-      id: uuidv4(),
-      title: "New Conversation",
-      messages: [],
-      folderId: null,
-      task_params: getTaskParams(selectedTile?.params?.inputs,collections)
-    };
-    dispatch({
-      field: "conversations",
-      value: [conversation, ...conversations],
-    });
-    dispatch({ field: "selectedConversation", value: conversation });
-  };
+  } 
 
   const handleEulaDialogClose = () => {
     setEulaStatus(true);
@@ -273,6 +215,21 @@ export const Home = () => {
   
   };
 
+  const handleNewConversation = () => {
+    const conversation = {
+      id: uuidv4(),
+      title: "New Conversation",
+      messages: [],
+      folderId: null,
+      task_params: getTaskParams(selectedTile?.params?.inputs,collections)
+    };
+    dispatch({
+      field: "conversations",
+      value: [conversation, ...conversations],
+    });
+    dispatch({ field: "selectedConversation", value: conversation });
+  };
+
 
   const handleIsPrivate = (isPrivate: boolean) => {
     dispatch({ field: "isPrivate", value: isPrivate });
@@ -282,6 +239,67 @@ export const Home = () => {
     dispatch({ field: "selectedTile", value: tile });
     handleUpdateSelectedConversation({key:"task_params",value:getTaskParams(tile?.params?.inputs,collections)})
   };
+
+  // on load
+  useEffect(() => {
+    //set a blank  new conversation
+    dispatch({
+      field: "selectedConversation",
+      value: {
+        id: uuidv4(),
+        name: "New Conversation",
+        messages: [],
+        folderId: null,
+        task_params:{}
+      },
+    });
+
+    fetchAllConversations(false).then((res) => {
+      const conversationHistory = res.data;
+      const cleanedConversationHistory =
+        cleanConversationHistory(conversationHistory);
+
+      dispatch({ field: "conversations", value: cleanedConversationHistory });
+    });
+
+    fetchFolders().then((res) => {
+      if (res && res.data && res.data.folders)
+        dispatch({ field: "folders", value: res.data.folders });
+    });
+
+    fetchPrompts().then((res) => {
+      if (res && res.data && res.data.prompts)
+        dispatch({ field: "prompts", value: res.data.prompts });
+    });
+
+    getEulaStatus().then((res) => {
+      if (res && res.data && res.data.success) {
+        setEulaStatus(res.data.data.eula);
+      }
+    });
+
+    handleGetCollections();
+
+    // fetchPrompts().then((res) => {
+    //   dispatch({ field: "prompts", value: res.data });
+    // });
+  }, []);
+
+  useEffect(() => {
+    if (refreshConversations) {
+      fetchAllConversations(isArchiveView).then((res) => {
+        const conversationHistory = res.data;
+        const cleanedConversationHistory =
+          cleanConversationHistory(conversationHistory);
+        dispatch({ field: "conversations", value: cleanedConversationHistory });
+        dispatch({ field: "refreshConversations", value: false });
+      });
+    }
+  }, [refreshConversations]);
+
+  useEffect(() => {
+    dispatch({ field: "refreshConversations", value: true });
+  }, [isArchiveView]);
 
   return (
     <HomeContext.Provider
@@ -296,6 +314,7 @@ export const Home = () => {
         handleIsPrivate,
         handleSelectedTile,
         handleUpdateSelectedConversation,
+        handleGetCollections,
       }}
     >
       <ThemeProvider theme={muiComponentTheme}>
