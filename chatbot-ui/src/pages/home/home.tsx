@@ -206,12 +206,6 @@ export const Home = () => {
       [data.key]: data.value,
     };
     dispatch({ field: "selectedConversation", value: updatedConversation });
-    dispatch({
-      field: "conversations",
-      value: conversations.map((c) =>
-        c.id === updatedConversation.id ? updatedConversation : c
-      ),
-    });
   
   };
 

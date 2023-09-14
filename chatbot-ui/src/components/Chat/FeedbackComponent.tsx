@@ -20,9 +20,38 @@ const FeedbackComponent = ({ message }: Props) => {
 
     const [thumbs,setThumbs] = useState<string>("");
 
-    const handleThumbClick = (isThumbsup: any) => {
+    const callFeedbackApi = (feedbackData: any) => {
+        
+        try {
+            const updatedMessages = selectedConversation?.messages.map((m) => {
+                if (m.id === feedbackData.message_id) {
+                  return {
+                    ...m,
+                    user_feedback:{ type: feedbackData.user_feedback.type, message: feedbackData.user_feedback.message },
+                  };
+                }
+                return m;
+              });
+            handleUpdateSelectedConversation({key:"messages",value:updatedMessages})
+        } catch (error) {
+            console.error("Error submitting feedback:", error);
+        }
+    }
+
+    const handleThumbClick = async(isThumbsup: any) => {
+
         setThumbs(isThumbsup);
         setShowMessageBox(true);
+        
+        if(message.user_feedback?.type != isThumbsup) {
+            const feedbackStatus = isThumbsup;
+            const feedbackData = {
+                message_id: message.id,
+                user_feedback: {type:feedbackStatus},
+            };
+            callFeedbackApi(feedbackData);
+            const data = await updateFeedback(selectedConversation?.id, feedbackData);
+        }
     };
 
     useEffect(() => {
@@ -32,34 +61,25 @@ const FeedbackComponent = ({ message }: Props) => {
         }
         setThumbs(message.user_feedback.type);
     },[message])
-
-    const handleSubmitFeedback = async () => {
+    
+    const handleSubmitFeedback = async() => {
         if (thumbs === "positive" || thumbs === "negative") {
-            const feedbackStatus = thumbs;
-            const feedbackData = {
-                message_id: message.id,
-                user_feedback: {type:feedbackStatus, message:additionalFeedback},
-            };
             try {
+                const feedbackStatus = thumbs;
+                const feedbackData = {
+                    message_id: message.id,
+                    user_feedback: {type:feedbackStatus, message:additionalFeedback},
+                };
+                callFeedbackApi(feedbackData);
                 const data = await updateFeedback(selectedConversation?.id, feedbackData);
-                const updatedMessages = selectedConversation?.messages.map((m) => {
-                    if (m.id === feedbackData.message_id) {
-                      return {
-                        ...m,
-                        user_feedback:{ type: feedbackData.user_feedback.type, message: feedbackData.user_feedback.message },
-                      };
-                    }
-                    return m;
-                  });
-                handleUpdateSelectedConversation({key:"messages",value:updatedMessages})
-                
+
                 if (thumbs === "positive") {
                     toast.success('We are glad to know that you like the response, thanks for sharing your feedback', {
                         position: "bottom-center",
                         duration: 5000
                     });
                 } else if (thumbs === "negative") {
-                    toast.error('Thanks for sharing the feedback, this feedback will be used to improve our responses and generate better results in the future.', {
+                    toast.success('Thanks for sharing the feedback, this feedback will be used to improve our responses and generate better results in the future.', {
                         position: "bottom-center",
                         duration: 5000
                     });
