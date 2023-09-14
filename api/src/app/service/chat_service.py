@@ -233,7 +233,7 @@ class chat_service:
         )
 
         acl = acl_obj(
-            uid=[email],
+            uid=[],
             gid=[],
             rid=[],
             owner=email
