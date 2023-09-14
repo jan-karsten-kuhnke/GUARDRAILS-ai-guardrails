@@ -15,14 +15,11 @@ class acl_service:
                 return None, 404
             
             acl = conversation['acl']
-            print(acl)
             if acl is None:
                 pass
-            print(type(data))
             keysList = [key for key in data.keys()]
             for key in keysList:
                 array = data[key] 
-                print(type(array))
                 if isinstance(array, list) :
                     if data['is_provide_access']:
                         acl[key].extend(array)
