@@ -10,7 +10,7 @@ import { LatestExportFormat, SupportedExportFormats } from "@/types/export";
 import HomeContext from "@/pages/home/home.context";
 
 import { ChatFolders } from "./components/ChatFolders";
-import { ChatbarSettings } from "./components/ChatbarSettings";
+import { ChatbarFooter } from "./components/ChatbarFooter";
 import { Conversations } from "./components/Conversations";
 
 import Sidebar from "../Sidebar";
@@ -168,7 +168,7 @@ export const Chatbar = () => {
         handleCreateItem={handleNewConversation}
         handleCreateFolder={() => handleCreateFolder("New folder", "chat")}
         handleDrop={handleDrop}
-        footerComponent={<ChatbarSettings />}
+        footerComponent={<ChatbarFooter />}
       />
     </ChatbarContext.Provider>
   );
