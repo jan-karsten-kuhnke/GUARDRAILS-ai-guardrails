@@ -1,3 +1,4 @@
+import { type } from "os";
 
 export interface Message {
   id?: string ;
@@ -5,8 +6,12 @@ export interface Message {
   content: string;
   userActionRequired: boolean;
   msg_info: any;
-  feedback?: string;
-  message?: string;
+  user_feedback?: UserFeedback;
+}
+
+export interface UserFeedback{
+  type: string;
+  message: string;
 }
 
 export type Role = 'assistant' | 'user' | 'guardrails';

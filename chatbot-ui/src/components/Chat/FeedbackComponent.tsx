@@ -26,52 +26,31 @@ const FeedbackComponent = ({ message }: Props) => {
     };
 
     useEffect(() => {
-        if (!message.feedback){
+        if (!message.user_feedback?.type){
             setThumbs("");
             return;
         }
-        setThumbs(message.feedback);
+        setThumbs(message.user_feedback.type);
     },[message])
 
-
-    const handleAdditionalFeedbackChange = (event: any) => {
-        setAdditionalFeedback(event.target.value);
-    };
     const handleSubmitFeedback = async () => {
         if (thumbs === "positive" || thumbs === "negative") {
             const feedbackStatus = thumbs;
             const feedbackData = {
                 message_id: message.id,
-                feedback: feedbackStatus,
-                message: additionalFeedback,
+                user_feedback: {type:feedbackStatus, message:additionalFeedback},
             };
-            // const feedbackData = {
-            //     message_id: message.id,
-            //     user_feedback: {type:feedbackStatus, message:additionalFeedback},
-            // };   
             try {
                 const data = await updateFeedback(selectedConversation?.id, feedbackData);
                 const updatedMessages = selectedConversation?.messages.map((m) => {
                     if (m.id === feedbackData.message_id) {
                       return {
                         ...m,
-                        feedback: feedbackData.feedback,
-                        message: feedbackData.message
+                        user_feedback:{ type: feedbackData.user_feedback.type, message: feedbackData.user_feedback.message },
                       };
                     }
                     return m;
                   });
-                // const updatedMessages = selectedConversation?.messages.map((m) => {
-                //     if (m.id === feedbackData.message_id) {
-                //       return {
-                //         ...m,
-                //         user_feedback:{type:feedbackStatus, message:additionalFeedback}
-                //       };
-                //     }
-                //     return m;
-                //   });
-
-
                 handleUpdateSelectedConversation({key:"messages",value:updatedMessages})
                 
                 if (thumbs === "positive") {
@@ -114,8 +93,8 @@ const FeedbackComponent = ({ message }: Props) => {
                     <textarea
                         placeholder="Add additional feedback (optional)"
                         value={additionalFeedback}
-                        onChange={handleAdditionalFeedbackChange}
-                        className="border border-gray-300 rounded-md p-2 resize-none"
+                        onChange={(event => setAdditionalFeedback(event.target.value))}
+                        className="border border-gray-300 rounded-md p-2 pr-5 pl-5 pt-4 resize-none focus:outline-none"
                     />
                     <button onClick={handleSubmitFeedback} className={` rounded-md p-2 ${theme.primaryButtonTheme}`}>
                         Submit Feedback

@@ -6,7 +6,7 @@ import { useCreateReducer } from "@/hooks/useCreateReducer";
 import { Navbar } from "@/components/Mobile/Navbar";
 import { Chat } from "@/components/Chat/Chat";
 import { useEffect, useRef, useState } from "react";
-import { Conversation } from "@/types/chat";
+import { Conversation, UserFeedback } from "@/types/chat";
 import { v4 as uuidv4 } from "uuid";
 import {
   fetchAllConversations,
@@ -209,8 +209,7 @@ export const Home = () => {
       conversation.messages = res.data.messages.map(
         (message: {
           id: string;
-          feedback: string;
-          message: string;
+          user_feedback: UserFeedback;
           role: any;
           content: any;
           user_action_required: any;
@@ -218,8 +217,7 @@ export const Home = () => {
         }) => ({
           id: message.id,
           role: message.role,
-          feedback: message.feedback,
-          message: message.message,
+          user_feedback: message.user_feedback,
           content: message.content,
           userActionRequired: message.user_action_required,
           msg_info: message.msg_info,
