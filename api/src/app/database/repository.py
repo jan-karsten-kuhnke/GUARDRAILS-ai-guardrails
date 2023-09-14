@@ -91,7 +91,7 @@ class Persistence:
         finally:
             session.close()
 
-    def insert_data_source(name, connection_string, schemas=[], tables_to_include=[], custom_schema_description=""):
+    def insert_data_source(name, connection_string, user_id, schemas=[], tables_to_include=[], custom_schema_description=""):
         try:
             session=Session()
             data_source = DataSourceEntity(
@@ -103,6 +103,7 @@ class Persistence:
                 )
             session.add(data_source)
             session.commit()
+            Persistence.update_chain_acl(data_source.id, 'data_source', {'uid':[], 'gid':[], 'rid':[], 'owner':user_id})
             return jsonify({"message": "successfully added data source"}), 200
         except Exception as ex:
             logging.error(f"Exception while adding datasource: {ex}")
@@ -605,7 +606,7 @@ class Persistence:
 
     
 
-    def insert_chain(title, icon, code, params, active, group_code):
+    def insert_chain(title, icon, code, params, active, group_code, user_id):
         try:
             session=Session()
             chain = ChainEntity(
@@ -618,6 +619,8 @@ class Persistence:
             )
             session.add(chain)
             session.commit()
+            #create an entry in acl table for chain
+            Persistence.update_chain_acl(chain.id, 'chain', {'uid':[], 'gid':[], 'rid':[], 'owner':user_id})
             return jsonify({"message": "Successfully inserted chain","success":True}), 200
         except Exception as e:
             logging.error(f"Exception while inserting chain: {e}")
@@ -655,43 +658,42 @@ class Persistence:
             session.close()
         
     
-    def update_chain_acl(id,entity_type, data):
+    def update_acl_list(id,entity_type, data):
         try:
             session=Session()
-            acl_chain=session.query(AclEntity).filter(AclEntity.entity_id == id).first()
-            
-            if acl_chain:
-                   gid_array = acl_chain.gid
-                   gid_array.extend(data['groups'])
-                   acl_chain.gid = gid_array
-            else:
-                return jsonify({"message": "Cannot find the chain","success":False}), 500
+            acl  = session.query(AclEntity).filter(AclEntity.entity_id == id, AclEntity.entity_type==entity_type ).first()
+            if acl is None:
+                #create an entry in acl table
+                acl = AclEntity(entity_id=id, entity_type=entity_type, uid=[], gid=[], rid=[], owner=data['owner'])
+                session.add(acl)
+                session.commit()
+                return
+            acl_list = acl.to_dict()
+
+            keysList = [key for key in data.keys()]
+            for key in keysList:
+                array = data[key] 
+                print(type(array))
+                if isinstance(array, list) :
+                    if data['is_provide_access']:
+                        acl_list[key].extend(array)
+                    else:
+                        for item in array:
+                            if item in acl_list[key]:
+                                acl_list[key].remove(item)
+                elif isinstance(array, str):
+                    if data['is_provide_access']:
+                        acl_list[key] = array
+                    else:
+                        acl_list[key] = ""
+
+            session.query(AclEntity).filter(AclEntity.entity_id == id, AclEntity.entity_type==entity_type ).update(acl_list)
             session.commit()
-            return jsonify({"message": "Successfully updated chain acl","success":True}), 200
+            return jsonify({"message": "Successfully updated {} acl".format(entity_type), "success": True}), 200
         except Exception as e:
-            logging.error(f"Exception while updating chain: {e}")
+            logging.error(f"Exception while updating acl: {e}")
             session.rollback()
-            return jsonify({"message": "Error in updating chain acl","success":False}), 500
+            return jsonify({"message": "Error in updating acl","success":False}), 500
         finally:
             session.close()
-
-    def update_data_source_acl(id,entity_type, data):
-        try:
-            session=Session()
-            data_source_acl=session.query(AclEntity).filter(AclEntity.entity_id == id).first()
-            
-            if data_source_acl:
-                    gid_array = data_source_acl.gid
-                    gid_array.extend(data['groups'])
-                    data_source_acl.gid = gid_array
-
-            else:
-                return jsonify({"message": "Cannot find the data source","success":False}), 500
-            session.commit()
-            return jsonify({"message": "Successfully updated data source acl","success":True}), 200
-        except Exception as e:
-            logging.error(f"Exception while updating data source: {e}")
-            session.rollback()
-            return jsonify({"message": "Error in updating data source acl","success":False}), 500
-        finally:
-            session.close() 
+ 

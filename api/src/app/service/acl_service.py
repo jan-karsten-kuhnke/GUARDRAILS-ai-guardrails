@@ -3,6 +3,8 @@ from repo.db import conversation_context
 from oidc import get_current_user_id
 from oidc import get_current_user_groups
 from oidc import get_current_user_roles
+from database.postgres import Session, engine
+from database.models import AclEntity
 
 class acl_service:
     def update_acl(entity_type, id, data):
@@ -37,8 +39,7 @@ class acl_service:
             res['message'] ="access provided" if data['is_provide_access'] else "access removed"
             return res
         elif entity_type == 'chain':
-            return Persistence.update_chain_acl(id,entity_type,data)
-        elif entity_type == 'data-source':
-            return Persistence.update_data_source_acl(id,entity_type,data)
+            return Persistence.update_acl_list(id,entity_type,data)
+        elif entity_type == 'data_source':
+            return Persistence.update_acl_list(id,entity_type,data)
         
-        return Persistence.update_acl(data)

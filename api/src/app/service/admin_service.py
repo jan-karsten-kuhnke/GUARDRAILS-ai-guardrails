@@ -34,14 +34,14 @@ class admin_service:
     
     def insert_data_source(data):
         name = data['name']
-
+        user_id = get_current_user_id()
         encrypted_connection_string = Encryption.encrypt(data['connection_string'])
 
         schemas = data['schemas'] if 'schemas' in data else []
         tables_to_include = data['tables_to_include'] if 'tables_to_include' in data else []
         custom_schema_description = data['custom_schema_description'] if 'custom_schema_description' in data else ""
 
-        return Persistence.insert_data_source(name=name, connection_string=encrypted_connection_string, schemas=schemas, tables_to_include=tables_to_include, custom_schema_description=custom_schema_description)
+        return Persistence.insert_data_source(name=name, connection_string=encrypted_connection_string, user_id=user_id, schemas=schemas, tables_to_include=tables_to_include, custom_schema_description=custom_schema_description)
 
     def update_data_source(id, data):
         name = data['name'] if 'name' in data else None
@@ -121,7 +121,8 @@ class admin_service:
         return {"success":True,"message":"Successfully completed the request"}
     
     def insert_chain(title, icon, code, params, active, group_code):
-        return Persistence.insert_chain(title, icon, code, params, active, group_code)
+        user_id = get_current_user_id()
+        return Persistence.insert_chain(title, icon, code, params, active, group_code, user_id)
     
     def update_chain(id,data):
         return Persistence.update_chain(id,data)
