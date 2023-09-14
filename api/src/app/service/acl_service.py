@@ -36,8 +36,8 @@ class acl_service:
             print(acl)  
             return conversation_context.update_conversation_acl(id, acl)
         elif entity_type == 'chain':
-            return Persistence.update_acl(data)
+            return Persistence.update_chain_acl(id,entity_type,data)
         elif entity_type == 'data-source':
-            return Persistence.update_acl(data)
+            return Persistence.update_data_source_acl(id,entity_type,data)
         
         return Persistence.update_acl(data)
