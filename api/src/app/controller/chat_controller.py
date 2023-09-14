@@ -9,6 +9,7 @@ from oidc import get_current_user_id
 from utils.util import rename_id
 import json
 from utils.util import validate_fields
+from utils.util import validate_feedback_fields
 endpoints = SmorestBlueprint('chat', __name__)
 
 @endpoints.route('/completions', methods=['POST'])
@@ -29,6 +30,7 @@ def chat_completion():
             for chunk in response:
                 yield chunk
         return Response(chat_completion_stream(data, user_id), mimetype='text/event-stream')
+        
 
     except Exception as e:
         # Handle general exceptions
@@ -124,5 +126,20 @@ def execute_on_document():
                 yield chunk
         return Response(summarize_brief_stream(data, user_id, token, filename, filepath), mimetype='text/event-stream')
 
+    except Exception as e:
+        return jsonify(error="An error occurred: " + str(e)), 500
+
+#feedback api
+@endpoints.route('/conversations/feedback/<conversation_id>', methods=['PUT'])
+@oidc.accept_token(require_token=True)
+def feedback(conversation_id):
+    try:
+        data=request.json
+        required_fields = {"message_id", "user_feedback", "type"}
+        validation_result = validate_feedback_fields(data, required_fields)
+        if validation_result:
+            return validation_result
+        user_id = get_current_user_id()
+        return chat_service.feedback(conversation_id, data, user_id)
     except Exception as e:
         return jsonify(error="An error occurred: " + str(e)), 500
