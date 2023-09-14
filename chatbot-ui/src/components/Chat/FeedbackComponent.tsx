@@ -70,6 +70,7 @@ const FeedbackComponent = ({ message }: Props) => {
                     message_id: message.id,
                     user_feedback: {type:feedbackStatus, message:additionalFeedback},
                 };
+                setShowMessageBox(false);
                 callFeedbackApi(feedbackData);
                 const data = await updateFeedback(selectedConversation?.id, feedbackData);
 
@@ -84,7 +85,6 @@ const FeedbackComponent = ({ message }: Props) => {
                         duration: 5000
                     });
                 }
-                setShowMessageBox(false);
                 setAdditionalFeedback('');
             } catch (error) {
                 console.error("Error submitting feedback:", error);
@@ -114,7 +114,7 @@ const FeedbackComponent = ({ message }: Props) => {
                         placeholder="Add additional feedback (optional)"
                         value={additionalFeedback}
                         onChange={(event => setAdditionalFeedback(event.target.value))}
-                        className="border border-gray-300 rounded-md p-2 pr-5 pl-5 pt-4 resize-none focus:outline-none"
+                        className={`rounded-md font-normal m-0 w-full resize-none pt-2 pr-8 pl-5 md:pt-2 md:pl-5 ${theme.feedbackTextAreaTheme}`}
                     />
                     <button onClick={handleSubmitFeedback} className={` rounded-md p-2 ${theme.primaryButtonTheme}`}>
                         Submit Feedback
