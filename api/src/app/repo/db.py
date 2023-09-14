@@ -121,7 +121,8 @@ class conversation_context:
 
 
     #conversation_logs admin-ui
-
+    def get_conversation_by_id_user_id(conversation_id, user_id):
+        return conversations_collection.find_one({"_id":conversation_id , "user_id":user_id})
     def get_conversation_list(sort, range_, filter_):
         response=ApiResponse()
         try:
@@ -262,8 +263,14 @@ class conversation_context:
             response.update(False,"Error in rejecting",None)
         return response.json()
 
-
-
+    def update_conversation_acl(id, acl):
+        response = ApiResponse()
+        
+        res = conversations_collection.update_one({"_id":id}, {"$set":{"acl":acl}})
+        print(str(res)) 
+        return response.update(True,"Successfully approved",None)
+    # def update_conversation(conversation_id, conversation):
+    #     conversations_collection.update_one({"_id":conversation_id}, {"$set":conversation})
 
 
 

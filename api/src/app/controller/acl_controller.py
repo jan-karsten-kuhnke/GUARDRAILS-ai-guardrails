@@ -14,7 +14,7 @@ from utils.util import validate_fields
 aclendpoints = SmorestBlueprint('acl', __name__)
 
 
-@aclendpoints.route('<entity_type>/<id>', methods=['POST'])
+@aclendpoints.route('/<entity_type>/<id>', methods=['POST'])
 @oidc.accept_token(require_token=True)
 def custom_rules_create(entity_type, id):
     if entity_type is None:
