@@ -655,7 +655,7 @@ class Persistence:
             session.close()
         
     
-    def update_chain_acl(id, data):
+    def update_chain_acl(id,entity_type, data):
         try:
             session=Session()
             acl_chain=session.query(AclEntity).filter(AclEntity.entity_id == id).first()
@@ -675,7 +675,7 @@ class Persistence:
         finally:
             session.close()
 
-    def update_data_source_acl(id, data):
+    def update_data_source_acl(id,entity_type, data):
         try:
             session=Session()
             data_source_acl=session.query(AclEntity).filter(AclEntity.entity_id == id).first()
