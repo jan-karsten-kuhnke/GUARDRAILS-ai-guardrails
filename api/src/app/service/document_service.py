@@ -18,13 +18,13 @@ class DocumentService:
             logging.error(f"Exception uploading document: {ex}")
 
     
-    def create_documents(location,collection_name,uploaded_by,uploaded_at,metadata):
+    def create_documents(location,collection_name,uploaded_by,uploaded_at,ingest_with_google,metadata):
         try:
             ingestion_service = IngestionService()
             files = IngestionService.get_all_documents(location)
 
             for file in files:
-                custom_ids = ingestion_service.ingest_file(file["file_path"], collection_name,uploaded_by,uploaded_at,metadata)
+                custom_ids = ingestion_service.ingest_file(file["file_path"], collection_name,uploaded_by,uploaded_at,ingest_with_google, metadata)
                 Persistence.insert_document(file['file_name'], file["file_path"], custom_ids, collection_name)
 
             return jsonify({"success":True,"message":"Successfully uploaded documents"}),200

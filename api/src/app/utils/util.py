@@ -76,4 +76,21 @@ def validate_fields(data, required_fields = None):
                 elif not (isinstance(data[field], str) or (field in nulls_allowed and type(data[field]) == type(None))):
                     return jsonify(error=f"Invalid data type for {field}"), 400
     return False
+
+def validate_feedback_fields(data, required_fields):
+    if not data:
+        return jsonify(error="Missing or invalid JSON data"), 400
+    missing_fields =[field for field in required_fields if field not in data and (not data.get("user_feedback") or field not in data["user_feedback"])]
+    if missing_fields:
+        return jsonify(error=f"Missing required fields: {', '.join(missing_fields)}"), 400
+    for field in required_fields:
+        if field == 'user_feedback':
+            if not isinstance(data[field], dict):
+                return jsonify(error=f"Invalid data type for {field}"), 400
+            if not isinstance(data[field]['type'], str):
+                return jsonify(error="Invalid data type for {variable}".format(variable=list(data[field].keys())[0])), 400
+        elif field !=  'type' and not (isinstance(data[field], str)):
+            return jsonify(error=f"Invalid data type for {field}"), 400
+    return False
+
     

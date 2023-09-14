@@ -6,7 +6,7 @@ import { useCreateReducer } from "@/hooks/useCreateReducer";
 import { Navbar } from "@/components/Mobile/Navbar";
 import { Chat } from "@/components/Chat/Chat";
 import { useEffect, useRef, useState } from "react";
-import { Conversation } from "@/types/chat";
+import { Conversation, UserFeedback } from "@/types/chat";
 import { v4 as uuidv4 } from "uuid";
 import {
   fetchAllConversations,
@@ -27,6 +27,7 @@ import { Tile } from "@/types/tiles";
 import { EulaDialog } from "@/components/EulaDialog/EulaDialog";
 import { ThemeProvider, createTheme } from "@mui/material";
 import { getTaskParams } from "@/utils/app/conversation";
+import { getCollections } from "@/services/DocsService";
 
 export const Home = () => {
   const contextValue = useCreateReducer<HomeInitialState>({
@@ -47,7 +48,8 @@ export const Home = () => {
       isArchiveView,
       showOnboardingGuide,
       selectedTile,
-      collections
+      collections,
+      selectedCollection
     },
     dispatch,
   } = contextValue;
@@ -60,79 +62,19 @@ export const Home = () => {
     },
   });
 
-  // on load
-  useEffect(() => {
-    //set a blank  new conversation
-    dispatch({
-      field: "selectedConversation",
-      value: {
-        id: uuidv4(),
-        name: "New Conversation",
-        messages: [],
-        folderId: null,
-        task_params:{}
-      },
-    });
-
-    fetchAllConversations(false).then((res) => {
-      const conversationHistory = res.data;
-      const cleanedConversationHistory =
-        cleanConversationHistory(conversationHistory);
-
-      dispatch({ field: "conversations", value: cleanedConversationHistory });
-    });
-
-    fetchFolders().then((res) => {
-      if (res && res.data && res.data.folders)
-        dispatch({ field: "folders", value: res.data.folders });
-    });
-
-    fetchPrompts().then((res) => {
-      if (res && res.data && res.data.prompts)
-        dispatch({ field: "prompts", value: res.data.prompts });
-    });
-
-    getEulaStatus().then((res) => {
+  const handleGetCollections = () => {
+    getCollections().then((res) => {
       if (res && res.data && res.data.success) {
-        setEulaStatus(res.data.data.eula);
+        dispatch({ field: "collections", value: res?.data?.data });
+        if (!selectedCollection) {
+          dispatch({
+            field: "selectedCollection",
+            value: res?.data?.data[0]?.name,
+          });
+        }
       }
     });
-
-    // fetchPrompts().then((res) => {
-    //   dispatch({ field: "prompts", value: res.data });
-    // });
-  }, []);
-
-  useEffect(() => {
-    if (refreshConversations) {
-      fetchAllConversations(isArchiveView).then((res) => {
-        const conversationHistory = res.data;
-        const cleanedConversationHistory =
-          cleanConversationHistory(conversationHistory);
-        dispatch({ field: "conversations", value: cleanedConversationHistory });
-        dispatch({ field: "refreshConversations", value: false });
-      });
-    }
-  }, [refreshConversations]);
-
-  useEffect(() => {
-    dispatch({ field: "refreshConversations", value: true });
-  }, [isArchiveView]);
-
-  const handleNewConversation = () => {
-    const conversation = {
-      id: uuidv4(),
-      title: "New Conversation",
-      messages: [],
-      folderId: null,
-      task_params: getTaskParams(selectedTile?.params?.inputs,collections)
-    };
-    dispatch({
-      field: "conversations",
-      value: [conversation, ...conversations],
-    });
-    dispatch({ field: "selectedConversation", value: conversation });
-  };
+  } 
 
   const handleEulaDialogClose = () => {
     setEulaStatus(true);
@@ -208,12 +150,16 @@ export const Home = () => {
     fetchConversationById(conversation.id).then((res) => {
       conversation.messages = res.data.messages.map(
         (message: {
+          id: string;
+          user_feedback: UserFeedback;
           role: any;
           content: any;
           user_action_required: any;
           msg_info: any;
         }) => ({
+          id: message.id,
           role: message.role,
+          user_feedback: message.user_feedback,
           content: message.content,
           userActionRequired: message.user_action_required,
           msg_info: message.msg_info,
@@ -260,13 +206,22 @@ export const Home = () => {
       [data.key]: data.value,
     };
     dispatch({ field: "selectedConversation", value: updatedConversation });
+  
+  };
+
+  const handleNewConversation = () => {
+    const conversation = {
+      id: uuidv4(),
+      title: "New Conversation",
+      messages: [],
+      folderId: null,
+      task_params: getTaskParams(selectedTile?.params?.inputs,collections)
+    };
     dispatch({
       field: "conversations",
-      value: conversations.map((c) =>
-        c.id === updatedConversation.id ? updatedConversation : c
-      ),
+      value: [conversation, ...conversations],
     });
-  
+    dispatch({ field: "selectedConversation", value: conversation });
   };
 
 
@@ -278,6 +233,67 @@ export const Home = () => {
     dispatch({ field: "selectedTile", value: tile });
     handleUpdateSelectedConversation({key:"task_params",value:getTaskParams(tile?.params?.inputs,collections)})
   };
+
+  // on load
+  useEffect(() => {
+    //set a blank  new conversation
+    dispatch({
+      field: "selectedConversation",
+      value: {
+        id: uuidv4(),
+        name: "New Conversation",
+        messages: [],
+        folderId: null,
+        task_params:{}
+      },
+    });
+
+    fetchAllConversations(false).then((res) => {
+      const conversationHistory = res.data;
+      const cleanedConversationHistory =
+        cleanConversationHistory(conversationHistory);
+
+      dispatch({ field: "conversations", value: cleanedConversationHistory });
+    });
+
+    fetchFolders().then((res) => {
+      if (res && res.data && res.data.folders)
+        dispatch({ field: "folders", value: res.data.folders });
+    });
+
+    fetchPrompts().then((res) => {
+      if (res && res.data && res.data.prompts)
+        dispatch({ field: "prompts", value: res.data.prompts });
+    });
+
+    getEulaStatus().then((res) => {
+      if (res && res.data && res.data.success) {
+        setEulaStatus(res.data.data.eula);
+      }
+    });
+
+    handleGetCollections();
+
+    // fetchPrompts().then((res) => {
+    //   dispatch({ field: "prompts", value: res.data });
+    // });
+  }, []);
+
+  useEffect(() => {
+    if (refreshConversations) {
+      fetchAllConversations(isArchiveView).then((res) => {
+        const conversationHistory = res.data;
+        const cleanedConversationHistory =
+          cleanConversationHistory(conversationHistory);
+        dispatch({ field: "conversations", value: cleanedConversationHistory });
+        dispatch({ field: "refreshConversations", value: false });
+      });
+    }
+  }, [refreshConversations]);
+
+  useEffect(() => {
+    dispatch({ field: "refreshConversations", value: true });
+  }, [isArchiveView]);
 
   return (
     <HomeContext.Provider
@@ -291,7 +307,8 @@ export const Home = () => {
         handleUpdateConversation,
         handleIsPrivate,
         handleSelectedTile,
-        handleUpdateSelectedConversation
+        handleUpdateSelectedConversation,
+        handleGetCollections,
       }}
     >
       <ThemeProvider theme={muiComponentTheme}>

@@ -673,7 +673,6 @@ class Persistence:
             keysList = [key for key in data.keys()]
             for key in keysList:
                 array = data[key] 
-                print(type(array))
                 if isinstance(array, list) :
                     if data['is_provide_access']:
                         acl_list[key].extend(array)

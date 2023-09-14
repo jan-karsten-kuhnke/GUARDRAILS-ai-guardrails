@@ -4,11 +4,12 @@ import { IconUpload } from "@tabler/icons-react";
 import { Message } from "@/types/chat";
 import HomeContext from "@/pages/home/home.context";
 import {
-  getCollections,
   getDocumentsByCollectionName,
 } from "@/services/DocsService";
 import DropDown from "../DropDown/DropDown";
 import { FormControl } from "@mui/material";
+import { checkInput } from "@/utils/app/conversation";
+import { COLLECTION_PICKER, DOCUMENT_PICKER } from "@/utils/constants";
 
 interface Props {
   inputs: [
@@ -50,53 +51,25 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
     handleSend(message, 0, formData);
   };
 
-  const collectionData = collections?.map((collection: any) => ({
-    value: collection?.name,
-    title: collection?.name
-  })) || [];
+ 
 
-  const documentData = documents?.map((document: any) => ({
-    value: document?.id,
-    title: document?.title
-  })) || [];
-
-  // collection selection
-  const handleGetCollections = () => {
-    getCollections().then((res) => {
-      if (res?.data?.success && res?.data?.data?.length) {
-        homeDispatch({ field: "collections", value: res?.data?.data });
-        getDocumentsByCollectionName(res?.data?.data[0]?.name).then((res) => {
-          if (res?.data?.success && res?.data?.data?.length) {
-            homeDispatch({ field: "documents", value: res?.data?.data });
-          } else {
-            homeDispatch({ field: "documents", value: [] });
-          }
-        });
-      }
-    });
-  };
-
-  useEffect(() => {
-    handleGetCollections();
-  }, []);
-
-  const handleCollectionSelect = (name: any) => {
-    let isDocumentPicker = false;
-    inputs.forEach((input) => {
-      if (input.key === "document" && input.type === "documentPicker") {
-        isDocumentPicker = true;
-      }
-    });
-    handleUpdateSelectedConversation({ key: "task_params", value: { ...selectedConversation?.task_params, collectionName: name, ...isDocumentPicker ? { document: undefined } : {} } })
-
-    getDocumentsByCollectionName(name).then((res) => {
+  const handleGetDocuments = () => {
+    const collectionName = selectedConversation?.task_params?.collectionName
+    if(!collectionName) return;
+    getDocumentsByCollectionName(collectionName).then((res) => {
       if (res?.data?.success && res?.data?.data?.length) {
         homeDispatch({ field: "documents", value: res?.data?.data });
       } else {
         homeDispatch({ field: "documents", value: [] });
       }
-    });
+    })
+  }
+
+  const handleCollectionSelect = (collection: any) => {
+    let isDocumentPicker = checkInput(inputs, DOCUMENT_PICKER);
+    handleUpdateSelectedConversation({ key: "task_params", value: { ...selectedConversation?.task_params, collectionName: collection, ...isDocumentPicker ? { document: undefined } : {} } })
   };
+
   const handleDocumentSelect = (id: any) => {
     if (id == undefined) {
     handleUpdateSelectedConversation({ key: "task_params", value: { ...selectedConversation?.task_params, document: undefined } })
@@ -107,6 +80,21 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
     handleUpdateSelectedConversation({ key: "task_params", value: { ...selectedConversation?.task_params, document: documentSelected } })
     }
   };
+
+  useEffect(() => {
+    if(!checkInput(inputs, DOCUMENT_PICKER)) return;
+    handleGetDocuments()
+  }, [selectedConversation?.task_params?.collectionName,selectedTile]);
+
+  const collectionData = collections?.map((collection: any) => ({
+    value: collection?.name,
+    title: collection?.name
+  })) || [];
+
+  const documentData = documents?.map((document: any) => ({
+    value: document?.id,
+    title: document?.title
+  })) || [];
 
   return (
     <>
