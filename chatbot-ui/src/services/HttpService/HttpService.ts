@@ -100,6 +100,10 @@ export const requestApproval = (conversationId: string) => {
   return _axios.get(`/chat/requestapproval/${conversationId}`);
 };
 
+export const updateFeedback = (conversationId: any, feedback:any) => {
+  return _axios.put(`/chat/conversations/feedback/${conversationId}`, feedback);
+};
+
 //pii => enpoints={baseURL}/pii
 
 export const analyzeMessage = (message: string) => {
