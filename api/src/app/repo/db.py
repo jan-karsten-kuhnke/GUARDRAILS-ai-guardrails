@@ -259,11 +259,10 @@ class conversation_context:
             response.update(False,"Error in rejecting",None)
         return response.json()
 
-    def update_conversation_acl(conversation_id,acl,user_id):
+    def update_conversation_acl(id,acl, user_id):
         response = ApiResponse()
         try:
-            print(conversation_id,acl,user_id)
-            res = conversations_collection.update_one({"_id":conversation_id, "user_id":user_id}, {"$set":{"acl":acl}})
+            res = conversations_collection.update_one({"_id":id, "user_id":user_id}, {"$set":{"acl":acl}}) 
             response.update(True,"",None)
         except Exception as ex:
             logging.info(f"Error in updating access list: {ex}")
