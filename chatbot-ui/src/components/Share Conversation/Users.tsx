@@ -67,9 +67,13 @@ export const Users: FC<Props> = () => {
     const updatedAcl = selectedConversation?.acl;
     updatedAcl.uid.push(user.email);
     updatedAcl.is_provide_access=true
+    let payload={
+      uid:[user.email],
+      is_provide_access:true
+    }
     toast
       .promise(
-        updateConversationAcl(selectedConversation?.id, updatedAcl), //calling api here
+        updateConversationAcl(selectedConversation?.id, payload), //calling api here
         {
           loading: `Sharing the conversation with ${user.firstName} ${user.lastName}`,
           success: <b>Succefully shared the conversation</b>,
@@ -99,11 +103,14 @@ export const Users: FC<Props> = () => {
     if (index > -1) {
       updatedAcl.uid.splice(index, 1);
     }
-    updatedAcl.is_provide_access=true
-
+    updatedAcl.is_provide_access=false
+    let payload={
+      uid:[user],
+      is_provide_access:false
+    }
     toast
     .promise(
-      updateConversationAcl(selectedConversation?.id, updatedAcl), //calling api here
+      updateConversationAcl(selectedConversation?.id, payload), //calling api here
       {
         loading: `Revoking access to the conversation for ${user}`,
         success: <b>Succefully revoked access to the conversation</b>,

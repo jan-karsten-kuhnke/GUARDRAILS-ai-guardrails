@@ -9,8 +9,6 @@ from database.models import AclEntity
 class acl_service:
     def update_acl(entity_type, id, data):
         user_id = get_current_user_id()
-        if len(data['owner']) == 0:
-            data['owner'] = user_id
         if entity_type == 'conversation':
             conversation = conversation_context.get_conversation_by_id_user_id(id, user_id)
             if conversation is None:
