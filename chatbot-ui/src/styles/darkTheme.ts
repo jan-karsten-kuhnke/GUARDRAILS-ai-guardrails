@@ -46,6 +46,7 @@ export const darkTheme = {
     "bg-gradient-to-b from-transparent via-[#343541] to-[#343541] ",
   chatTextAreaTheme:
     "bg-[#40414f] text-neutral-100 rounded shadow-[0_0_15px_rgba(0,0,0,0.10)] ",
+  feedbackTextAreaTheme: "bg-[#343541] text-neutral-100 rounded shadow-[0_0_15px_rgba(0,0,0,0.10)] ",
   chatSendButtonTheme: {
     active: "bg-[#202123] text-white",
     disabled: "text-white opacity-50",
@@ -70,4 +71,5 @@ export const darkTheme = {
     disabledIconColor: "#5A5A5A",
   },
   bgLoader: "bg-[#ffffff]",
+  shareButtonColor:"#343541"
 };

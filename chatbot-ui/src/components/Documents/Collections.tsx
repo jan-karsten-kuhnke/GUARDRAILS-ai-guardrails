@@ -5,13 +5,12 @@ import { IconPlus } from "@tabler/icons-react";
 import { FC, useContext, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 
-interface CollectionsProps {
-  handleGetCollections: () => void;
-}
 
-const Collections: FC<CollectionsProps> = ({ handleGetCollections }) => {
+
+const Collections = () => {
   const {
     state: { theme, collections },
+    handleGetCollections,
   } = useContext(HomeContext);
 
   const [collectionName, setCollectionName] = useState("");

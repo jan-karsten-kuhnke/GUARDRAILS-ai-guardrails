@@ -1,14 +1,18 @@
 from flask import Flask, Blueprint, Response, jsonify
 from flask_restful import Resource, Api, reqparse, request
 from service.chat_service import chat_service
+from service.acl_service import acl_service
 from flask_smorest import Blueprint as SmorestBlueprint
 from time import time
 import os
 from oidc import oidc
 from oidc import get_current_user_id
+from oidc import get_current_user_groups
+from oidc import get_current_user_roles
 from utils.util import rename_id
 import json
 from utils.util import validate_fields
+from utils.util import validate_feedback_fields
 endpoints = SmorestBlueprint('chat', __name__)
 
 @endpoints.route('/completions', methods=['POST'])
@@ -22,13 +26,16 @@ def chat_completion():
         if validation_result:
             return validation_result
         user_id = get_current_user_id()
+        user_groups = get_current_user_groups()
+        user_roles = get_current_user_roles()
         token = request.headers.get('authorization', '').split(' ')[1]
 
         def chat_completion_stream(data, user_id):
-            response = chat_service.chat_completion(data, user_id, token)
+            response = chat_service.chat_completion(data, user_id, token,  user_groups, user_roles)
             for chunk in response:
                 yield chunk
         return Response(chat_completion_stream(data, user_id), mimetype='text/event-stream')
+        
 
     except Exception as e:
         # Handle general exceptions
@@ -91,6 +98,15 @@ def update_conversation_properties(conversation_id):
         return jsonify(error="Conversation not found"), 404
     return {"result": "success"}
 
+@endpoints.route('/conversations/<conversation_id>/acl', methods=['PUT'])
+@oidc.accept_token(require_token=True)
+def update_conversation_acl(conversation_id):
+    acl = request.get_json(silent=True)
+    result = acl_service.update_acl(
+        "conversation", conversation_id, acl)
+    if not result['success']:
+        return jsonify(error="Conversation not found"), 404
+    return {"result": "Succesfully updated conversation acl", "success": True}
 
 @endpoints.route('/executeondoc', methods=['POST'])
 @oidc.accept_token(require_token=True)
@@ -124,5 +140,20 @@ def execute_on_document():
                 yield chunk
         return Response(summarize_brief_stream(data, user_id, token, filename, filepath), mimetype='text/event-stream')
 
+    except Exception as e:
+        return jsonify(error="An error occurred: " + str(e)), 500
+
+#feedback api
+@endpoints.route('/conversations/feedback/<conversation_id>', methods=['PUT'])
+@oidc.accept_token(require_token=True)
+def feedback(conversation_id):
+    try:
+        data=request.json
+        required_fields = {"message_id", "user_feedback", "type"}
+        validation_result = validate_feedback_fields(data, required_fields)
+        if validation_result:
+            return validation_result
+        user_id = get_current_user_id()
+        return chat_service.feedback(conversation_id, data, user_id)
     except Exception as e:
         return jsonify(error="An error occurred: " + str(e)), 500

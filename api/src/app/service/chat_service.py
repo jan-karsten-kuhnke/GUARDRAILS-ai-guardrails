@@ -14,6 +14,9 @@ from executors.applet.Conversation import Conversation
 from executors.applet.QaRetrieval import QaRetrieval
 from executors.applet.Sql import Sql
 from executors.applet.Visualization import Visualization
+from oidc import get_current_user_id
+from oidc import get_current_user_groups
+from oidc import get_current_user_roles
 
 
 class conversation_obj(TypedDict):
@@ -29,6 +32,7 @@ class conversation_obj(TypedDict):
     task: str
     metadata: dict
     task_params: dict
+    acl:dict
 
 
 class message_obj(TypedDict):
@@ -40,10 +44,15 @@ class message_obj(TypedDict):
     msg_info: Optional[dict]
     task: str
 
+class acl_obj(TypedDict):
+    uid: list
+    gid: list
+    rid: list
+    owner:str
 
 class chat_service:
 
-    def chat_completion(data, current_user_id, token, filename=None, filepath=None):
+    def chat_completion(data, current_user_id, token, user_groups, user_roles, filename=None, filepath=None):
         try:
             task = str(data["task"]) if "task" in data else None
             task_params = data["task_params"] if "task_params" in data else None
@@ -74,11 +83,6 @@ class chat_service:
                 filename=document_obj['metadata']['title']
                 document_array=document_obj['docs']
 
-
-                
-            
-            
-
             conversation_id = None
             manage_conversation_context = False
             
@@ -96,7 +100,7 @@ class chat_service:
             
             
             chat_service.update_conversation(
-                conversation_id, prompt, 'user', current_user_id, task, title, task_params, metadata)
+                conversation_id, prompt, 'user', current_user_id, task,user_groups, user_roles, title, task_params, metadata)
 
             current_completion = ''
             msg_info = None
@@ -106,7 +110,7 @@ class chat_service:
             role = "assistant"
             if (manage_conversation_context):
                 messages = chat_service.get_history_for_bot(
-                    conversation_id, current_user_id)
+                    conversation_id, current_user_id, user_groups, user_roles)
 
             is_private = False
             history = []
@@ -189,13 +193,15 @@ class chat_service:
                 yield (json.dumps({"error": "Invalid executor"}))
 
             answer = res['answer']
-
+            #This id for new response object
+            message_id=str(uuid.uuid4())
             msg_info = {
                 "sources": res['sources'] if 'sources' in res else [],
                 "visualization": res['visualization'] if 'visualization' in res else None,
                 "dataset": res['dataset'] if 'dataset' in res else None,
             }
             chunk = json.dumps({
+                "id": message_id,
                 "role": "assistant",
                 "content": answer,
                 "msg_info": msg_info,
@@ -205,7 +211,7 @@ class chat_service:
 
             chat_service.save_chat_log(current_user_id, prompt)
             chat_service.update_conversation(
-                conversation_id, current_completion, role, current_user_id, task, None, task_params,metadata, msg_info)
+                conversation_id, current_completion, role, current_user_id, task,user_groups, user_roles, None, task_params,metadata, msg_info, message_id)
         except Exception as e:
             yield (json.dumps({"error": "error"}))
             logging.error("Error in chat completion: "+str(e))
@@ -223,6 +229,19 @@ class chat_service:
             children=[],
             msg_info=msg_info
         )
+        acl = acl_obj(
+            uid=[],
+            gid=[],
+            rid=[],
+            owner=email
+        )
+
+        acl = acl_obj(
+            uid=[],
+            gid=[],
+            rid=[],
+            owner=email
+        )
 
         messages = [message]
         conversation = conversation_obj(
@@ -236,16 +255,17 @@ class chat_service:
             state='active',
             task=task,
             task_params=task_params,
-            metadata=metadata
+            metadata=metadata,
+            acl=acl
         )
         new_conversation_id = conversation_context.insert_conversation(
             conversation)
         return new_conversation_id
 
-    def update_conversation(conversation_id, content, role, user_id, task, title=None, task_params=None,metadata=None, msg_info=None):
+    def update_conversation(conversation_id, content, role, user_id, task,user_groups, user_roles, title=None, task_params=None,metadata=None, msg_info=None, message_id=None):
         conversation = conversation_context.get_conversation_by_id(
-            conversation_id, user_id)
-        if (conversation == None):
+            conversation_id, user_id, user_groups, user_roles)
+        if conversation is None:
             chat_service.create_Conversation(
                 content, user_id, task, msg_info, title, conversation_id, task_params,metadata)
             return
@@ -253,7 +273,7 @@ class chat_service:
             task = conversation['task']
         messages = conversation['messages']
         message = message_obj(
-            id=str(uuid.uuid4()),
+            id=message_id if message_id else str(uuid.uuid4()),
             role=role,
             content=content,
             created=datetime.now(),
@@ -283,17 +303,24 @@ class chat_service:
         Persistence.insert_chat_log(user_id, text)
 
     def get_conversations(user_id, flag=False):
+        userName = get_current_user_id()
+        userGroups = get_current_user_groups()
+        userRoles = get_current_user_roles()
         cursor = conversation_context.get_conversations_by_user_email(
-            user_id, flag)
-        conversations = []
+            user_id, flag, userName, userGroups, userRoles)
+        conversations = {}
         for conversation in cursor:
-            conversations.append(conversation)
+            conversations =conversation['owned']
         conversations.sort(key=lambda x: x.get('created'), reverse=True)
         return conversations
 
     def get_conversation_by_id(conversation_id, user_id):
-        return conversation_context.get_conversation_by_id(conversation_id, user_id)
-
+        userName = get_current_user_id()
+        userGroups = get_current_user_groups()
+        userRoles = get_current_user_roles()
+        conversation = conversation_context.get_conversation_by_id(conversation_id, userName, userGroups, userRoles)
+        return conversation
+    
     def archive_all_conversations(user_id):
         conversation_context.archive_all_conversations(user_id)
 
@@ -302,9 +329,9 @@ class chat_service:
             user_id, conversation_id, flag)
         return result
 
-    def get_history_for_bot(conversation_id, user_id):
+    def get_history_for_bot(conversation_id, user_id, user_groups, user_roles):
         conversation = conversation_context.get_conversation_by_id(
-            conversation_id, user_id)
+            conversation_id, user_id, user_groups, user_roles)
         messages = conversation['messages']
         result = []
         for m in messages:
@@ -318,3 +345,28 @@ class chat_service:
        result =  conversation_context.update_conversation_properties(
             conversation_id, data, user_id)
        return result
+ 
+    def update_conversation_acl(conversation_id, acl, user_id):
+        result =  conversation_context.update_conversation_acl(
+            conversation_id, acl, user_id)
+        return result
+
+    def feedback(conversation_id, data, user_id):
+        result=conversation_context.get_conversation_by_id(conversation_id,user_id)
+        if result is None:
+            return {"error": "Conversation not found"}, 404
+        messages=result['messages']
+        status=False
+        for m in messages:
+            if m['id']==data['message_id']:
+                m['user_feedback']={
+                "type":data['user_feedback']['type'],
+                "message":data['user_feedback']['message'] if 'message' in data['user_feedback'] else None
+                }
+                status=True
+                break
+        if status==False:
+            return {"error": "Message ID not found"}, 404
+        result=conversation_context.update_conversation(conversation_id,result)
+        return {"result": "success"}
+

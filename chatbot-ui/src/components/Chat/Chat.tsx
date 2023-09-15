@@ -75,7 +75,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       message: Message,
       deleteCount = 0,
       formData: FormData = new FormData(),
-      document: any = undefined
+      task_params: any = undefined
     ) => {
       if (containsOnlyWhitespacesOrNewlines(message.content)) return;
       message.content = message.content.trim();
@@ -110,6 +110,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           updatedConversation = {
             ...selectedConversation,
             messages: [...selectedConversation.messages, message],
+            ... task_params ? {task_params} : {}
           };
         }
         homeDispatch({
@@ -137,22 +138,22 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             sendDocumentData = true
           }
         })
-        //renamed qaDocumentId to documentId
-        let task_params: any = {
-          ...document?.id ? { document } : selectedConversation?.task_params,
-        };
 
+        if(!task_params)
+        {
+          task_params = selectedConversation?.task_params
+        }
         try {
           if (selectedTile.params?.useExecuteOnDoc) {
             toast.loading(
               "Summarization might be a time taking process depending on the size of your document",
               {
-                position: "bottom-right",
+                position: "bottom-center",
                 duration: 5000,
               }
             );
         
-            if (document) { //if selectedTile.params?.useExecuteOnDoc is true
+            if (task_params?.document) { //if selectedTile.params?.useExecuteOnDoc is true
               response = await fetchPrompt(
                 chatBody.message,
                 selectedConversation.id,
@@ -207,6 +208,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         let text = "";
         let msg_info = null;
         let role;
+        let message_id;
         while (!done) {
           if (stopConversationRef.current === true) {
             controller.abort();
@@ -217,19 +219,19 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
           done = doneReading;
           const chunkValue = decoder.decode(value); // stores role, content, msg_info (JSON String)
           if (!chunkValue || chunkValue === "") continue;
-          let parsed = parseChunk(chunkValue, text, msg_info, role);
+          let parsed = parseChunk(chunkValue, text, msg_info, role,message_id);
           role = parsed.role;
           msg_info = parsed.msg_info;
           text += parsed.content;
+          message_id = parsed.id;
         
-          updateMessagesAndConversation(isFirst, homeDispatch, updatedConversation, text, role, msg_info, parsed)
+          updateMessagesAndConversation(isFirst, homeDispatch, updatedConversation, text, role, msg_info, parsed,message_id)
         }
         homeDispatch({ field: "messageIsStreaming", value: false });
       }
     },
     [conversations, selectedConversation, stopConversationRef, isPrivate, selectedTile, selectedCollection]
   );
-
   const handleRequestApproval = async (conversationId: string) => {
     homeDispatch({ field: "loading", value: true });
     homeDispatch({ field: "messageIsStreaming", value: true });
@@ -302,10 +304,9 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
         userActionRequired: false,
         msg_info: null,
       };
-      handleSend(message, 0, undefined, executeOnUploadedDocRef.current.document)
+      handleSend(message, 0, undefined, executeOnUploadedDocRef.current.task_params)
       executeOnUploadedDocRef.current = null;
     }
-
   }, [executeOnUploadedDocRef.current])
 
   useEffect(() => {
@@ -353,24 +354,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       }
     }
   },[selectedConversation,selectedTile]);
-
-  // useEffect(() => {
-  //   const foundTile = tiles.find((tile) => tile.code === selectedConversation?.task);
-  //   if (foundTile) {
-  //     handleSelectedTile(foundTile);
-  //   }
-
-  //   if(selectedConversation?.task_params && selectedConversation?.task_params?.collectionName){
-  //     homeDispatch({field: "selectedCollection", value: selectedConversation?.task_params?.collectionName})
-  //   }
-
-  //   if(selectedConversation?.task_params && selectedConversation?.task_params?.documentId){
-  //     homeDispatch({field: "selectedDocument", value: {id:selectedConversation?.task_params?.documentId, title:selectedConversation?.task_params?.documentName}})
-  //   }
-  //   else{
-  //     homeDispatch({field: "selectedDocument", value: undefined})
-  //   }
-  // },[selectedConversation])
 
   return (
     <div className={`relative flex-1 overflow-hidden ${theme.chatBackground}`}>

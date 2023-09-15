@@ -17,7 +17,7 @@ import ChatbarContext from "../Chatbar.context";
 import { ClearConversations } from "./ClearConversations";
 import { AuthContext } from "@/services/AuthService";
 
-export const ChatbarSettings = () => {
+export const ChatbarFooter = () => {
   const authContext = useContext(AuthContext);
 
   const {

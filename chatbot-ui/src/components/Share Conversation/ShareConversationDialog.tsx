@@ -1,26 +1,41 @@
 import { FC, useContext, useEffect, useState } from "react";
 
 import HomeContext from "@/pages/home/home.context";
-import { PrivateDocuments } from "./PrivateDocuments";
 
 import { IconSquareRoundedX } from "@tabler/icons-react";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import { Box, Tab, Tooltip } from "@mui/material";
-import { getCollections } from "@/services/DocsService";
-import Collections from "./Collections";
+import {Users} from "./Users";
+import { Groups } from "./Groups";
+
 
 interface Props {
   open: boolean;
   onClose: () => void;
 }
 
-export const DocumentDialog: FC<Props> = ({ open, onClose }) => {
+export const ShareConversationDialog: FC<Props> = ({ open, onClose }) => {
   const {
-    state: { theme, selectedCollection },
+    state: { theme, selectedConversation },
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
   const [tab, setTab] = useState("1");
+  const [data, setData] = useState([]);
+
+
+  useEffect(() => {
+    if(tab === "1") {
+      // Get all users'
+      const user:any=["A","B","C","D","E"];
+      setData(user);
+    } else {
+      // Get all groups
+      const group:any=["a","b","c","d","e"];
+      setData(group);
+    }
+  }, [tab]);
+
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
     setTab(newValue);
@@ -52,7 +67,7 @@ export const DocumentDialog: FC<Props> = ({ open, onClose }) => {
             <div
               className={`text-lg pb-4 font-bold text-[${theme.textColor}] flex justify-between`}
             >
-              <span>{"Manage documents"}</span>
+              <span>{"Share conversation"}</span>
               <Tooltip title="Close" placement="top">
                 <IconSquareRoundedX
                   onClick={onClose}
@@ -85,15 +100,15 @@ export const DocumentDialog: FC<Props> = ({ open, onClose }) => {
                     },
                   }}
                 >
-                  <Tab label="Documents" value="1" />
-                  <Tab label="Collections" value="2" />
+                  <Tab label="Users" value="1" />
+                  <Tab label="Groups" value="2" />
                 </TabList>
               </Box>
               <TabPanel value="1" sx={{ padding: "24px 0px" }}>
-                <PrivateDocuments />
+                <Users />
               </TabPanel>
               <TabPanel value="2" sx={{ padding: "24px 0px" }}>
-                <Collections/>
+                <Groups />
               </TabPanel>
             </TabContext>
           </div>

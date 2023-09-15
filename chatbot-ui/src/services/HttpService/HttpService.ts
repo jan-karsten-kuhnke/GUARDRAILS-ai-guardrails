@@ -100,6 +100,10 @@ export const requestApproval = (conversationId: string) => {
   return _axios.get(`/chat/requestapproval/${conversationId}`);
 };
 
+export const updateFeedback = (conversationId: any, feedback:any) => {
+  return _axios.put(`/chat/conversations/feedback/${conversationId}`, feedback);
+};
+
 //pii => enpoints={baseURL}/pii
 
 export const analyzeMessage = (message: string) => {
@@ -143,3 +147,14 @@ export const getEulaStatus = () => {
 export const setEulaStatus = () => {
   return _axios.post(`/user/eula`);
 };
+
+export const searchUsers = (searchTerm: string) => {
+  return _axios.get(`/user/search-users/${searchTerm}`);
+}
+export const userGroups = () => {
+  return _axios.get(`/user/user-groups`);
+}
+
+export const updateConversationAcl=(conversationId:string,acl:object)=>{
+  return _axios.post(`/acl/conversation/${conversationId}`,acl);
+}

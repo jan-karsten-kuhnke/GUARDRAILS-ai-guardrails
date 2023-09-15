@@ -24,9 +24,9 @@ export interface HomeContextProps {
   handleUpdateSelectedConversation: (
     data: KeyValuePair,
   ) => void;
-  
   handleIsPrivate:(isPrivate:boolean)=>void;
   handleSelectedTile:(tile:Tile)=>void;
+  handleGetCollections:()=>void;
 }
 
 const HomeContext = createContext<HomeContextProps>(undefined!);

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 
 import { useCreateReducer } from '@/hooks/useCreateReducer';
 
@@ -8,7 +8,7 @@ import { Prompt } from '@/types/prompt';
 import HomeContext from '@/pages/home/home.context';
 
 import { PromptFolders } from './components/PromptFolders';
-import { PromptbarSettings } from './components/PromptbarSettings';
+import { PromptbarFooter } from './components/PromptbarFooter';
 import { Prompts } from './components/Prompts';
 
 import Sidebar from '../Sidebar';
@@ -142,7 +142,7 @@ const Promptbar = () => {
         handleCreateItem={handleCreatePrompt}
         handleCreateFolder={() => handleCreateFolder(('New folder'), 'prompt')}
         handleDrop={handleDrop}
-        footerComponent={<PromptbarSettings/>}
+        footerComponent={<PromptbarFooter/>}
       />
     </PromptbarContext.Provider>
   );

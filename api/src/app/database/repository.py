@@ -1,8 +1,9 @@
 import json
-from sqlalchemy import create_engine, text, func ,or_,and_
+
+from sqlalchemy import create_engine, text, func ,or_,and_, select
 from sqlalchemy.orm import sessionmaker
 
-from database.models import Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, DocumentEntity, FolderEntity , PromptEntity , OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity, ChainEntity,  EulaEntity, DataSourceEntity
+from database.models import AclEntity, Base, AnalysisAuditEntity, AnonymizeAuditEntity, ChatLogEntity, DocumentEntity, FolderEntity , PromptEntity , OrganisationEntity,CustomRuleEntity,PredefinedRuleEntity, ChainEntity,  EulaEntity, DataSourceEntity, AclEntity
 from database.vector_store.vector_store_model import Vector_Base, CollectionEntity
 
 from globals import Globals
@@ -90,7 +91,7 @@ class Persistence:
         finally:
             session.close()
 
-    def insert_data_source(name, connection_string, schemas=[], tables_to_include=[], custom_schema_description=""):
+    def insert_data_source(name, connection_string, user_id, schemas=[], tables_to_include=[], custom_schema_description=""):
         try:
             session=Session()
             data_source = DataSourceEntity(
@@ -102,6 +103,7 @@ class Persistence:
                 )
             session.add(data_source)
             session.commit()
+            Persistence.update_chain_acl(data_source.id, 'data_source', {'uid':[], 'gid':[], 'rid':[], 'owner':user_id})
             return jsonify({"message": "successfully added data source"}), 200
         except Exception as ex:
             logging.error(f"Exception while adding datasource: {ex}")
@@ -406,6 +408,56 @@ class Persistence:
             logging.error(f"Exception while getting data source: {ex}")
         finally:
             session.close()
+        
+    def get_all_data_source(userName, userGroups, userRoles):
+        try:
+            session=Session()
+            subquery = Persistence.acl_subquery(userName, userGroups, userRoles, 'data_source', session)
+            main_query = (
+                session.query(DataSourceEntity)
+                .filter(DataSourceEntity.id.in_(subquery))
+            )
+            results = main_query.all()
+            res = []
+            for r in results:
+                res.append(DataSourceEntity.to_dict(r))
+            return res
+        except Exception as ex:
+            logging.error(f"Exception while getting data source: {ex}")
+        finally:
+            session.close()
+
+    def acl_subquery(userName, userGroups, userRoles, entity_name, session):
+        try:
+            subquery = (
+                session.query(AclEntity.entity_id)
+                .filter(AclEntity.entity_type == entity_name)
+                .filter(
+                    AclEntity.gid.overlap(userGroups) |
+                    AclEntity.rid.overlap(userRoles) |
+                    AclEntity.uid.overlap([userName]) |
+                    (AclEntity.owner == userName)
+                )
+            )
+            return subquery
+        except Exception as ex:
+            logging.error(f"Exception while getting acl subquery: {ex}")
+            # session.close()
+            
+    def get_all_tiles(userName, userGroups, userRoles):
+        try:
+            session=Session()
+            subquery = Persistence.acl_subquery(userName, userGroups, userRoles, 'chain', session)
+            main_query = (
+                session.query(ChainEntity)
+                .filter(ChainEntity.id.in_(subquery))
+            )
+            results = main_query.all()
+            return results
+        except Exception as ex:
+            logging.error(f"Exception while getting tiles: {ex}")
+        finally:
+            session.close()
 
     def get_folder_data(user_id):
         try:
@@ -554,7 +606,7 @@ class Persistence:
 
     
 
-    def insert_chain(title, icon, code, params, active, group_code):
+    def insert_chain(title, icon, code, params, active, group_code, user_id):
         try:
             session=Session()
             chain = ChainEntity(
@@ -567,6 +619,8 @@ class Persistence:
             )
             session.add(chain)
             session.commit()
+            #create an entry in acl table for chain
+            Persistence.update_chain_acl(chain.id, 'chain', {'uid':[], 'gid':[], 'rid':[], 'owner':user_id})
             return jsonify({"message": "Successfully inserted chain","success":True}), 200
         except Exception as e:
             logging.error(f"Exception while inserting chain: {e}")
@@ -603,3 +657,42 @@ class Persistence:
         finally:
             session.close()
         
+    
+    def update_acl_list(id,entity_type, data):
+        try:
+            session=Session()
+            acl  = session.query(AclEntity).filter(AclEntity.entity_id == id, AclEntity.entity_type==entity_type ).first()
+            if acl is None:
+                #create an entry in acl table
+                acl = AclEntity(entity_id=id, entity_type=entity_type, uid=[], gid=[], rid=[], owner=data['owner'])
+                session.add(acl)
+                session.commit()
+                return
+            acl_list = acl.to_dict()
+
+            keysList = [key for key in data.keys()]
+            for key in keysList:
+                array = data[key] 
+                if isinstance(array, list) :
+                    if data['is_provide_access']:
+                        acl_list[key].extend(array)
+                    else:
+                        for item in array:
+                            if item in acl_list[key]:
+                                acl_list[key].remove(item)
+                elif isinstance(array, str):
+                    if data['is_provide_access']:
+                        acl_list[key] = array
+                    else:
+                        acl_list[key] = ""
+
+            session.query(AclEntity).filter(AclEntity.entity_id == id, AclEntity.entity_type==entity_type ).update(acl_list)
+            session.commit()
+            return jsonify({"message": "Successfully updated {} acl".format(entity_type), "success": True}), 200
+        except Exception as e:
+            logging.error(f"Exception while updating acl: {e}")
+            session.rollback()
+            return jsonify({"message": "Error in updating acl","success":False}), 500
+        finally:
+            session.close()
+ 

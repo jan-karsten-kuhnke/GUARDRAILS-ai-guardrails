@@ -19,6 +19,15 @@ class keycloak_wrapper:
         token = json.loads(response.text)
         return token["access_token"]
 
+    #search users by name
+    def search_users(name):
+        url = base_url + "/users?search=" + name
+        token = keycloak_wrapper._get_access_token()
+        response = requests.request("GET", url, headers={"Authorization": "Bearer " + token})
+        if (response.status_code == 200):
+            return json.loads(response.text)
+        return []
+    
     def get_users_by_role(role_name):
         url = base_url + "/roles/" + role_name + "/users"
         token = keycloak_wrapper._get_access_token()

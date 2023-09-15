@@ -10,6 +10,7 @@ import logging
 import json
 from globals import Globals
 from sqlalchemy import cast, create_engine, text, select
+from integration.keycloak_wrapper import keycloak_wrapper
 
 class userdata_service:
     def get_all_folders(user_id):
@@ -29,20 +30,11 @@ class userdata_service:
 
     def get_tiles(user_id):
         try:
-            pg_schema = Globals.pg_schema
-            chain_table = ChainEntity.__tablename__
             user_groups = get_current_user_groups()
             user_roles = get_current_user_roles()
             session=Session()
             all_chains  = session.query(ChainEntity).all()
-            query = text(
-                f"SELECT * FROM {pg_schema}.{chain_table} "
-                f"WHERE '{json.dumps(user_roles)}' @> (acl->'rid') "
-                f"OR '{json.dumps(user_groups)}' @> (acl->'gid') "
-                f"OR '{json.dumps([user_id])}' @> (acl->'uid')")
-
-            connection = engine.connect()
-            assigned_chains = connection.execute(query)
+            assigned_chains = Persistence.get_all_tiles(user_id, user_groups, user_roles)
 
             assigned_chain_codes = []
             previous_requests = []
@@ -92,3 +84,12 @@ class userdata_service:
 
     def set_eula_status(user_id):
         return Persistence.set_eula_status(user_id)
+    
+    def search_users(name):
+        all_users= keycloak_wrapper.search_users(name)
+        current_user_id = get_current_user_id()
+        users = list(filter(lambda x: x['email'] != current_user_id, all_users))
+        return users
+    
+    def get_user_groups():
+        return get_current_user_groups()
