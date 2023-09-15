@@ -23,6 +23,7 @@ class acl_service:
                 if isinstance(array, list) :
                     if data['is_provide_access']:
                         acl[key].extend(array)
+                        acl[key]=list(set(acl[key]))
                     else:
                         for item in array:
                             if item in acl[key]:
