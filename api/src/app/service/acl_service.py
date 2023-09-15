@@ -8,9 +8,9 @@ from database.models import AclEntity
 
 class acl_service:
     def update_acl(entity_type, id, data):
-        userName = get_current_user_id()
+        user_id = get_current_user_id()
         if entity_type == 'conversation':
-            conversation = conversation_context.get_conversation_by_id_user_id(id, userName)
+            conversation = conversation_context.get_conversation_by_id_user_id(id, user_id)
             if conversation is None:
                 return None, 404
             
@@ -23,6 +23,7 @@ class acl_service:
                 if isinstance(array, list) :
                     if data['is_provide_access']:
                         acl[key].extend(array)
+                        acl[key]=list(set(acl[key]))
                     else:
                         for item in array:
                             if item in acl[key]:
@@ -32,7 +33,7 @@ class acl_service:
                         acl[key] = array
                     else:
                         acl[key] = "" 
-            res =  conversation_context.update_conversation_acl(id, acl)
+            res =  conversation_context.update_conversation_acl(id, acl,user_id)
             res['message'] ="access provided" if data['is_provide_access'] else "access removed"
             return res
         elif entity_type == 'chain':

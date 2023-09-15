@@ -83,11 +83,6 @@ class chat_service:
                 filename=document_obj['metadata']['title']
                 document_array=document_obj['docs']
 
-
-                
-            
-            
-
             conversation_id = None
             manage_conversation_context = False
             

@@ -49,12 +49,7 @@ def conversation_pipeline(user_id: Union[ObjectId, str], flag, username, user_gr
         match_query["$match"] = {"_id": user_id, "acl.owner": username}
     elif isinstance(user_id, str) and flag != None:
         match_query["$match"] = {"user_id": user_id, "archived": flag, "acl.owner": username}
-    
-    project_stage = {
-        "$project": {
-            "acl": 0
-        }
-    }
+   
     facet_stage = {
         "$facet": {
             "shared": [
@@ -67,10 +62,10 @@ def conversation_pipeline(user_id: Union[ObjectId, str], flag, username, user_gr
                             {"acl.uid": {"$in": [username]}}
                         ]
                     }
-                },project_stage
+                }
             ],
             "owned": [
-                match_query,project_stage
+                match_query
             ]
         }
     }
@@ -86,7 +81,7 @@ class conversation_context:
         result = conversations_collection.insert_one(conversation) 
         return result.inserted_id
 
-    def get_conversation_by_id(conversation_id,  username, user_groups, user_roles):
+    def get_conversation_by_id(conversation_id,  username, user_groups=[], user_roles=[]):
         pipeline  = conversation_pipeline(conversation_id, None, username, user_groups, user_roles)
         results = conversations_collection.aggregate(pipeline)
         conversation_array=[]
@@ -97,7 +92,7 @@ class conversation_context:
             return None
         return conversation_array[0].get('owned')[0]
     
-    def get_conversations_by_user_email(user_id,flag, username, user_groups, user_roles):
+    def get_conversations_by_user_email(user_id,flag, username, user_groups=[], user_roles=[]):
         pipeline  = conversation_pipeline(user_id,flag, username, user_groups, user_roles)
         results = conversations_collection.aggregate(pipeline)
         return loads(dumps(results))
@@ -116,9 +111,6 @@ class conversation_context:
        result =  conversations_collection.update_one({"_id":conversation_id, "user_id":user_id}, {"$set":{"folderId":data['folderId'], "title":data['title']}})
        return result
     
-    def update_conversation_acl(conversation_id,acl,user_id):
-         result =  conversations_collection.update_one({"_id":conversation_id, "user_id":user_id}, {"$set":{"acl":acl}})
-         return result
     def request_approval(conversation_id,group_managers_emails):
         conversations_collection.update_one({"_id":conversation_id}, {"$set":{"state":"waiting for approval","assigned_to":group_managers_emails}})
 
@@ -267,11 +259,10 @@ class conversation_context:
             response.update(False,"Error in rejecting",None)
         return response.json()
 
-    def update_conversation_acl(id, acl):
+    def update_conversation_acl(id,acl, user_id):
         response = ApiResponse()
         try:
-            res = conversations_collection.update_one({"_id":id}, {"$set":{"acl":acl}})
-            print(str(res)) 
+            res = conversations_collection.update_one({"_id":id, "user_id":user_id}, {"$set":{"acl":acl}}) 
             response.update(True,"",None)
         except Exception as ex:
             logging.info(f"Error in updating access list: {ex}")
