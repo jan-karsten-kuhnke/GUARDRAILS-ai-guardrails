@@ -29,7 +29,6 @@ export const Groups: FC<Props> = ({}) => {
 
     });
   }, []);
-  console.log(loading)
 
 
   const handleShare = (group: any) => {

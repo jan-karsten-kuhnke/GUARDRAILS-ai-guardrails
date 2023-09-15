@@ -81,7 +81,7 @@ class conversation_context:
         result = conversations_collection.insert_one(conversation) 
         return result.inserted_id
 
-    def get_conversation_by_id(conversation_id,  username, user_groups, user_roles):
+    def get_conversation_by_id(conversation_id,  username, user_groups=[], user_roles=[]):
         pipeline  = conversation_pipeline(conversation_id, None, username, user_groups, user_roles)
         results = conversations_collection.aggregate(pipeline)
         conversation_array=[]
@@ -92,7 +92,7 @@ class conversation_context:
             return None
         return conversation_array[0].get('owned')[0]
     
-    def get_conversations_by_user_email(user_id,flag, username, user_groups, user_roles):
+    def get_conversations_by_user_email(user_id,flag, username, user_groups=[], user_roles=[]):
         pipeline  = conversation_pipeline(user_id,flag, username, user_groups, user_roles)
         results = conversations_collection.aggregate(pipeline)
         return loads(dumps(results))

@@ -138,7 +138,6 @@ export const Users: FC<Props> = () => {
       }
     });
   };
-console.log(selectedConversation?.acl)
   return (
     <>
       <Search

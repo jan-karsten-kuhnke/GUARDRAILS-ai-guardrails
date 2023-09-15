@@ -165,6 +165,7 @@ export const Home = () => {
           msg_info: message.msg_info,
         })
       );
+      conversation.acl=res.data?.acl
       dispatch({
         field: "selectedConversation",
         value: conversation,
@@ -230,6 +231,7 @@ export const Home = () => {
     });
     dispatch({ field: "selectedConversation", value: conversation });
   };
+
 
 
   const handleIsPrivate = (isPrivate: boolean) => {
