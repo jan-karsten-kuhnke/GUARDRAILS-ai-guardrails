@@ -1,13 +1,14 @@
 import { FC, useContext, useEffect, useState } from "react";
 import { ChangeEvent } from "react";
-import { IconUpload } from "@tabler/icons-react";
+import { IconSend, IconUpload } from "@tabler/icons-react";
 import { Message } from "@/types/chat";
 import HomeContext from "@/pages/home/home.context";
 import { getDocumentsByCollectionName } from "@/services/DocsService";
 import DropDown from "../DropDown/DropDown";
-import { FormControl } from "@mui/material";
+import { Button, FormControl } from "@mui/material";
 import { checkInput } from "@/utils/app/conversation";
 import { COLLECTION_PICKER, DOCUMENT_PICKER } from "@/utils/constants";
+import toast from "react-hot-toast";
 
 interface Props {
   inputs: [
@@ -32,23 +33,46 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
-  const [inputUrl, setInputUrl] = useState('');
+  const [inputUrl, setInputUrl] = useState("");
   const [isValidUrl, setIsValidUrl] = useState(true);
 
   const handleUrlChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setIsValidUrl(false)
+    setIsValidUrl(false);
     const url = event.target.value;
     setInputUrl(url);
     // Regular expression to validate a URL
-    const urlRegex = new RegExp('^(https?:\\/\\/)?'+ // protocol
-    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
-    '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
-    '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-    '(\\#[-a-z\\d_]*)?$','i')
-    setIsValidUrl(urlRegex.test(url));
-    console.log(urlRegex.test(url));
+    const urlRegex = new RegExp(
+      "^(https?:\\/\\/)?" + // protocol
+        "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
+        "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
+        "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
+        "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
+        "(\\#[-a-z\\d_]*)?$",
+      "i"
+    );
+    if (urlRegex.test(url)) {
+      setIsValidUrl(true);
+      handleUpdateSelectedConversation({
+        key: "task_params",
+        value: {
+          ...selectedConversation?.task_params,
+          ...(url ? { url: url } : {}),
+        },
+      });
+    }
   };
+
+  const handleUrlSend = (url: string) => {
+    
+    let message: Message = {
+      role: "user",
+      content: "Insight from URL",
+      userActionRequired: false,
+      msg_info: null,
+    };
+    handleSend(message, 0);
+    setInputUrl("");
+  }
 
   const handleDocumentUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -241,24 +265,41 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
               return (
                 <div
                   key={index}
-                  className="w-1/2 md:w-1/2 lg:w-1/2 xl:w-1/2 p-2"
+                  className="w-full md:w-full lg:w-full xl:w-full p-2"
                 >
                   <div className={`text-[${theme.textColor}] pb-2`}>
                     Insert URL
                   </div>
-                  <FormControl
-                    sx={{ minWidth: 120, width: "100%" }}
-                    size="small"
-                  >
+                  <div className="w-full">
+
                     <input
-                    className={`${isValidUrl ? theme.searchBoxTheme : theme.errorInputTheme} w-full flex-1 rounded-md border  px-4 py-2.5 pr-10 text-[14px] leading-3 `}
+                      className={`${
+                        isValidUrl
+                          ? theme.searchBoxTheme
+                          : theme.errorInputTheme
+                      } w-1/2 flex-1 rounded-md border  px-4 py-2.5 pr-10 text-[14px] leading-3 `}
                       type="text"
                       placeholder="Enter a URL"
                       value={inputUrl}
                       onChange={handleUrlChange}
                     />
-                  </FormControl>
-                
+                  
+                  <Button
+                    variant="contained"
+                    sx={{
+                      backgroundColor: theme.primaryColor,
+                      fontSize: "12px",
+                      color: "#fff",
+                      padding: "9px",
+                      textTransform: "Capitalize",
+                      margin: "10px",
+                    }}
+                    onClick={() => (isValidUrl && inputUrl.length) ? handleUrlSend(inputUrl) : toast.error("Invalid URL")}
+                    >
+                    Send
+                    <IconSend size={18} />
+                  </Button>
+                  </div>
                 </div>
               );
             }
