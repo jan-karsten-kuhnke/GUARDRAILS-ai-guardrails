@@ -67,10 +67,10 @@ def conversation_pipeline(user_id: Union[ObjectId, str], flag, username, user_gr
                             {"acl.uid": {"$in": [username]}}
                         ]
                     }
-                },project_stage
+                }
             ],
             "owned": [
-                match_query,project_stage
+                match_query
             ]
         }
     }
@@ -263,10 +263,10 @@ class conversation_context:
             response.update(False,"Error in rejecting",None)
         return response.json()
 
-    def update_conversation_acl(id, acl):
+    def update_conversation_acl(id,user_id, acl):
         response = ApiResponse()
         try:
-            res = conversations_collection.update_one({"_id":id}, {"$set":{"acl":acl}})
+            res = conversations_collection.update_one({"_id":id, "user_id":user_id}, {"$set":{"acl":acl}})
             print(str(res)) 
             response.update(True,"",None)
         except Exception as ex:
