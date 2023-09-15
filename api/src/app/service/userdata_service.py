@@ -10,6 +10,7 @@ import logging
 import json
 from globals import Globals
 from sqlalchemy import cast, create_engine, text, select
+from integration.keycloak_wrapper import keycloak_wrapper
 
 class userdata_service:
     def get_all_folders(user_id):
@@ -92,3 +93,12 @@ class userdata_service:
 
     def set_eula_status(user_id):
         return Persistence.set_eula_status(user_id)
+    
+    def search_users(name):
+        all_users= keycloak_wrapper.search_users(name)
+        current_user_id = get_current_user_id()
+        users = list(filter(lambda x: x['email'] != current_user_id, all_users))
+        return users
+    
+    def get_user_groups():
+        return get_current_user_groups()

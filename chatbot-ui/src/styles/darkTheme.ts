@@ -71,4 +71,5 @@ export const darkTheme = {
     disabledIconColor: "#5A5A5A",
   },
   bgLoader: "bg-[#ffffff]",
+  shareButtonColor:"#343541"
 };

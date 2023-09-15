@@ -29,6 +29,7 @@ class conversation_obj(TypedDict):
     task: str
     metadata: dict
     task_params: dict
+    acl:dict
 
 
 class message_obj(TypedDict):
@@ -40,6 +41,11 @@ class message_obj(TypedDict):
     msg_info: Optional[dict]
     task: str
 
+class acl_obj(TypedDict):
+    uid: list
+    gid: list
+    rid: list
+    owner:str
 
 class chat_service:
 
@@ -225,6 +231,12 @@ class chat_service:
             children=[],
             msg_info=msg_info
         )
+        acl = acl_obj(
+            uid=[],
+            gid=[],
+            rid=[],
+            owner=email
+        )
 
         messages = [message]
         conversation = conversation_obj(
@@ -238,7 +250,8 @@ class chat_service:
             state='active',
             task=task,
             task_params=task_params,
-            metadata=metadata
+            metadata=metadata,
+            acl=acl
         )
         new_conversation_id = conversation_context.insert_conversation(
             conversation)
@@ -320,6 +333,12 @@ class chat_service:
        result =  conversation_context.update_conversation_properties(
             conversation_id, data, user_id)
        return result
+ 
+    def update_conversation_acl(conversation_id, acl, user_id):
+        result =  conversation_context.update_conversation_acl(
+            conversation_id, acl, user_id)
+        return result
+
     def feedback(conversation_id, data, user_id):
         result=conversation_context.get_conversation_by_id(conversation_id,user_id)
         if result is None:
@@ -338,3 +357,4 @@ class chat_service:
             return {"error": "Message ID not found"}, 404
         result=conversation_context.update_conversation(conversation_id,result)
         return {"result": "success"}
+

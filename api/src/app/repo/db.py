@@ -63,6 +63,10 @@ class conversation_context:
     def update_conversation_properties(conversation_id,data,user_id):
        result =  conversations_collection.update_one({"_id":conversation_id, "user_id":user_id}, {"$set":{"folderId":data['folderId'], "title":data['title']}})
        return result
+    
+    def update_conversation_acl(conversation_id,acl,user_id):
+         result =  conversations_collection.update_one({"_id":conversation_id, "user_id":user_id}, {"$set":{"acl":acl}})
+         return result
     def request_approval(conversation_id,group_managers_emails):
         conversations_collection.update_one({"_id":conversation_id}, {"$set":{"state":"waiting for approval","assigned_to":group_managers_emails}})
 
