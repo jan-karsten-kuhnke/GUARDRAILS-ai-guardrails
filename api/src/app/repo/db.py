@@ -49,12 +49,7 @@ def conversation_pipeline(user_id: Union[ObjectId, str], flag, username, user_gr
         match_query["$match"] = {"_id": user_id, "acl.owner": username}
     elif isinstance(user_id, str) and flag != None:
         match_query["$match"] = {"user_id": user_id, "archived": flag, "acl.owner": username}
-    
-    project_stage = {
-        "$project": {
-            "acl": 0
-        }
-    }
+   
     facet_stage = {
         "$facet": {
             "shared": [
@@ -67,10 +62,10 @@ def conversation_pipeline(user_id: Union[ObjectId, str], flag, username, user_gr
                             {"acl.uid": {"$in": [username]}}
                         ]
                     }
-                },project_stage
+                }
             ],
             "owned": [
-                match_query,project_stage
+                match_query
             ]
         }
     }
@@ -116,9 +111,6 @@ class conversation_context:
        result =  conversations_collection.update_one({"_id":conversation_id, "user_id":user_id}, {"$set":{"folderId":data['folderId'], "title":data['title']}})
        return result
     
-    def update_conversation_acl(conversation_id,acl,user_id):
-         result =  conversations_collection.update_one({"_id":conversation_id, "user_id":user_id}, {"$set":{"acl":acl}})
-         return result
     def request_approval(conversation_id,group_managers_emails):
         conversations_collection.update_one({"_id":conversation_id}, {"$set":{"state":"waiting for approval","assigned_to":group_managers_emails}})
 
@@ -267,11 +259,11 @@ class conversation_context:
             response.update(False,"Error in rejecting",None)
         return response.json()
 
-    def update_conversation_acl(id, acl):
+    def update_conversation_acl(conversation_id,acl,user_id):
         response = ApiResponse()
         try:
+            print(conversation_id,acl,user_id)
             res = conversations_collection.update_one({"_id":id}, {"$set":{"acl":acl}})
-            print(str(res)) 
             response.update(True,"",None)
         except Exception as ex:
             logging.info(f"Error in updating access list: {ex}")

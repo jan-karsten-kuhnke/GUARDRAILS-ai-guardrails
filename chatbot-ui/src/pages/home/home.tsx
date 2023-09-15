@@ -220,7 +220,8 @@ export const Home = () => {
           uid:[],
           rid:[],
           gid:[],
-          owner:""
+          owner:"",
+          is_provide_access:true
         }
     };
     dispatch({
@@ -255,7 +256,8 @@ export const Home = () => {
           uid:[],
           rid:[],
           gid:[],
-          owner:""
+          owner:"",
+          is_provide_access:true
         }
       },
     });

@@ -66,6 +66,7 @@ export const Users: FC<Props> = () => {
     if (!selectedConversation) return;
     const updatedAcl = selectedConversation?.acl;
     updatedAcl.uid.push(user.email);
+    updatedAcl.is_provide_access=true
     toast
       .promise(
         updateConversationAcl(selectedConversation?.id, updatedAcl), //calling api here
@@ -98,6 +99,8 @@ export const Users: FC<Props> = () => {
     if (index > -1) {
       updatedAcl.uid.splice(index, 1);
     }
+    updatedAcl.is_provide_access=true
+
     toast
     .promise(
       updateConversationAcl(selectedConversation?.id, updatedAcl), //calling api here
@@ -128,7 +131,7 @@ export const Users: FC<Props> = () => {
       }
     });
   };
-
+console.log(selectedConversation?.acl)
   return (
     <>
       <Search

@@ -36,6 +36,8 @@ export const Groups: FC<Props> = ({}) => {
     if (!selectedConversation) return;
     const updatedAcl = selectedConversation?.acl;
     updatedAcl.gid.push(group);
+    updatedAcl.is_provide_access=true
+
     toast
       .promise(
         updateConversationAcl(selectedConversation?.id, updatedAcl), //calling api here
@@ -68,6 +70,8 @@ export const Groups: FC<Props> = ({}) => {
     if (index > -1) {
       updatedAcl.gid.splice(index, 1);
     }
+    updatedAcl.is_provide_access=true
+
     toast
     .promise(
       updateConversationAcl(selectedConversation?.id, updatedAcl), //calling api here

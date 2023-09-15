@@ -72,7 +72,7 @@ export const lightTheme = {
     disabledIconColor: "#BBBBBB",
   },
   bgLoader: "bg-[#1c96a3]",
-  shareButtonColor:"#1c96a3"
+  shareButtonColor:"#1c96a3",
   feedbackTextAreaTheme: "bg-white text-neutral-500 outline-none rounded shadow-[0_3px_8px_rgba(0,0,0,0.24)]  focus:shadow-[0_0_2px_1px_rgba(28,150,163)]",
 
 };
