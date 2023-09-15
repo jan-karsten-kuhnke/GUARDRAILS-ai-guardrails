@@ -308,9 +308,9 @@ class chat_service:
         userRoles = get_current_user_roles()
         cursor = conversation_context.get_conversations_by_user_email(
             user_id, flag, userName, userGroups, userRoles)
-        conversations = []
+        conversations = {}
         for conversation in cursor:
-            conversations.append(conversation)
+            conversations =conversation['owned']
         conversations.sort(key=lambda x: x.get('created'), reverse=True)
         return conversations
 
