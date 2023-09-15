@@ -1,11 +1,14 @@
 from flask import Flask, Blueprint, Response, jsonify
 from flask_restful import Resource, Api, reqparse, request
 from service.chat_service import chat_service
+from service.acl_service import acl_service
 from flask_smorest import Blueprint as SmorestBlueprint
 from time import time
 import os
 from oidc import oidc
 from oidc import get_current_user_id
+from oidc import get_current_user_groups
+from oidc import get_current_user_roles
 from utils.util import rename_id
 import json
 from utils.util import validate_fields
@@ -23,10 +26,12 @@ def chat_completion():
         if validation_result:
             return validation_result
         user_id = get_current_user_id()
+        user_groups = get_current_user_groups()
+        user_roles = get_current_user_roles()
         token = request.headers.get('authorization', '').split(' ')[1]
 
         def chat_completion_stream(data, user_id):
-            response = chat_service.chat_completion(data, user_id, token)
+            response = chat_service.chat_completion(data, user_id, token,  user_groups, user_roles)
             for chunk in response:
                 yield chunk
         return Response(chat_completion_stream(data, user_id), mimetype='text/event-stream')
@@ -97,10 +102,9 @@ def update_conversation_properties(conversation_id):
 @oidc.accept_token(require_token=True)
 def update_conversation_acl(conversation_id):
     acl = request.get_json(silent=True)
-    user_id = get_current_user_id()
-    result = chat_service.update_conversation_acl(
-        conversation_id, acl, user_id)
-    if result.matched_count == 0:
+    result = acl_service.update_acl(
+        "conversation", conversation_id, acl)
+    if not result['success']:
         return jsonify(error="Conversation not found"), 404
     return {"result": "Succesfully updated conversation acl", "success": True}
 

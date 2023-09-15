@@ -156,5 +156,5 @@ export const userGroups = () => {
 }
 
 export const updateConversationAcl=(conversationId:string,acl:object)=>{
-  return _axios.put(`/chat/conversations/${conversationId}/acl`,acl);
+  return _axios.post(`/acl/conversation/${conversationId}`,acl);
 }

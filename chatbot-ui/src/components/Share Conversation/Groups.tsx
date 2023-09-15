@@ -29,16 +29,20 @@ export const Groups: FC<Props> = ({}) => {
 
     });
   }, []);
-  console.log(loading)
 
 
   const handleShare = (group: any) => {
     if (!selectedConversation) return;
     const updatedAcl = selectedConversation?.acl;
     updatedAcl.gid.push(group);
+    updatedAcl.is_provide_access=false
+    let payload={
+      gid:[group],
+      is_provide_access:true
+    }
     toast
       .promise(
-        updateConversationAcl(selectedConversation?.id, updatedAcl), //calling api here
+        updateConversationAcl(selectedConversation?.id, payload), //calling api here
         {
           loading: `Sharing the conversation with ${group} group`,
           success: <b>Succefully shared the conversation</b>,
@@ -68,9 +72,14 @@ export const Groups: FC<Props> = ({}) => {
     if (index > -1) {
       updatedAcl.gid.splice(index, 1);
     }
+    updatedAcl.is_provide_access=true
+    let payload={
+      gid:[group],
+      is_provide_access:false
+    }
     toast
     .promise(
-      updateConversationAcl(selectedConversation?.id, updatedAcl), //calling api here
+      updateConversationAcl(selectedConversation?.id, payload), //calling api here
       {
         loading: `Revoking access to the conversation for ${group} group`,
         success: <b>Succefully revoked access to the conversation</b>,
