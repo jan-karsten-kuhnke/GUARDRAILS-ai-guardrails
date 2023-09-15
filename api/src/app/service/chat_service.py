@@ -83,11 +83,6 @@ class chat_service:
                 filename=document_obj['metadata']['title']
                 document_array=document_obj['docs']
 
-
-                
-            
-            
-
             conversation_id = None
             manage_conversation_context = False
             
@@ -313,9 +308,9 @@ class chat_service:
         userRoles = get_current_user_roles()
         cursor = conversation_context.get_conversations_by_user_email(
             user_id, flag, userName, userGroups, userRoles)
-        conversations = {}
+        conversations = []
         for conversation in cursor:
-            conversations =conversation['owned']
+            conversations.append(conversation)
         conversations.sort(key=lambda x: x.get('created'), reverse=True)
         return conversations
 
