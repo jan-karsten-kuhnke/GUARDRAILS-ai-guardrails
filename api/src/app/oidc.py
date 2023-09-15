@@ -29,4 +29,4 @@ def get_current_user_groups():
 def get_current_user_roles():
     token = request.headers['authorization'].split(' ')[1]
     user_info = oidc._get_token_info(token)
-    return user_info['realm_access']['roles']  
+    return user_info['realm_access']['roles']

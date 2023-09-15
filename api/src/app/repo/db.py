@@ -1,5 +1,9 @@
 
+from bson.json_util import dumps
+from bson.json_util import loads
 import pymongo
+from bson import ObjectId
+from typing import Union
 
 from utils.apiResponse import ApiResponse
 from globals import *
@@ -38,18 +42,66 @@ def get_filter_parameter(filter_list):
     
     return filter_parameter
 
+def conversation_pipeline(user_id: Union[ObjectId, str], flag, username, user_groups, user_roles):
+    match_query = {}
+    
+    if flag== None:
+        match_query["$match"] = {"_id": user_id, "acl.owner": username}
+    elif isinstance(user_id, str) and flag != None:
+        match_query["$match"] = {"user_id": user_id, "archived": flag, "acl.owner": username}
+    
+    project_stage = {
+        "$project": {
+            "acl": 0
+        }
+    }
+    facet_stage = {
+        "$facet": {
+            "shared": [
+                {
+                    "$match": {
+                        "archived": flag,
+                        "$or": [
+                            {"acl.gid": {"$in": user_groups}},
+                            {"acl.rid": {"$in": user_roles}},
+                            {"acl.uid": {"$in": [username]}}
+                        ]
+                    }
+                },project_stage
+            ],
+            "owned": [
+                match_query,project_stage
+            ]
+        }
+    }
+    if flag== None:
+        facet_stage["$facet"]["shared"][0]["$match"].pop("archived", None)
+
+    pipeline = [facet_stage]
+    return pipeline
+
 class conversation_context:
     def insert_conversation(conversation):
         conversation['archived'] = False
         result = conversations_collection.insert_one(conversation) 
         return result.inserted_id
 
-    def get_conversation_by_id(conversation_id, user_id):
-        return conversations_collection.find_one({"_id":conversation_id , "user_id":user_id})
+    def get_conversation_by_id(conversation_id,  username, user_groups, user_roles):
+        pipeline  = conversation_pipeline(conversation_id, None, username, user_groups, user_roles)
+        results = conversations_collection.aggregate(pipeline)
+        conversation_array=[]
+        for c in results:
+            conversation_array.append(c)
+
+        if not conversation_array[0].get('owned'):
+            return None
+        return conversation_array[0].get('owned')[0]
     
-    def get_conversations_by_user_email(user_id,flag):
-        return conversations_collection.find({"user_id":user_id, "archived":flag}, {"messages":0, "last_node":0, "updated":0,"user_id":0,"root_message":0})
-    
+    def get_conversations_by_user_email(user_id,flag, username, user_groups, user_roles):
+        pipeline  = conversation_pipeline(user_id,flag, username, user_groups, user_roles)
+        results = conversations_collection.aggregate(pipeline)
+        return loads(dumps(results))
+
     def update_conversation(conversation_id, conversation):
         conversations_collection.update_one({"_id":conversation_id}, {"$set":conversation})
 
@@ -73,7 +125,8 @@ class conversation_context:
 
 
     #conversation_logs admin-ui
-
+    def get_conversation_by_id_user_id(conversation_id, user_id):
+        return conversations_collection.find_one({"_id":conversation_id , "user_id":user_id})
     def get_conversation_list(sort, range_, filter_):
         response=ApiResponse()
         try:
@@ -214,8 +267,16 @@ class conversation_context:
             response.update(False,"Error in rejecting",None)
         return response.json()
 
-
-
+    def update_conversation_acl(id, acl):
+        response = ApiResponse()
+        try:
+            res = conversations_collection.update_one({"_id":id}, {"$set":{"acl":acl}})
+            print(str(res)) 
+            response.update(True,"",None)
+        except Exception as ex:
+            logging.info(f"Error in updating access list: {ex}")
+            response.update(False,"Error in updating access list",None)    
+        return response.json()
 
 
 
