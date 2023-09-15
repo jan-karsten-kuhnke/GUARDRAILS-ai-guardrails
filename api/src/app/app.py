@@ -14,7 +14,7 @@ from flask_swagger_ui import get_swaggerui_blueprint
 from oidc import oidc
 from globals import *
 
-Globals.prepare_client_secrets()
+Globals.prepare_client_secrets() 
 app = Flask(__name__)
 # sets the root level of the logger 
 def configure_logging():
@@ -24,7 +24,6 @@ def configure_logging():
 
 
 app.config["PROPAGATE_EXCEPTIONS"] = True
-
 logging.info('client_secret', Globals.oidc_client_id)
 SWAGGER_URL = '/api/documentation'
 API_URL = 'http://127.0.0.1:8080/swagger.json'

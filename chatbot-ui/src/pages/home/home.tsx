@@ -6,7 +6,7 @@ import { useCreateReducer } from "@/hooks/useCreateReducer";
 import { Navbar } from "@/components/Mobile/Navbar";
 import { Chat } from "@/components/Chat/Chat";
 import { useEffect, useRef, useState } from "react";
-import { Conversation } from "@/types/chat";
+import { Conversation, UserFeedback } from "@/types/chat";
 import { v4 as uuidv4 } from "uuid";
 import {
   fetchAllConversations,
@@ -150,12 +150,16 @@ export const Home = () => {
     fetchConversationById(conversation.id).then((res) => {
       conversation.messages = res.data.messages.map(
         (message: {
+          id: string;
+          user_feedback: UserFeedback;
           role: any;
           content: any;
           user_action_required: any;
           msg_info: any;
         }) => ({
+          id: message.id,
           role: message.role,
+          user_feedback: message.user_feedback,
           content: message.content,
           userActionRequired: message.user_action_required,
           msg_info: message.msg_info,
@@ -202,12 +206,6 @@ export const Home = () => {
       [data.key]: data.value,
     };
     dispatch({ field: "selectedConversation", value: updatedConversation });
-    dispatch({
-      field: "conversations",
-      value: conversations.map((c) =>
-        c.id === updatedConversation.id ? updatedConversation : c
-      ),
-    });
   
   };
 
@@ -217,7 +215,13 @@ export const Home = () => {
       title: "New Conversation",
       messages: [],
       folderId: null,
-      task_params: getTaskParams(selectedTile?.params?.inputs,collections)
+      task_params: getTaskParams(selectedTile?.params?.inputs,collections),
+      acl:{
+          uid:[],
+          rid:[],
+          gid:[],
+          owner:""
+        }
     };
     dispatch({
       field: "conversations",
@@ -246,7 +250,13 @@ export const Home = () => {
         name: "New Conversation",
         messages: [],
         folderId: null,
-        task_params:{}
+        task_params:{},
+        acl:{
+          uid:[],
+          rid:[],
+          gid:[],
+          owner:""
+        }
       },
     });
 

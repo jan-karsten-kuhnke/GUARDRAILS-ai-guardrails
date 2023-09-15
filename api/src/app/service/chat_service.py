@@ -29,6 +29,7 @@ class conversation_obj(TypedDict):
     task: str
     metadata: dict
     task_params: dict
+    acl:dict
 
 
 class message_obj(TypedDict):
@@ -40,6 +41,11 @@ class message_obj(TypedDict):
     msg_info: Optional[dict]
     task: str
 
+class acl_obj(TypedDict):
+    uid: list
+    gid: list
+    rid: list
+    owner:str
 
 class chat_service:
 
@@ -189,13 +195,15 @@ class chat_service:
                 yield (json.dumps({"error": "Invalid executor"}))
 
             answer = res['answer']
-
+            #This id for new response object
+            message_id=str(uuid.uuid4())
             msg_info = {
                 "sources": res['sources'] if 'sources' in res else [],
                 "visualization": res['visualization'] if 'visualization' in res else None,
                 "dataset": res['dataset'] if 'dataset' in res else None,
             }
             chunk = json.dumps({
+                "id": message_id,
                 "role": "assistant",
                 "content": answer,
                 "msg_info": msg_info,
@@ -205,7 +213,7 @@ class chat_service:
 
             chat_service.save_chat_log(current_user_id, prompt)
             chat_service.update_conversation(
-                conversation_id, current_completion, role, current_user_id, task, None, task_params,metadata, msg_info)
+                conversation_id, current_completion, role, current_user_id, task, None, task_params,metadata, msg_info,message_id)
         except Exception as e:
             yield (json.dumps({"error": "error"}))
             logging.error("Error in chat completion: "+str(e))
@@ -223,6 +231,12 @@ class chat_service:
             children=[],
             msg_info=msg_info
         )
+        acl = acl_obj(
+            uid=[],
+            gid=[],
+            rid=[],
+            owner=email
+        )
 
         messages = [message]
         conversation = conversation_obj(
@@ -236,13 +250,14 @@ class chat_service:
             state='active',
             task=task,
             task_params=task_params,
-            metadata=metadata
+            metadata=metadata,
+            acl=acl
         )
         new_conversation_id = conversation_context.insert_conversation(
             conversation)
         return new_conversation_id
 
-    def update_conversation(conversation_id, content, role, user_id, task, title=None, task_params=None,metadata=None, msg_info=None):
+    def update_conversation(conversation_id, content, role, user_id, task, title=None, task_params=None,metadata=None, msg_info=None,message_id=None):
         conversation = conversation_context.get_conversation_by_id(
             conversation_id, user_id)
         if (conversation == None):
@@ -253,7 +268,7 @@ class chat_service:
             task = conversation['task']
         messages = conversation['messages']
         message = message_obj(
-            id=str(uuid.uuid4()),
+            id=message_id if message_id else str(uuid.uuid4()),
             role=role,
             content=content,
             created=datetime.now(),
@@ -318,3 +333,28 @@ class chat_service:
        result =  conversation_context.update_conversation_properties(
             conversation_id, data, user_id)
        return result
+ 
+    def update_conversation_acl(conversation_id, acl, user_id):
+        result =  conversation_context.update_conversation_acl(
+            conversation_id, acl, user_id)
+        return result
+
+    def feedback(conversation_id, data, user_id):
+        result=conversation_context.get_conversation_by_id(conversation_id,user_id)
+        if result is None:
+            return {"error": "Conversation not found"}, 404
+        messages=result['messages']
+        status=False
+        for m in messages:
+            if m['id']==data['message_id']:
+                m['user_feedback']={
+                "type":data['user_feedback']['type'],
+                "message":data['user_feedback']['message'] if 'message' in data['user_feedback'] else None
+                }
+                status=True
+                break
+        if status==False:
+            return {"error": "Message ID not found"}, 404
+        result=conversation_context.update_conversation(conversation_id,result)
+        return {"result": "success"}
+

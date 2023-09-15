@@ -3,8 +3,9 @@ import {
   IconMessage,
   IconPencil,
   IconTrash,
+  IconShare,
   IconX,
-} from '@tabler/icons-react';
+} from "@tabler/icons-react";
 import {
   DragEvent,
   KeyboardEvent,
@@ -12,14 +13,16 @@ import {
   useContext,
   useEffect,
   useState,
-} from 'react';
+} from "react";
+import { Tooltip } from "@mui/material";
 
-import { Conversation } from '@/types/chat';
+import { Conversation } from "@/types/chat";
+import { ShareConversationDialog } from "@/components/Share Conversation/ShareConversationDialog";
 
-import HomeContext from '@/pages/home/home.context';
+import HomeContext from "@/pages/home/home.context";
 
-import SidebarActionButton from '@/components/Buttons/SidebarActionButton';
-import ChatbarContext from '@/components/Chatbar/Chatbar.context';
+import SidebarActionButton from "@/components/Buttons/SidebarActionButton";
+import ChatbarContext from "@/components/Chatbar/Chatbar.context";
 
 interface Props {
   conversation: Conversation;
@@ -33,6 +36,9 @@ export const ConversationComponent = ({ conversation }: Props) => {
   } = useContext(HomeContext);
 
   const { handleDeleteConversation } = useContext(ChatbarContext);
+
+  const [isShareConversationDialogOpen, setIsShareConversationDialogOpen] =
+    useState(false);
 
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
@@ -131,7 +137,7 @@ export const ConversationComponent = ({ conversation }: Props) => {
           <IconMessage size={18} />
           <div
             className={`relative max-h-5 flex-1 overflow-hidden text-ellipsis whitespace-nowrap break-all text-left text-[12.5px] leading-3 ${
-              selectedConversation?.id === conversation.id ? 'pr-12' : 'pr-1'
+              selectedConversation?.id === conversation.id ? "pr-16" : "pr-1"
             }`}
           >
             {conversation.title}
@@ -141,7 +147,7 @@ export const ConversationComponent = ({ conversation }: Props) => {
 
       {(isDeleting || isRenaming) &&
         selectedConversation?.id === conversation.id && (
-          <div className="absolute right-1 z-10 flex text-gray-300">
+          <div className="ml-3 absolute right-1 z-10 flex text-gray-300">
             <SidebarActionButton handleClick={handleConfirm}>
               <IconCheck size={18} />
             </SidebarActionButton>
@@ -151,18 +157,43 @@ export const ConversationComponent = ({ conversation }: Props) => {
           </div>
         )}
 
-      {selectedConversation?.id === conversation.id && !selectedConversation.archived &&
+      {selectedConversation?.id === conversation.id &&
+        !selectedConversation.archived &&
         !isDeleting &&
         !isRenaming && (
           <div className="absolute right-1 z-10 flex text-gray-300">
             <SidebarActionButton handleClick={handleOpenRenameModal}>
-              <IconPencil size={18} />
+              <Tooltip title="Edit" placement="top">
+                <IconPencil size={18} />
+              </Tooltip>
             </SidebarActionButton>
             <SidebarActionButton handleClick={handleOpenDeleteModal}>
-              <IconTrash size={18} />
+              <Tooltip title="Delete" placement="top">
+                <IconTrash size={18} />
+              </Tooltip>
             </SidebarActionButton>
+
+            {selectedConversation?.messages?.length > 0 && (
+              <SidebarActionButton
+              handleClick={() => {
+                setIsShareConversationDialogOpen(true);
+              }}
+            >
+              <Tooltip title="Share" placement="top">
+                <IconShare size={18} />
+              </Tooltip>
+            </SidebarActionButton>
+            )}
+            
           </div>
         )}
+
+      <ShareConversationDialog
+        open={isShareConversationDialogOpen}
+        onClose={() => {
+          setIsShareConversationDialogOpen(false);
+        }}
+      />
     </div>
   );
 };
