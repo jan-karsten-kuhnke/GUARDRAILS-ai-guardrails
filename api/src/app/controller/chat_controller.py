@@ -120,6 +120,8 @@ def execute_on_document():
             return validation_result
 
         user_id = get_current_user_id()
+        user_groups = get_current_user_groups()
+        user_roles = get_current_user_roles()
         token = request.headers['authorization'].split(' ')[1]
         files = request.files.getlist('files')
         if len(files) == 0 or files[0].filename == '':
@@ -133,12 +135,12 @@ def execute_on_document():
         file.save(filepath)
         file.close()
 
-        def summarize_brief_stream(data, user_id, token, filename, filepath):
+        def summarize_brief_stream(data, user_id, token,user_groups, user_roles, filename, filepath):
             response = chat_service.chat_completion(
-                data, user_id, token, filename, filepath)
+                data, user_id, token,user_groups, user_roles, filename, filepath)
             for chunk in response:
                 yield chunk
-        return Response(summarize_brief_stream(data, user_id, token, filename, filepath), mimetype='text/event-stream')
+        return Response(summarize_brief_stream(data, user_id, token, user_groups, user_roles, filename, filepath), mimetype='text/event-stream')
 
     except Exception as e:
         return jsonify(error="An error occurred: " + str(e)), 500
