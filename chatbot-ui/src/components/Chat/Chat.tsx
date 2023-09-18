@@ -349,8 +349,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
     homeDispatch({ field: "selectedTile", value: foundTile });
   },[selectedConversation])
 
-  console.log("selectedTile",selectedTile)
-
   return (
     <div className={`relative flex-1 overflow-hidden ${theme.chatBackground}`}>
       <>
