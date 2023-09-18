@@ -62,11 +62,11 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
     }
   };
 
-  const handleUrlSend = (url: string) => {
+  const handleUrlSend = () => {
     
     let message: Message = {
       role: "user",
-      content: "Insight from URL",
+      content: selectedTile?.params?.prompt,
       userActionRequired: false,
       msg_info: null,
     };
@@ -294,7 +294,7 @@ const AdditionalInputs: FC<Props> = ({ inputs, handleSend }) => {
                       textTransform: "Capitalize",
                       margin: "10px",
                     }}
-                    onClick={() => (isValidUrl && inputUrl.length) ? handleUrlSend(inputUrl) : toast.error("Invalid URL")}
+                    onClick={() => (isValidUrl && inputUrl.length) ? handleUrlSend() : toast.error("Invalid URL")}
                     >
                     Send
                     <IconSend size={18} />
