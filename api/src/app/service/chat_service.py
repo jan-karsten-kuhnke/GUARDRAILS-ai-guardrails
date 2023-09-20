@@ -14,6 +14,7 @@ from executors.applet.Conversation import Conversation
 from executors.applet.QaRetrieval import QaRetrieval
 from executors.applet.Sql import Sql
 from executors.applet.Visualization import Visualization
+
 from oidc import get_current_user_id
 from oidc import get_current_user_groups
 from oidc import get_current_user_roles
@@ -188,26 +189,58 @@ class chat_service:
                 except Exception as e:
                     yield ("Sorry. Some error occured. Please try again.")
                     logging.error("error: "+str(e))
+            elif (executor == "tcot-p4d"):
+                try:
+                    from executors.applet.tcot import Tcot
+                    logging.info("calling tcot executor")
+                    is_generator = True
+                    executor_instance = Tcot()
+                    res = executor_instance.execute(query=prompt, is_private=is_private, chat_history=history, params=params)
+
+
+                except Exception as e:
+                    yield ("Sorry. Some error occured. Please try again.")
+                    logging.error("error: "+str(e))
 
             else:
                 yield (json.dumps({"error": "Invalid executor"}))
 
-            answer = res['answer']
-            #This id for new response object
-            message_id=str(uuid.uuid4())
-            msg_info = {
-                "sources": res['sources'] if 'sources' in res else [],
-                "visualization": res['visualization'] if 'visualization' in res else None,
-                "dataset": res['dataset'] if 'dataset' in res else None,
-            }
-            chunk = json.dumps({
-                "id": message_id,
-                "role": "assistant",
-                "content": answer,
-                "msg_info": msg_info,
-            })
-            yield (chunk)
-            current_completion += answer
+            if is_generator:
+                message_id=str(uuid.uuid4())
+                for r in res:
+                    answer = r['answer']
+                    #This id for new response object
+                    msg_info = {
+                        "sources": r['sources'] if 'sources' in r else [],
+                        "visualization": r['visualization'] if 'visualization' in r else None,
+                        "dataset": r['dataset'] if 'dataset' in r else None,
+                    }
+                    chunk = json.dumps({
+                        "id": message_id,
+                        "role": "assistant",
+                        "content": answer,
+                        "msg_info": msg_info,
+                    })
+                    yield (chunk)
+                    current_completion += answer
+                return
+            else:
+                answer = res['answer']
+                #This id for new response object
+                message_id=str(uuid.uuid4())
+                msg_info = {
+                    "sources": res['sources'] if 'sources' in res else [],
+                    "visualization": res['visualization'] if 'visualization' in res else None,
+                    "dataset": res['dataset'] if 'dataset' in res else None,
+                }
+                chunk = json.dumps({
+                    "id": message_id,
+                    "role": "assistant",
+                    "content": answer,
+                    "msg_info": msg_info,
+                })
+                yield (chunk)
+                current_completion += answer
 
             chat_service.save_chat_log(current_user_id, prompt)
             chat_service.update_conversation(

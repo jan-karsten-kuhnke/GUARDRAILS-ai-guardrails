@@ -221,3 +221,7 @@ api/keys/vertexai.json
 keys/
 db/
 api/src/app/service/userdata_service.py
+api/src/app/executors/applet/building_add_patch.py
+api/src/app/executors/applet/tcot.py
+api/src/app/executors/applet/building_create_patch.py
+api/src/app/executors/applet/pe_criteria.py
