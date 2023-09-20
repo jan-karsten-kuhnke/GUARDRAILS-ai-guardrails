@@ -289,10 +289,6 @@ export const Home = () => {
     });
 
     handleGetCollections();
-
-    // fetchPrompts().then((res) => {
-    //   dispatch({ field: "prompts", value: res.data });
-    // });
   }, []);
 
   useEffect(() => {

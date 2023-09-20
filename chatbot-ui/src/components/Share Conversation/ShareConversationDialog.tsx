@@ -100,15 +100,15 @@ export const ShareConversationDialog: FC<Props> = ({ open, onClose }) => {
                     },
                   }}
                 >
-                  <Tab label="Users" value="1" />
-                  <Tab label="Groups" value="2" />
+                  <Tab label="Groups" value="1" />
+                  <Tab label="Users" value="2" />
                 </TabList>
               </Box>
               <TabPanel value="1" sx={{ padding: "24px 0px" }}>
-                <Users />
+                <Groups />
               </TabPanel>
               <TabPanel value="2" sx={{ padding: "24px 0px" }}>
-                <Groups />
+                <Users />
               </TabPanel>
             </TabContext>
           </div>

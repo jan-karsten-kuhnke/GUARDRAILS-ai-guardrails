@@ -28,6 +28,7 @@ import {
   executeOnDoc,
 } from "@/services";
 import { getTaskParams, parseChunk, updateMessagesAndConversation} from "@/utils/app/conversation";
+import { Tile } from "@/types/tiles";
 interface Props {
   stopConversationRef: MutableRefObject<boolean>;
 }
@@ -55,6 +56,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
       tiles,
       selectedCollection,
     },
+    handleSelectedTile,
     dispatch: homeDispatch,
   } = useContext(HomeContext);
 
@@ -64,7 +66,6 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   const [autoScrollEnabled, setAutoScrollEnabled] = useState<boolean>(true);
   const [showScrollDownButton, setShowScrollDownButton] =
     useState<boolean>(false);
-  const [chatTitle, setChatTitle] = useState<string>('');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -342,18 +343,11 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
   }, [messagesEndRef]);
 
   useEffect(() => {
-    // Checking for new chat
-    if(selectedConversation?.messages.length === 0){
-      setChatTitle(selectedTile.title);
-    }
-    // for an existing chat
-    else{
-      const selectedTask = tiles.find(tile => tile.code === selectedConversation?.task);
-      if(selectedTask){
-        setChatTitle(selectedTask.title);
-      }
-    }
-  },[selectedConversation,selectedTile]);
+    if(!tiles || !selectedConversation?.task) return;
+    let foundTile = tiles.find(tile => tile.code === selectedConversation?.task) as Tile;
+    if(!foundTile) return;
+    homeDispatch({ field: "selectedTile", value: foundTile });
+  },[selectedConversation])
 
   return (
     <div className={`relative flex-1 overflow-hidden ${theme.chatBackground}`}>
@@ -428,7 +422,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
               <div
                 className={`sticky top-0 z-10 flex justify-center py-4 ${theme.chatTitleTheme}`}
               >
-                {chatTitle}
+                {selectedTile?.title}
               </div>
               {selectedConversation?.messages.map((message, index) => (
                 <MemoizedChatMessage
@@ -466,7 +460,7 @@ export const Chat = memo(({ stopConversationRef }: Props) => {
             </>
           )}
         </div>
-        {selectedTile.params?.executor != "summarize"  && selectedTile.params?.executor != "extraction" && (
+        {!["summarize" ,"extraction", "tcot-p4d"].includes(selectedTile.params?.executor)&& (
           <ChatInput
             stopConversationRef={stopConversationRef}
             textareaRef={textareaRef}

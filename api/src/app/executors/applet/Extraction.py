@@ -42,7 +42,7 @@ class Extraction:
         properties = ",".join(propertiesArray)   
         query =  params['inputQuery']
         query = query.replace("_properties_",properties)
-        docs = store.similarity_search(query)
+        docs = store.similarity_search(query = query, filter = {'source' : params['title']})
                 
         prompt = params['promptTemplate']
         prompt_properties = ":'' ,".join(propertiesArray)
